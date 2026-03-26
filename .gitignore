@@ -1,0 +1,8 @@
+dist/
+.terraform/
+.terraform.lock.hcl
+tmp/
+coverage.out
+*.coverprofile
+*.test
+.DS_Store

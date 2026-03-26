@@ -1,0 +1,19 @@
+---
+page_title: "{{.Name}} Ephemeral Resource - {{.ProviderName}}"
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} Ephemeral Resource
+
+> Ephemeral resources require Terraform 1.10.0 or later. For background, see the Terraform documentation for ephemeral resources: https://developer.hashicorp.com/terraform/language/resources/ephemeral
+
+{{ .Description | trimspace }}
+
+{{ if .HasExample -}}
+## Example Usage
+
+{{ tffile .ExampleFile }}
+{{- end }}
+
+{{ .SchemaMarkdown | trimspace }}

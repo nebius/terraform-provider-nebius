@@ -1,0 +1,95 @@
+name: release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_needed: ${{ steps.version.outputs.release_needed }}
+      version: ${{ steps.version.outputs.version }}
+      version_tag: ${{ steps.version.outputs.version_tag }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch tags
+        run: git fetch --force --tags origin
+
+      - name: Read version and create tag if missing
+        id: version
+        run: |
+          version="$(sed -n 's/^const versionString = "\(.*\)"$/\1/p' provider/version/version.go)"
+          if [ -z "$version" ]; then
+            echo "Failed to read versionString from provider/version/version.go" >&2
+            exit 1
+          fi
+
+          if ! printf '%s\n' "$version" | grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'; then
+            echo "versionString must be a valid SemVer version, got: $version" >&2
+            exit 1
+          fi
+
+          version_tag="v$version"
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "version_tag=$version_tag" >> "$GITHUB_OUTPUT"
+
+          if git rev-parse -q --verify "refs/tags/$version_tag" >/dev/null; then
+            echo "release_needed=false" >> "$GITHUB_OUTPUT"
+            echo "Tag $version_tag already exists, skipping release."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$version_tag" -m "Release $version_tag"
+          git push origin "refs/tags/$version_tag"
+          echo "release_needed=true" >> "$GITHUB_OUTPUT"
+
+  ## Enable when ready to release and GPG key and secrets are set up
+  # goreleaser:
+  #   needs: prepare-release
+  #   if: needs.prepare-release.outputs.release_needed == 'true'
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Check out release tag
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #         ref: refs/tags/${{ needs.prepare-release.outputs.version_tag }}
+
+  #     - name: Import GPG key
+  #       uses: crazy-max/ghaction-import-gpg@v6
+  #       with:
+  #         gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+  #         passphrase: ${{ secrets.PASSPHRASE }}
+
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version-file: go.mod
+  #         cache: true
+
+  #     - name: Run GoReleaser
+  #       uses: goreleaser/goreleaser-action@v6
+  #       with:
+  #         distribution: goreleaser
+  #         version: latest
+  #         args: release --clean
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

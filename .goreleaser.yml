@@ -1,0 +1,47 @@
+version: 2
+
+project_name: terraform-provider-nebius
+
+builds:
+  - id: provider
+    binary: "{{ .ProjectName }}_v{{ .Version }}"
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: provider
+    ids:
+      - provider
+    format: zip
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_SHA256SUMS"
+  extra_files:
+    - glob: ./terraform-registry-manifest.json
+      name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
+
+signs:
+  - artifacts: checksum
+
+release:
+  draft: false
+  prerelease: auto
+  extra_files:
+    - glob: ./terraform-registry-manifest.json
+      name_template: "{{ .ProjectName }}_{{ .Version }}_manifest.json"
