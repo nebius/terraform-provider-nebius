@@ -29,7 +29,6 @@ func main() {
 		fmt.Println(v)
 		return
 	}
-	// just to check the changes propagation
 
 	isTesting := os.Getenv(testFlagEnv) != ""
 	opts := providerserver.ServeOpts{
