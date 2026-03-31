@@ -1,10 +1,13 @@
-# Terraform Provider for Nebius
+# Nebius AI Cloud provider for Terraform
 
-This repository contains the Terraform provider for Nebius AI Cloud.
+This repository contains the Nebius AI Cloud provider for Terraform source code.
 
-The repository already follows the public Terraform Registry naming convention for providers (`terraform-provider-nebius`), and the release assets in this repository are prepared for publication to the public Terraform Registry under the `nebius/nebius` source address.
+See the [full documentation on installation, how-tos and usage here](https://docs.nebius.com/terraform-provider/). This readme explains basics of development and build process.
 
-The remaining blockers are operational rather than structural: the GitHub repository must be public, signed releases must be enabled, and the provider must be published from the Terraform Registry UI. The exact follow-up checklist is in [PUBLISHING.md](PUBLISHING.md).
+## Contributing
+
+External contributions are appreciated. This repository is a public mirror, so pull requests may be closed without being merged directly here even when a change is later ported internally and published back to the mirror. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow note.
+
 
 ## Build
 
@@ -19,11 +22,15 @@ Build the provider locally:
 make build
 ```
 
-Install the provider binary into your Go bin directory:
+### Debug
+
+To start in debug mode, add the following variable to your debug env:
 
 ```bash
-make install
+NEBIUS_TERRAFORM_PROVIDER_TEST=true
 ```
+
+Then, copy the `TF_REATTACH_PROVIDERS` string from the output and run your Terraform with that string in its env.
 
 ## Documentation Generation
 
@@ -41,7 +48,7 @@ Validate generated docs against Terraform Registry rules:
 make docs-validate
 ```
 
-Notes:
+**Notes:**
 
 - `tfplugindocs` is invoked from the `tools/` helper module.
 - If Terraform is not already installed locally, `tfplugindocs` may download it automatically during documentation generation.
