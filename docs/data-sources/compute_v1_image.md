@@ -93,7 +93,12 @@ data ... {
    Positive and monotonically increases on each resource spec change (but *not* on each change of the
    resource's container(s) or status).
    Service allows zero value or current.
-- `source_disk_id` (String) ID of the disk to create the image from
+- `source_disk_id` (String) :
+
+   ID of the disk to create the image from
+   
+   *Cannot be set alongside source_storage.*
+- `source_storage` (Attributes) *Cannot be set alongside source_disk_id.* (see [below for nested schema](#nestedatt--source_storage))
 - `status` (Attributes) (see [below for nested schema](#nestedatt--status))
 - `unsupported_platforms` (Map of String) list of platforms where this image is not supported with explanation
 - `updated_at` (String) :
@@ -105,6 +110,15 @@ data ... {
 
 <a id="nestedatt--metadata"></a>
 ### Nested Schema for `metadata`
+
+
+<a id="nestedatt--source_storage"></a>
+### Nested Schema for `source_storage`
+
+Read-Only:
+
+- `bucket_name` (String)
+- `object_name` (String)
 
 
 <a id="nestedatt--status"></a>

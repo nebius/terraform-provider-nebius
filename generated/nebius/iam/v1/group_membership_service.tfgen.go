@@ -137,6 +137,43 @@ func (r *serviceGroupMembership) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "*Cannot be set alongside tenant_user_account_status.*",
 					},
+					"group_member_metadata": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"id": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "Identifier for the resource, unique for its resource type.",
+							},
+							"parent_id": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
+							},
+							"name": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "Human readable name for the resource.",
+							},
+							"resource_version": schema.Int64Attribute{
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n   \n",
+							},
+							"created_at": schema.StringAttribute{
+								CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Timestamp indicating when the resource was created.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+							},
+							"updated_at": schema.StringAttribute{
+								CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Timestamp indicating when the resource was last updated.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+							},
+							"labels": schema.MapAttribute{
+								ElementType:         types.StringType,
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Labels associated with the resource.\n   \n",
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: "",
@@ -262,6 +299,51 @@ func (r *serviceGroupMembership) ResourceSchema() schema1.Schema {
 						},
 						Computed:            true,
 						MarkdownDescription: "*Cannot be set alongside tenant_user_account_status.*",
+						PlanModifiers:       []planmodifier.Object{},
+					},
+					"group_member_metadata": schema1.SingleNestedAttribute{
+						Attributes: map[string]schema1.Attribute{
+							"id": schema1.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "Identifier for the resource, unique for its resource type.",
+								PlanModifiers:       []planmodifier.String{},
+							},
+							"parent_id": schema1.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
+								PlanModifiers:       []planmodifier.String{},
+							},
+							"name": schema1.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "Human readable name for the resource.",
+								PlanModifiers:       []planmodifier.String{},
+							},
+							"resource_version": schema1.Int64Attribute{
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n   \n",
+								PlanModifiers:       []planmodifier.Int64{},
+							},
+							"created_at": schema1.StringAttribute{
+								CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Timestamp indicating when the resource was created.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+								PlanModifiers:       []planmodifier.String{},
+							},
+							"updated_at": schema1.StringAttribute{
+								CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Timestamp indicating when the resource was last updated.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+								PlanModifiers:       []planmodifier.String{},
+							},
+							"labels": schema1.MapAttribute{
+								ElementType:         types.StringType,
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Labels associated with the resource.\n   \n",
+								PlanModifiers:       []planmodifier.Map{},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n",
 						PlanModifiers:       []planmodifier.Object{},
 					},
 				},

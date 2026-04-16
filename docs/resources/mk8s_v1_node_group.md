@@ -264,20 +264,19 @@ Required:
 <a id="nestedatt--template--local_disks"></a>
 ### Nested Schema for `template.local_disks`
 
-Required:
+Optional:
 
 - `config` (Attributes) :
 
    config defines actions that managed Kubernetes service performs on mounted local disks
    to provide them inside Kubernetes cluster with a convenient interface.
    
+   When omitted, a default value is generated.
+   
    #### Inner value description
    
    LocalDisksSpecConfig defines actions that managed Kubernetes service performs on mounted local disks
    to provide them inside Kubernetes cluster with a convenient interface. (see [below for nested schema](#nestedatt--template--local_disks--config))
-
-Optional:
-
 - `passthrough_group` (Attributes) :
 
    Requests passthrough local disks from the host.
@@ -289,7 +288,19 @@ Optional:
 
 Optional:
 
-- `none` (Boolean) none: "do nothing" - local disks will be provisioned as on a regular compute instance.
+- `kubelet_ephemeral` (Boolean) :
+
+   kubelet_ephemeral: combine all local disks into a single storage volume and use it as kubelet's local ephemeral storage on the node
+   See also https://kubernetes.io/docs/concepts/storage/ephemeral-storage/
+   
+   The default when LocalDisksSpecConfig is not set.
+   
+   *Cannot be set alongside none.*
+- `none` (Boolean) :
+
+   none: "do nothing" - local disks will be provisioned as on a regular compute instance.
+   
+   *Cannot be set alongside kubelet_ephemeral.*
 
 
 <a id="nestedatt--template--local_disks--passthrough_group"></a>

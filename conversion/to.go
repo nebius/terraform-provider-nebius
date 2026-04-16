@@ -194,20 +194,8 @@ func AttrTypeCheck(
 	desc protoreflect.FieldDescriptor,
 	name string,
 ) diag.Diagnostics {
-	if _, ok := attrType.(basetypes.DynamicTypable); ok {
+	if _, isDynamic := attrType.(basetypes.DynamicTypable); isDynamic {
 		return diag.Diagnostics{}
-	}
-	if desc.Kind() == protoreflect.MessageKind {
-		wt, ok := wellknown.WellKnownOf(desc.Message())
-		if ok && attrType.Equal(wt.Type()) {
-			return diag.Diagnostics{}
-		}
-		if attrType.Equal(jsontypes.NormalizedType{}) {
-			return diag.Diagnostics{}
-		}
-		if _, ok = attrType.(basetypes.ObjectTypable); ok {
-			return diag.Diagnostics{}
-		}
 	}
 	var reqType string
 	ok := false
@@ -229,6 +217,18 @@ func AttrTypeCheck(
 	case protoreflect.StringKind, protoreflect.BytesKind, protoreflect.EnumKind:
 		reqType = "basetypes.StringType"
 		_, ok = attrType.(basetypes.StringTypable)
+	case protoreflect.MessageKind:
+		wt, isWN := wellknown.WellKnownOf(desc.Message())
+		if isWN && attrType.Equal(wt.Type()) {
+			return diag.Diagnostics{}
+		}
+		if attrType.Equal(jsontypes.NormalizedType{}) {
+			return diag.Diagnostics{}
+		}
+		if _, isObj := attrType.(basetypes.ObjectTypable); isObj {
+			return diag.Diagnostics{}
+		}
+		fallthrough
 	default: // notest // hard to replicate type that is not here
 		return DiagnosticsFromErrString(
 			"protobuf type not supported",

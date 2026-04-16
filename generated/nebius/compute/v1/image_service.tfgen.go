@@ -103,7 +103,21 @@ func (r *serviceImage) DataSourceSchema() schema.Schema {
 			},
 			"source_disk_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "ID of the disk to create the image from",
+				MarkdownDescription: ":\n\n   ID of the disk to create the image from\n   \n   *Cannot be set alongside source_storage.*\n",
+			},
+			"source_storage": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"bucket_name": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "",
+					},
+					"object_name": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "",
+					},
+				},
+				Computed:            true,
+				MarkdownDescription: "*Cannot be set alongside source_disk_id.*",
 			},
 			"cpu_architecture": schema.StringAttribute{
 				Computed:            true,
