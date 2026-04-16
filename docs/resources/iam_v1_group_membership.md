@@ -60,8 +60,42 @@ description: |-
 
 Read-Only:
 
+- `group_member_metadata` (Attributes) :
+
+   #### Inner value description
+   
+   Common resource metadata. (see [below for nested schema](#nestedatt--status--group_member_metadata))
 - `service_account_status` (Attributes) *Cannot be set alongside tenant_user_account_status.* (see [below for nested schema](#nestedatt--status--service_account_status))
 - `tenant_user_account_status` (Attributes) *Cannot be set alongside service_account_status.* (see [below for nested schema](#nestedatt--status--tenant_user_account_status))
+
+<a id="nestedatt--status--group_member_metadata"></a>
+### Nested Schema for `status.group_member_metadata`
+
+Read-Only:
+
+- `created_at` (String) :
+
+   Timestamp indicating when the resource was created.
+   
+   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
+- `id` (String) Identifier for the resource, unique for its resource type.
+- `labels` (Map of String) :
+
+   Labels associated with the resource.
+- `name` (String) Human readable name for the resource.
+- `parent_id` (String) Identifier of the parent resource to which the resource belongs.
+- `resource_version` (Number) :
+
+   Version of the resource for safe concurrent modifications and consistent reads.
+   Positive and monotonically increases on each resource spec change (but *not* on each change of the
+   resource's container(s) or status).
+   Service allows zero value or current.
+- `updated_at` (String) :
+
+   Timestamp indicating when the resource was last updated.
+   
+   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
+
 
 <a id="nestedatt--status--service_account_status"></a>
 ### Nested Schema for `status.service_account_status`

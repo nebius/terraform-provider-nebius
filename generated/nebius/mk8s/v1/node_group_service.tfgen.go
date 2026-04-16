@@ -313,11 +313,15 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 								Attributes: map[string]schema.Attribute{
 									"none": schema.BoolAttribute{
 										Computed:            true,
-										MarkdownDescription: "none: \"do nothing\" - local disks will be provisioned as on a regular compute instance.",
+										MarkdownDescription: ":\n\n   none: \"do nothing\" - local disks will be provisioned as on a regular compute instance.\n   \n   *Cannot be set alongside kubelet_ephemeral.*\n",
+									},
+									"kubelet_ephemeral": schema.BoolAttribute{
+										Computed:            true,
+										MarkdownDescription: ":\n\n   kubelet_ephemeral: combine all local disks into a single storage volume and use it as kubelet's local ephemeral storage on the node\n   See also https://kubernetes.io/docs/concepts/storage/ephemeral-storage/\n   \n   The default when LocalDisksSpecConfig is not set.\n   \n   *Cannot be set alongside none.*\n",
 									},
 								},
 								Computed:            true,
-								MarkdownDescription: ":\n\n   config defines actions that managed Kubernetes service performs on mounted local disks\n   to provide them inside Kubernetes cluster with a convenient interface.\n   \n   #### Inner value description\n   \n   LocalDisksSpecConfig defines actions that managed Kubernetes service performs on mounted local disks\n   to provide them inside Kubernetes cluster with a convenient interface.\n",
+								MarkdownDescription: ":\n\n   config defines actions that managed Kubernetes service performs on mounted local disks\n   to provide them inside Kubernetes cluster with a convenient interface.\n   \n   When omitted, a default value is generated.\n   \n   #### Inner value description\n   \n   LocalDisksSpecConfig defines actions that managed Kubernetes service performs on mounted local disks\n   to provide them inside Kubernetes cluster with a convenient interface.\n",
 							},
 						},
 						Computed:            true,
@@ -903,21 +907,43 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							"config": schema1.SingleNestedAttribute{
 								Attributes: map[string]schema1.Attribute{
 									"none": schema1.BoolAttribute{
-										Validators:          []validator.Bool{},
+										Validators: []validator.Bool{
+											validators.OneofValidator([]string{
+												"none",
+												"kubelet_ephemeral",
+											}, fieldNameMapNodeGroup),
+										},
+										Computed:            true,
 										Optional:            true,
-										MarkdownDescription: "none: \"do nothing\" - local disks will be provisioned as on a regular compute instance.",
+										MarkdownDescription: ":\n\n   none: \"do nothing\" - local disks will be provisioned as on a regular compute instance.\n   \n   *Cannot be set alongside kubelet_ephemeral.*\n",
+										PlanModifiers:       []planmodifier.Bool{},
+									},
+									"kubelet_ephemeral": schema1.BoolAttribute{
+										Validators: []validator.Bool{
+											validators.OneofValidator([]string{
+												"none",
+												"kubelet_ephemeral",
+											}, fieldNameMapNodeGroup),
+										},
+										Computed:            true,
+										Optional:            true,
+										MarkdownDescription: ":\n\n   kubelet_ephemeral: combine all local disks into a single storage volume and use it as kubelet's local ephemeral storage on the node\n   See also https://kubernetes.io/docs/concepts/storage/ephemeral-storage/\n   \n   The default when LocalDisksSpecConfig is not set.\n   \n   *Cannot be set alongside none.*\n",
 										PlanModifiers:       []planmodifier.Bool{},
 									},
 								},
-								Validators:          []validator.Object{},
-								Required:            true,
-								MarkdownDescription: ":\n\n   config defines actions that managed Kubernetes service performs on mounted local disks\n   to provide them inside Kubernetes cluster with a convenient interface.\n   \n   #### Inner value description\n   \n   LocalDisksSpecConfig defines actions that managed Kubernetes service performs on mounted local disks\n   to provide them inside Kubernetes cluster with a convenient interface.\n",
+								Validators: []validator.Object{
+									validators.ProtoFieldValidator(&v1.LocalDisksSpec{}, "config", "config", fieldNameMapNodeGroup),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   config defines actions that managed Kubernetes service performs on mounted local disks\n   to provide them inside Kubernetes cluster with a convenient interface.\n   \n   When omitted, a default value is generated.\n   \n   #### Inner value description\n   \n   LocalDisksSpecConfig defines actions that managed Kubernetes service performs on mounted local disks\n   to provide them inside Kubernetes cluster with a convenient interface.\n",
 								PlanModifiers:       []planmodifier.Object{},
 							},
 						},
 						Validators: []validator.Object{
 							validators.ProtoFieldValidator(&v1.NodeTemplate{}, "local_disks", "local_disks", fieldNameMapNodeGroup),
 						},
+						Computed:            true,
 						Optional:            true,
 						MarkdownDescription: ":\n\n   local_disks enables the provisioning of fast local drives.\n   This type of storage is strictly ephemeral: on node restart, all data is erased, similar to RAM.\n",
 						PlanModifiers:       []planmodifier.Object{},

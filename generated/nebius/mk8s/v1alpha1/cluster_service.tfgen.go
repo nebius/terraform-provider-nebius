@@ -206,8 +206,10 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 	ret := schema1.Schema{
 		Attributes: map[string]schema1.Attribute{
 			"metadata": schema1.SingleNestedAttribute{
-				Attributes:          map[string]schema1.Attribute{},
-				Validators:          []validator.Object{},
+				Attributes: map[string]schema1.Attribute{},
+				Validators: []validator.Object{
+					validators.ProtoFieldValidator(&v1alpha1.Cluster{}, "metadata", "metadata", fieldNameMapCluster),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n",

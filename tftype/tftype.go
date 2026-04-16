@@ -4,17 +4,19 @@ type TFType int
 
 const (
 	TFUnknown TFType = iota
-	TFBool    TFType = iota
-	TFDynamic TFType = iota
-	TFFloat64 TFType = iota
-	TFInt64   TFType = iota
-	TFNumber  TFType = iota
-	TFObject  TFType = iota
-	TFString  TFType = iota
+	TFBool
+	TFDynamic
+	TFFloat64
+	TFInt64
+	TFNumber
+	TFObject
+	TFString
 )
 
 func (t TFType) TypeName() string {
 	switch t {
+	case TFUnknown:
+		return ""
 	case TFBool:
 		return "Bool"
 	case TFDynamic:
@@ -29,6 +31,7 @@ func (t TFType) TypeName() string {
 		return "Object"
 	case TFString:
 		return "String"
+	default:
+		return ""
 	}
-	return ""
 }

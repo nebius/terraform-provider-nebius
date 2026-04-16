@@ -480,6 +480,7 @@ func mapKeyUnmarshalDiagnostics(err error, from string, to protoreflect.FieldDes
 //   - diagnostics: A slice of diagnostics indicating any errors during the conversion process.
 func MapKeyFromString(from string, to protoreflect.FieldDescriptor, keyPath path.Path) (protoreflect.MapKey, diag.Diagnostics) {
 	var ret protoreflect.MapKey
+	//nolint:exhaustive // default covers all other cases here
 	switch to.Kind() {
 	case protoreflect.BoolKind:
 		val, err := strconv.ParseBool(from)
