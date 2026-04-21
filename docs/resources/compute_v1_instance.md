@@ -228,7 +228,49 @@ Optional:
    - When converting an ExistingDisk to a ManagedDisk, you must provide `ManagedDisk.name` and `ManagedDisk.spec`
      exactly as they are currently defined in the disk resource.
      Obtain the current values via `DiskService.Get` and copy them verbatim.
-     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail. (see [below for nested schema](#nestedatt--boot_disk--existing_disk))
+     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail.
+   
+   *Cannot be set alongside managed_disk.* (see [below for nested schema](#nestedatt--boot_disk--existing_disk))
+- `managed_disk` (Attributes) :
+
+   Attach a managed disk.
+   
+   Lifecycle:
+   - The disk is deleted when the instance is deleted.
+   
+   Semantics:
+   - Specifying a ManagedDisk expresses an intent to have that managed disk attached.
+   - If this intent cannot be satisfied, the entire operation fails.
+   - You can check the intent status in `instance.status.disk_attachments`.
+   
+   Updates and matching:
+   - Managed disks can be updated only via instance spec updates. Updates via DiskService are not allowed.
+   - During updates, disks are matched by `name`.
+   
+   Renaming and data loss:
+   - Changing the disk `name` triggers disk replacement (create a new disk and delete the old one),
+     which causes data loss.
+   - To rename a managed disk safely:
+     1) switch it to ExistingDisk in the instance spec, and
+     2) update/rename it via DiskService.
+   
+   Conflicts:
+   - Instance create/update fails if there is already a disk with the same `name`.
+     as requested by any ManagedDisk.
+   
+   Finding the disk ID:
+   - The disk ID is available in `instance.status.disk_attachments` after it is created.
+     Use `DiskAttachmentStatus.name` to find the desired disk which matches `name`.
+   
+   Switching to an existing (non-managed) disk:
+   - To preserve the disk after instance deletion, switch it to ExistingDisk in the instance spec,
+     use the disk ID from `instance.status.disk_attachments`.
+   
+   Deletion protection:
+   - Switching ExistingDisk to ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.
+   - Deleting an instance that has a ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.
+   
+   *Cannot be set alongside existing_disk.* (see [below for nested schema](#nestedatt--boot_disk--managed_disk))
 
 <a id="nestedatt--boot_disk--existing_disk"></a>
 ### Nested Schema for `boot_disk.existing_disk`
@@ -236,6 +278,92 @@ Optional:
 Required:
 
 - `id` (String)
+
+
+<a id="nestedatt--boot_disk--managed_disk"></a>
+### Nested Schema for `boot_disk.managed_disk`
+
+Required:
+
+- `name` (String) :
+
+   Name of a dependent disk.
+   Use it to convert an ExistingDisk to a dependent disk.
+   Changing the name will replace the disk and cause data loss.
+- `spec` (Attributes) Specification of a dependent disk to be created. (see [below for nested schema](#nestedatt--boot_disk--managed_disk--spec))
+
+Optional:
+
+- `labels` (Map of String) :
+
+   Labels associated with disk resource.
+
+<a id="nestedatt--boot_disk--managed_disk--spec"></a>
+### Nested Schema for `boot_disk.managed_disk.spec`
+
+Required:
+
+- `type` (String) :
+
+   The type of disk defines the performance and reliability characteristics of the block device.
+   For details, see https://docs.nebius.com/compute/storage/types#disks-types
+   
+   #### Supported values
+   
+   the list of available types will be clarified later, it is not final version
+   Possible values:
+   
+   - `UNSPECIFIED`
+   - `NETWORK_SSD`
+   - `NETWORK_HDD`
+   - `NETWORK_SSD_NON_REPLICATED`
+   - `NETWORK_SSD_IO_M3`
+
+Optional:
+
+- `block_size_bytes` (Number) :
+
+   Block size in bytes.
+   The block size must be a power of two between 4096 bytes (4 KiB) and 131072 bytes (128 KiB).
+   The default value is 4096 bytes (4 KiB).
+- `disk_encryption` (Attributes) Defines how data on the disk is encrypted. By default, no encryption is applied. (see [below for nested schema](#nestedatt--boot_disk--managed_disk--spec--disk_encryption))
+- `forbid_deletion` (Boolean) Prevents deletion whilst set
+- `size_bytes` (Number) *Cannot be set alongside size_kibibytes, size_mebibytes or size_gibibytes.*
+- `size_gibibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*
+- `size_kibibytes` (Number) *Cannot be set alongside size_bytes, size_mebibytes or size_gibibytes.*
+- `size_mebibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_gibibytes.*
+- `source_image_family` (Attributes) *Cannot be set alongside source_image_id.* (see [below for nested schema](#nestedatt--boot_disk--managed_disk--spec--source_image_family))
+- `source_image_id` (String) *Cannot be set alongside source_image_family.*
+
+<a id="nestedatt--boot_disk--managed_disk--spec--disk_encryption"></a>
+### Nested Schema for `boot_disk.managed_disk.spec.disk_encryption`
+
+Optional:
+
+- `type` (String) :
+
+   #### Supported values
+   
+   Possible values:
+   
+   - `DISK_ENCRYPTION_UNSPECIFIED` - No encryption is applied unless explicitly specified.
+   - `DISK_ENCRYPTION_MANAGED`:
+      Enables encryption using the platform's default root key from KMS.
+      Available for disks with NETWORK_SSD_NON_REPLICATED and NETWORK_SSD_IO_M3 types only.
+
+
+<a id="nestedatt--boot_disk--managed_disk--spec--source_image_family"></a>
+### Nested Schema for `boot_disk.managed_disk.spec.source_image_family`
+
+Required:
+
+- `image_family` (String)
+
+Optional:
+
+- `parent_id` (String)
+
+
 
 
 
@@ -393,7 +521,49 @@ Optional:
    - When converting an ExistingDisk to a ManagedDisk, you must provide `ManagedDisk.name` and `ManagedDisk.spec`
      exactly as they are currently defined in the disk resource.
      Obtain the current values via `DiskService.Get` and copy them verbatim.
-     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail. (see [below for nested schema](#nestedatt--secondary_disks--existing_disk))
+     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail.
+   
+   *Cannot be set alongside managed_disk.* (see [below for nested schema](#nestedatt--secondary_disks--existing_disk))
+- `managed_disk` (Attributes) :
+
+   Attach a managed disk.
+   
+   Lifecycle:
+   - The disk is deleted when the instance is deleted.
+   
+   Semantics:
+   - Specifying a ManagedDisk expresses an intent to have that managed disk attached.
+   - If this intent cannot be satisfied, the entire operation fails.
+   - You can check the intent status in `instance.status.disk_attachments`.
+   
+   Updates and matching:
+   - Managed disks can be updated only via instance spec updates. Updates via DiskService are not allowed.
+   - During updates, disks are matched by `name`.
+   
+   Renaming and data loss:
+   - Changing the disk `name` triggers disk replacement (create a new disk and delete the old one),
+     which causes data loss.
+   - To rename a managed disk safely:
+     1) switch it to ExistingDisk in the instance spec, and
+     2) update/rename it via DiskService.
+   
+   Conflicts:
+   - Instance create/update fails if there is already a disk with the same `name`.
+     as requested by any ManagedDisk.
+   
+   Finding the disk ID:
+   - The disk ID is available in `instance.status.disk_attachments` after it is created.
+     Use `DiskAttachmentStatus.name` to find the desired disk which matches `name`.
+   
+   Switching to an existing (non-managed) disk:
+   - To preserve the disk after instance deletion, switch it to ExistingDisk in the instance spec,
+     use the disk ID from `instance.status.disk_attachments`.
+   
+   Deletion protection:
+   - Switching ExistingDisk to ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.
+   - Deleting an instance that has a ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.
+   
+   *Cannot be set alongside existing_disk.* (see [below for nested schema](#nestedatt--secondary_disks--managed_disk))
 
 <a id="nestedatt--secondary_disks--existing_disk"></a>
 ### Nested Schema for `secondary_disks.existing_disk`
@@ -403,12 +573,99 @@ Required:
 - `id` (String)
 
 
+<a id="nestedatt--secondary_disks--managed_disk"></a>
+### Nested Schema for `secondary_disks.managed_disk`
+
+Required:
+
+- `name` (String) :
+
+   Name of a dependent disk.
+   Use it to convert an ExistingDisk to a dependent disk.
+   Changing the name will replace the disk and cause data loss.
+- `spec` (Attributes) Specification of a dependent disk to be created. (see [below for nested schema](#nestedatt--secondary_disks--managed_disk--spec))
+
+Optional:
+
+- `labels` (Map of String) :
+
+   Labels associated with disk resource.
+
+<a id="nestedatt--secondary_disks--managed_disk--spec"></a>
+### Nested Schema for `secondary_disks.managed_disk.spec`
+
+Required:
+
+- `type` (String) :
+
+   The type of disk defines the performance and reliability characteristics of the block device.
+   For details, see https://docs.nebius.com/compute/storage/types#disks-types
+   
+   #### Supported values
+   
+   the list of available types will be clarified later, it is not final version
+   Possible values:
+   
+   - `UNSPECIFIED`
+   - `NETWORK_SSD`
+   - `NETWORK_HDD`
+   - `NETWORK_SSD_NON_REPLICATED`
+   - `NETWORK_SSD_IO_M3`
+
+Optional:
+
+- `block_size_bytes` (Number) :
+
+   Block size in bytes.
+   The block size must be a power of two between 4096 bytes (4 KiB) and 131072 bytes (128 KiB).
+   The default value is 4096 bytes (4 KiB).
+- `disk_encryption` (Attributes) Defines how data on the disk is encrypted. By default, no encryption is applied. (see [below for nested schema](#nestedatt--secondary_disks--managed_disk--spec--disk_encryption))
+- `forbid_deletion` (Boolean) Prevents deletion whilst set
+- `size_bytes` (Number) *Cannot be set alongside size_kibibytes, size_mebibytes or size_gibibytes.*
+- `size_gibibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*
+- `size_kibibytes` (Number) *Cannot be set alongside size_bytes, size_mebibytes or size_gibibytes.*
+- `size_mebibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_gibibytes.*
+- `source_image_family` (Attributes) *Cannot be set alongside source_image_id.* (see [below for nested schema](#nestedatt--secondary_disks--managed_disk--spec--source_image_family))
+- `source_image_id` (String) *Cannot be set alongside source_image_family.*
+
+<a id="nestedatt--secondary_disks--managed_disk--spec--disk_encryption"></a>
+### Nested Schema for `secondary_disks.managed_disk.spec.disk_encryption`
+
+Optional:
+
+- `type` (String) :
+
+   #### Supported values
+   
+   Possible values:
+   
+   - `DISK_ENCRYPTION_UNSPECIFIED` - No encryption is applied unless explicitly specified.
+   - `DISK_ENCRYPTION_MANAGED`:
+      Enables encryption using the platform's default root key from KMS.
+      Available for disks with NETWORK_SSD_NON_REPLICATED and NETWORK_SSD_IO_M3 types only.
+
+
+<a id="nestedatt--secondary_disks--managed_disk--spec--source_image_family"></a>
+### Nested Schema for `secondary_disks.managed_disk.spec.source_image_family`
+
+Required:
+
+- `image_family` (String)
+
+Optional:
+
+- `parent_id` (String)
+
+
+
+
 
 <a id="nestedatt--status"></a>
 ### Nested Schema for `status`
 
 Read-Only:
 
+- `disk_attachments` (Attributes List) Status of the requested disk attachments. (see [below for nested schema](#nestedatt--status--disk_attachments))
 - `infiniband_topology_path` (Attributes) (see [below for nested schema](#nestedatt--status--infiniband_topology_path))
 - `maintenance_event_id` (String)
 - `network_interfaces` (Attributes List) :
@@ -433,6 +690,32 @@ Read-Only:
    - `STOPPED`
    - `DELETING`
    - `ERROR`
+
+<a id="nestedatt--status--disk_attachments"></a>
+### Nested Schema for `status.disk_attachments`
+
+Read-Only:
+
+- `id` (String) :
+
+   Disk ID.
+   - For ExistingDisk, this is the referenced disk ID.
+   - For ManagedDisk, may be empty while the attachment intent is still pending.
+- `is_managed` (Boolean) :
+
+   Indicates whether this attachment is managed by the instance lifecycle.
+   If true, the disk is expected to be deleted when the instance is deleted.
+   If false, the disk is preserved and only detached on instance deletion.
+- `name` (String) :
+
+   Disk name used to match this status entry with the desired attachment
+   from the instance specification.
+   
+   Consistency:
+   - For ManagedDisk, this value is derived from the instance spec (ManagedDisk.name).
+   - For ExistingDisk, this value is derived from the disk resource name and may lag behind
+     in case of renaming. It is updated asynchronously and is eventually consistent.
+
 
 <a id="nestedatt--status--infiniband_topology_path"></a>
 ### Nested Schema for `status.infiniband_topology_path`

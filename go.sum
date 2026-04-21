@@ -79,8 +79,8 @@ github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWE
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/mitchellh/go-testing-interface v1.14.1 h1:jrgshOhYAUVNMAJiKbEu7EqAwgJJ2JqpQmpLJOu07cU=
 github.com/mitchellh/go-testing-interface v1.14.1/go.mod h1:gfgS7OtZj6MA4U1UrDRp04twqAjfvlZyCfX3sDjEym8=
-github.com/nebius/gosdk v0.2.9 h1:qYe7thQtHG9NE2qiJQwnAmPxllnUj+0hteRoywZJd8s=
-github.com/nebius/gosdk v0.2.9/go.mod h1:/Oxx4LcJgp5bhuFvsJNV+TfdKOXmgnM2RrqvLBOWfyU=
+github.com/nebius/gosdk v0.2.10 h1:T0nqbRgEC1M5I/1RPM6/4ehFaklKqgOAp3UTlQ9sANk=
+github.com/nebius/gosdk v0.2.10/go.mod h1:/Oxx4LcJgp5bhuFvsJNV+TfdKOXmgnM2RrqvLBOWfyU=
 github.com/oklog/run v1.2.0 h1:O8x3yXwah4A73hJdlrwo/2X6J62gE5qTMusH0dvz60E=
 github.com/oklog/run v1.2.0/go.mod h1:mgDbKRSwPhJfesJ4PntqFUbKQRZ50NgmZTSPlFA0YFk=
 github.com/osteele/liquid v1.8.1 h1:b+uxMOkD1OOLxueaSvrE0yx6nMqf023DZPPAjPWT5eI=
