@@ -210,7 +210,84 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 							},
 						},
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Attach an existing disk.\n   \n   Lifecycle:\n   - The disk is preserved when the instance is deleted (it will be detached).\n   \n   Switching to a managed disk:\n   - To delete the disk together with the instance, switch to ManagedDisk in the instance spec.\n   - For the switch, `ManagedDisk.name` MUST match the current disk `name`\n     (see DiskService.Get for the disk referenced by `ExistingDisk.id`).\n   - When converting an ExistingDisk to a ManagedDisk, you must provide `ManagedDisk.name` and `ManagedDisk.spec`\n     exactly as they are currently defined in the disk resource.\n     Obtain the current values via `DiskService.Get` and copy them verbatim.\n     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail.\n",
+						MarkdownDescription: ":\n\n   Attach an existing disk.\n   \n   Lifecycle:\n   - The disk is preserved when the instance is deleted (it will be detached).\n   \n   Switching to a managed disk:\n   - To delete the disk together with the instance, switch to ManagedDisk in the instance spec.\n   - For the switch, `ManagedDisk.name` MUST match the current disk `name`\n     (see DiskService.Get for the disk referenced by `ExistingDisk.id`).\n   - When converting an ExistingDisk to a ManagedDisk, you must provide `ManagedDisk.name` and `ManagedDisk.spec`\n     exactly as they are currently defined in the disk resource.\n     Obtain the current values via `DiskService.Get` and copy them verbatim.\n     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail.\n   \n   *Cannot be set alongside managed_disk.*\n",
+					},
+					"managed_disk": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"name": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Name of a dependent disk.\n   Use it to convert an ExistingDisk to a dependent disk.\n   Changing the name will replace the disk and cause data loss.\n",
+							},
+							"labels": schema.MapAttribute{
+								ElementType:         types.StringType,
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Labels associated with disk resource.\n   \n",
+							},
+							"spec": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"size_bytes": schema.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside size_kibibytes, size_mebibytes or size_gibibytes.*",
+									},
+									"size_kibibytes": schema.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside size_bytes, size_mebibytes or size_gibibytes.*",
+									},
+									"size_mebibytes": schema.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside size_bytes, size_kibibytes or size_gibibytes.*",
+									},
+									"size_gibibytes": schema.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*",
+									},
+									"block_size_bytes": schema.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: ":\n\n   Block size in bytes.\n   The block size must be a power of two between 4096 bytes (4 KiB) and 131072 bytes (128 KiB).\n   The default value is 4096 bytes (4 KiB).\n",
+									},
+									"type": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: ":\n\n   The type of disk defines the performance and reliability characteristics of the block device.\n   For details, see https://docs.nebius.com/compute/storage/types#disks-types\n   \n   #### Supported values\n   \n   the list of available types will be clarified later, it is not final version\n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `NETWORK_SSD`\n   - `NETWORK_HDD`\n   - `NETWORK_SSD_NON_REPLICATED`\n   - `NETWORK_SSD_IO_M3`\n   \n",
+									},
+									"source_image_id": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside source_image_family.*",
+									},
+									"source_image_family": schema.SingleNestedAttribute{
+										Attributes: map[string]schema.Attribute{
+											"image_family": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "",
+											},
+											"parent_id": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "",
+											},
+										},
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside source_image_id.*",
+									},
+									"disk_encryption": schema.SingleNestedAttribute{
+										Attributes: map[string]schema.Attribute{
+											"type": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `DISK_ENCRYPTION_UNSPECIFIED` - No encryption is applied unless explicitly specified.\n   - `DISK_ENCRYPTION_MANAGED`:\n      Enables encryption using the platform's default root key from KMS.\n      Available for disks with NETWORK_SSD_NON_REPLICATED and NETWORK_SSD_IO_M3 types only.\n   \n   \n",
+											},
+										},
+										Computed:            true,
+										MarkdownDescription: "Defines how data on the disk is encrypted. By default, no encryption is applied.",
+									},
+									"forbid_deletion": schema.BoolAttribute{
+										Computed:            true,
+										MarkdownDescription: "Prevents deletion whilst set",
+									},
+								},
+								Computed:            true,
+								MarkdownDescription: "Specification of a dependent disk to be created.",
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Attach a managed disk.\n   \n   Lifecycle:\n   - The disk is deleted when the instance is deleted.\n   \n   Semantics:\n   - Specifying a ManagedDisk expresses an intent to have that managed disk attached.\n   - If this intent cannot be satisfied, the entire operation fails.\n   - You can check the intent status in `instance.status.disk_attachments`.\n   \n   Updates and matching:\n   - Managed disks can be updated only via instance spec updates. Updates via DiskService are not allowed.\n   - During updates, disks are matched by `name`.\n   \n   Renaming and data loss:\n   - Changing the disk `name` triggers disk replacement (create a new disk and delete the old one),\n     which causes data loss.\n   - To rename a managed disk safely:\n     1) switch it to ExistingDisk in the instance spec, and\n     2) update/rename it via DiskService.\n   \n   Conflicts:\n   - Instance create/update fails if there is already a disk with the same `name`.\n     as requested by any ManagedDisk.\n   \n   Finding the disk ID:\n   - The disk ID is available in `instance.status.disk_attachments` after it is created.\n     Use `DiskAttachmentStatus.name` to find the desired disk which matches `name`.\n   \n   Switching to an existing (non-managed) disk:\n   - To preserve the disk after instance deletion, switch it to ExistingDisk in the instance spec,\n     use the disk ID from `instance.status.disk_attachments`.\n   \n   Deletion protection:\n   - Switching ExistingDisk to ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.\n   - Deleting an instance that has a ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.\n   \n   *Cannot be set alongside existing_disk.*\n",
 					},
 					"device_id": schema.StringAttribute{
 						Computed:            true,
@@ -235,7 +312,84 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 								},
 							},
 							Computed:            true,
-							MarkdownDescription: ":\n\n   Attach an existing disk.\n   \n   Lifecycle:\n   - The disk is preserved when the instance is deleted (it will be detached).\n   \n   Switching to a managed disk:\n   - To delete the disk together with the instance, switch to ManagedDisk in the instance spec.\n   - For the switch, `ManagedDisk.name` MUST match the current disk `name`\n     (see DiskService.Get for the disk referenced by `ExistingDisk.id`).\n   - When converting an ExistingDisk to a ManagedDisk, you must provide `ManagedDisk.name` and `ManagedDisk.spec`\n     exactly as they are currently defined in the disk resource.\n     Obtain the current values via `DiskService.Get` and copy them verbatim.\n     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail.\n",
+							MarkdownDescription: ":\n\n   Attach an existing disk.\n   \n   Lifecycle:\n   - The disk is preserved when the instance is deleted (it will be detached).\n   \n   Switching to a managed disk:\n   - To delete the disk together with the instance, switch to ManagedDisk in the instance spec.\n   - For the switch, `ManagedDisk.name` MUST match the current disk `name`\n     (see DiskService.Get for the disk referenced by `ExistingDisk.id`).\n   - When converting an ExistingDisk to a ManagedDisk, you must provide `ManagedDisk.name` and `ManagedDisk.spec`\n     exactly as they are currently defined in the disk resource.\n     Obtain the current values via `DiskService.Get` and copy them verbatim.\n     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail.\n   \n   *Cannot be set alongside managed_disk.*\n",
+						},
+						"managed_disk": schema.SingleNestedAttribute{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Name of a dependent disk.\n   Use it to convert an ExistingDisk to a dependent disk.\n   Changing the name will replace the disk and cause data loss.\n",
+								},
+								"labels": schema.MapAttribute{
+									ElementType:         types.StringType,
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Labels associated with disk resource.\n   \n",
+								},
+								"spec": schema.SingleNestedAttribute{
+									Attributes: map[string]schema.Attribute{
+										"size_bytes": schema.Int64Attribute{
+											Computed:            true,
+											MarkdownDescription: "*Cannot be set alongside size_kibibytes, size_mebibytes or size_gibibytes.*",
+										},
+										"size_kibibytes": schema.Int64Attribute{
+											Computed:            true,
+											MarkdownDescription: "*Cannot be set alongside size_bytes, size_mebibytes or size_gibibytes.*",
+										},
+										"size_mebibytes": schema.Int64Attribute{
+											Computed:            true,
+											MarkdownDescription: "*Cannot be set alongside size_bytes, size_kibibytes or size_gibibytes.*",
+										},
+										"size_gibibytes": schema.Int64Attribute{
+											Computed:            true,
+											MarkdownDescription: "*Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*",
+										},
+										"block_size_bytes": schema.Int64Attribute{
+											Computed:            true,
+											MarkdownDescription: ":\n\n   Block size in bytes.\n   The block size must be a power of two between 4096 bytes (4 KiB) and 131072 bytes (128 KiB).\n   The default value is 4096 bytes (4 KiB).\n",
+										},
+										"type": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: ":\n\n   The type of disk defines the performance and reliability characteristics of the block device.\n   For details, see https://docs.nebius.com/compute/storage/types#disks-types\n   \n   #### Supported values\n   \n   the list of available types will be clarified later, it is not final version\n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `NETWORK_SSD`\n   - `NETWORK_HDD`\n   - `NETWORK_SSD_NON_REPLICATED`\n   - `NETWORK_SSD_IO_M3`\n   \n",
+										},
+										"source_image_id": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "*Cannot be set alongside source_image_family.*",
+										},
+										"source_image_family": schema.SingleNestedAttribute{
+											Attributes: map[string]schema.Attribute{
+												"image_family": schema.StringAttribute{
+													Computed:            true,
+													MarkdownDescription: "",
+												},
+												"parent_id": schema.StringAttribute{
+													Computed:            true,
+													MarkdownDescription: "",
+												},
+											},
+											Computed:            true,
+											MarkdownDescription: "*Cannot be set alongside source_image_id.*",
+										},
+										"disk_encryption": schema.SingleNestedAttribute{
+											Attributes: map[string]schema.Attribute{
+												"type": schema.StringAttribute{
+													Computed:            true,
+													MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `DISK_ENCRYPTION_UNSPECIFIED` - No encryption is applied unless explicitly specified.\n   - `DISK_ENCRYPTION_MANAGED`:\n      Enables encryption using the platform's default root key from KMS.\n      Available for disks with NETWORK_SSD_NON_REPLICATED and NETWORK_SSD_IO_M3 types only.\n   \n   \n",
+												},
+											},
+											Computed:            true,
+											MarkdownDescription: "Defines how data on the disk is encrypted. By default, no encryption is applied.",
+										},
+										"forbid_deletion": schema.BoolAttribute{
+											Computed:            true,
+											MarkdownDescription: "Prevents deletion whilst set",
+										},
+									},
+									Computed:            true,
+									MarkdownDescription: "Specification of a dependent disk to be created.",
+								},
+							},
+							Computed:            true,
+							MarkdownDescription: ":\n\n   Attach a managed disk.\n   \n   Lifecycle:\n   - The disk is deleted when the instance is deleted.\n   \n   Semantics:\n   - Specifying a ManagedDisk expresses an intent to have that managed disk attached.\n   - If this intent cannot be satisfied, the entire operation fails.\n   - You can check the intent status in `instance.status.disk_attachments`.\n   \n   Updates and matching:\n   - Managed disks can be updated only via instance spec updates. Updates via DiskService are not allowed.\n   - During updates, disks are matched by `name`.\n   \n   Renaming and data loss:\n   - Changing the disk `name` triggers disk replacement (create a new disk and delete the old one),\n     which causes data loss.\n   - To rename a managed disk safely:\n     1) switch it to ExistingDisk in the instance spec, and\n     2) update/rename it via DiskService.\n   \n   Conflicts:\n   - Instance create/update fails if there is already a disk with the same `name`.\n     as requested by any ManagedDisk.\n   \n   Finding the disk ID:\n   - The disk ID is available in `instance.status.disk_attachments` after it is created.\n     Use `DiskAttachmentStatus.name` to find the desired disk which matches `name`.\n   \n   Switching to an existing (non-managed) disk:\n   - To preserve the disk after instance deletion, switch it to ExistingDisk in the instance spec,\n     use the disk ID from `instance.status.disk_attachments`.\n   \n   Deletion protection:\n   - Switching ExistingDisk to ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.\n   - Deleting an instance that has a ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.\n   \n   *Cannot be set alongside existing_disk.*\n",
 						},
 						"device_id": schema.StringAttribute{
 							Computed:            true,
@@ -429,6 +583,26 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 					"reservation_id": schema.StringAttribute{
 						Computed:            true,
 						MarkdownDescription: "",
+					},
+					"disk_attachments": schema.ListNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"id": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Disk ID.\n   - For ExistingDisk, this is the referenced disk ID.\n   - For ManagedDisk, may be empty while the attachment intent is still pending.\n",
+								},
+								"name": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Disk name used to match this status entry with the desired attachment\n   from the instance specification.\n   \n   Consistency:\n   - For ManagedDisk, this value is derived from the instance spec (ManagedDisk.name).\n   - For ExistingDisk, this value is derived from the disk resource name and may lag behind\n     in case of renaming. It is updated asynchronously and is eventually consistent.\n",
+								},
+								"is_managed": schema.BoolAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Indicates whether this attachment is managed by the instance lifecycle.\n   If true, the disk is expected to be deleted when the instance is deleted.\n   If false, the disk is preserved and only detached on instance deletion.\n",
+								},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: "Status of the requested disk attachments.",
 					},
 				},
 				Computed:            true,
@@ -663,9 +837,188 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 								PlanModifiers:       []planmodifier.String{},
 							},
 						},
-						Validators:          []validator.Object{},
+						Validators: []validator.Object{
+							validators.OneofValidator([]string{
+								"existing_disk",
+								"managed_disk",
+							}, fieldNameMapInstance),
+						},
 						Optional:            true,
-						MarkdownDescription: ":\n\n   Attach an existing disk.\n   \n   Lifecycle:\n   - The disk is preserved when the instance is deleted (it will be detached).\n   \n   Switching to a managed disk:\n   - To delete the disk together with the instance, switch to ManagedDisk in the instance spec.\n   - For the switch, `ManagedDisk.name` MUST match the current disk `name`\n     (see DiskService.Get for the disk referenced by `ExistingDisk.id`).\n   - When converting an ExistingDisk to a ManagedDisk, you must provide `ManagedDisk.name` and `ManagedDisk.spec`\n     exactly as they are currently defined in the disk resource.\n     Obtain the current values via `DiskService.Get` and copy them verbatim.\n     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail.\n",
+						MarkdownDescription: ":\n\n   Attach an existing disk.\n   \n   Lifecycle:\n   - The disk is preserved when the instance is deleted (it will be detached).\n   \n   Switching to a managed disk:\n   - To delete the disk together with the instance, switch to ManagedDisk in the instance spec.\n   - For the switch, `ManagedDisk.name` MUST match the current disk `name`\n     (see DiskService.Get for the disk referenced by `ExistingDisk.id`).\n   - When converting an ExistingDisk to a ManagedDisk, you must provide `ManagedDisk.name` and `ManagedDisk.spec`\n     exactly as they are currently defined in the disk resource.\n     Obtain the current values via `DiskService.Get` and copy them verbatim.\n     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail.\n   \n   *Cannot be set alongside managed_disk.*\n",
+						PlanModifiers:       []planmodifier.Object{},
+					},
+					"managed_disk": schema1.SingleNestedAttribute{
+						Attributes: map[string]schema1.Attribute{
+							"name": schema1.StringAttribute{
+								Validators:          []validator.String{},
+								Required:            true,
+								MarkdownDescription: ":\n\n   Name of a dependent disk.\n   Use it to convert an ExistingDisk to a dependent disk.\n   Changing the name will replace the disk and cause data loss.\n",
+								PlanModifiers:       []planmodifier.String{},
+							},
+							"labels": schema1.MapAttribute{
+								ElementType:         types.StringType,
+								Validators:          []validator.Map{},
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Labels associated with disk resource.\n   \n",
+								PlanModifiers:       []planmodifier.Map{},
+							},
+							"spec": schema1.SingleNestedAttribute{
+								Attributes: map[string]schema1.Attribute{
+									"size_bytes": schema1.Int64Attribute{
+										Validators: []validator.Int64{
+											validators.OneofValidator([]string{
+												"size_bytes",
+												"size_kibibytes",
+												"size_mebibytes",
+												"size_gibibytes",
+											}, fieldNameMapInstance),
+										},
+										Optional:            true,
+										MarkdownDescription: "*Cannot be set alongside size_kibibytes, size_mebibytes or size_gibibytes.*",
+										PlanModifiers:       []planmodifier.Int64{},
+									},
+									"size_kibibytes": schema1.Int64Attribute{
+										Validators: []validator.Int64{
+											validators.OneofValidator([]string{
+												"size_bytes",
+												"size_kibibytes",
+												"size_mebibytes",
+												"size_gibibytes",
+											}, fieldNameMapInstance),
+										},
+										Optional:            true,
+										MarkdownDescription: "*Cannot be set alongside size_bytes, size_mebibytes or size_gibibytes.*",
+										PlanModifiers:       []planmodifier.Int64{},
+									},
+									"size_mebibytes": schema1.Int64Attribute{
+										Validators: []validator.Int64{
+											validators.OneofValidator([]string{
+												"size_bytes",
+												"size_kibibytes",
+												"size_mebibytes",
+												"size_gibibytes",
+											}, fieldNameMapInstance),
+										},
+										Optional:            true,
+										MarkdownDescription: "*Cannot be set alongside size_bytes, size_kibibytes or size_gibibytes.*",
+										PlanModifiers:       []planmodifier.Int64{},
+									},
+									"size_gibibytes": schema1.Int64Attribute{
+										Validators: []validator.Int64{
+											validators.OneofValidator([]string{
+												"size_bytes",
+												"size_kibibytes",
+												"size_mebibytes",
+												"size_gibibytes",
+											}, fieldNameMapInstance),
+										},
+										Optional:            true,
+										MarkdownDescription: "*Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*",
+										PlanModifiers:       []planmodifier.Int64{},
+									},
+									"block_size_bytes": schema1.Int64Attribute{
+										Validators:          []validator.Int64{},
+										Optional:            true,
+										MarkdownDescription: ":\n\n   Block size in bytes.\n   The block size must be a power of two between 4096 bytes (4 KiB) and 131072 bytes (128 KiB).\n   The default value is 4096 bytes (4 KiB).\n",
+										PlanModifiers: []planmodifier.Int64{
+											int64planmodifier.RequiresReplace(),
+										},
+									},
+									"type": schema1.StringAttribute{
+										Validators: []validator.String{
+											validators.EnumValidator(v1.DiskSpec_DiskType_value),
+										},
+										Required:            true,
+										MarkdownDescription: ":\n\n   The type of disk defines the performance and reliability characteristics of the block device.\n   For details, see https://docs.nebius.com/compute/storage/types#disks-types\n   \n   #### Supported values\n   \n   the list of available types will be clarified later, it is not final version\n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `NETWORK_SSD`\n   - `NETWORK_HDD`\n   - `NETWORK_SSD_NON_REPLICATED`\n   - `NETWORK_SSD_IO_M3`\n   \n",
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.RequiresReplace(),
+										},
+									},
+									"source_image_id": schema1.StringAttribute{
+										Validators: []validator.String{
+											validators.OneofValidator([]string{
+												"source_image_id",
+												"source_image_family",
+											}, fieldNameMapInstance),
+										},
+										Optional:            true,
+										MarkdownDescription: "*Cannot be set alongside source_image_family.*",
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.RequiresReplace(),
+										},
+									},
+									"source_image_family": schema1.SingleNestedAttribute{
+										Attributes: map[string]schema1.Attribute{
+											"image_family": schema1.StringAttribute{
+												Validators:          []validator.String{},
+												Required:            true,
+												MarkdownDescription: "",
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+											},
+											"parent_id": schema1.StringAttribute{
+												Validators:          []validator.String{},
+												Optional:            true,
+												MarkdownDescription: "",
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+											},
+										},
+										Validators: []validator.Object{
+											validators.OneofValidator([]string{
+												"source_image_id",
+												"source_image_family",
+											}, fieldNameMapInstance),
+										},
+										Optional:            true,
+										MarkdownDescription: "*Cannot be set alongside source_image_id.*",
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.RequiresReplace(),
+										},
+									},
+									"disk_encryption": schema1.SingleNestedAttribute{
+										Attributes: map[string]schema1.Attribute{
+											"type": schema1.StringAttribute{
+												Validators: []validator.String{
+													validators.EnumValidator(v1.DiskEncryption_DiskEncryptionType_value),
+												},
+												Optional:            true,
+												MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `DISK_ENCRYPTION_UNSPECIFIED` - No encryption is applied unless explicitly specified.\n   - `DISK_ENCRYPTION_MANAGED`:\n      Enables encryption using the platform's default root key from KMS.\n      Available for disks with NETWORK_SSD_NON_REPLICATED and NETWORK_SSD_IO_M3 types only.\n   \n   \n",
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+											},
+										},
+										Validators:          []validator.Object{},
+										Optional:            true,
+										MarkdownDescription: "Defines how data on the disk is encrypted. By default, no encryption is applied.",
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.RequiresReplace(),
+										},
+									},
+									"forbid_deletion": schema1.BoolAttribute{
+										Validators:          []validator.Bool{},
+										Optional:            true,
+										MarkdownDescription: "Prevents deletion whilst set",
+										PlanModifiers:       []planmodifier.Bool{},
+									},
+								},
+								Validators:          []validator.Object{},
+								Required:            true,
+								MarkdownDescription: "Specification of a dependent disk to be created.",
+								PlanModifiers:       []planmodifier.Object{},
+							},
+						},
+						Validators: []validator.Object{
+							validators.OneofValidator([]string{
+								"existing_disk",
+								"managed_disk",
+							}, fieldNameMapInstance),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   Attach a managed disk.\n   \n   Lifecycle:\n   - The disk is deleted when the instance is deleted.\n   \n   Semantics:\n   - Specifying a ManagedDisk expresses an intent to have that managed disk attached.\n   - If this intent cannot be satisfied, the entire operation fails.\n   - You can check the intent status in `instance.status.disk_attachments`.\n   \n   Updates and matching:\n   - Managed disks can be updated only via instance spec updates. Updates via DiskService are not allowed.\n   - During updates, disks are matched by `name`.\n   \n   Renaming and data loss:\n   - Changing the disk `name` triggers disk replacement (create a new disk and delete the old one),\n     which causes data loss.\n   - To rename a managed disk safely:\n     1) switch it to ExistingDisk in the instance spec, and\n     2) update/rename it via DiskService.\n   \n   Conflicts:\n   - Instance create/update fails if there is already a disk with the same `name`.\n     as requested by any ManagedDisk.\n   \n   Finding the disk ID:\n   - The disk ID is available in `instance.status.disk_attachments` after it is created.\n     Use `DiskAttachmentStatus.name` to find the desired disk which matches `name`.\n   \n   Switching to an existing (non-managed) disk:\n   - To preserve the disk after instance deletion, switch it to ExistingDisk in the instance spec,\n     use the disk ID from `instance.status.disk_attachments`.\n   \n   Deletion protection:\n   - Switching ExistingDisk to ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.\n   - Deleting an instance that has a ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.\n   \n   *Cannot be set alongside existing_disk.*\n",
 						PlanModifiers:       []planmodifier.Object{},
 					},
 					"device_id": schema1.StringAttribute{
@@ -704,9 +1057,188 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 									PlanModifiers:       []planmodifier.String{},
 								},
 							},
-							Validators:          []validator.Object{},
+							Validators: []validator.Object{
+								validators.OneofValidator([]string{
+									"existing_disk",
+									"managed_disk",
+								}, fieldNameMapInstance),
+							},
 							Optional:            true,
-							MarkdownDescription: ":\n\n   Attach an existing disk.\n   \n   Lifecycle:\n   - The disk is preserved when the instance is deleted (it will be detached).\n   \n   Switching to a managed disk:\n   - To delete the disk together with the instance, switch to ManagedDisk in the instance spec.\n   - For the switch, `ManagedDisk.name` MUST match the current disk `name`\n     (see DiskService.Get for the disk referenced by `ExistingDisk.id`).\n   - When converting an ExistingDisk to a ManagedDisk, you must provide `ManagedDisk.name` and `ManagedDisk.spec`\n     exactly as they are currently defined in the disk resource.\n     Obtain the current values via `DiskService.Get` and copy them verbatim.\n     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail.\n",
+							MarkdownDescription: ":\n\n   Attach an existing disk.\n   \n   Lifecycle:\n   - The disk is preserved when the instance is deleted (it will be detached).\n   \n   Switching to a managed disk:\n   - To delete the disk together with the instance, switch to ManagedDisk in the instance spec.\n   - For the switch, `ManagedDisk.name` MUST match the current disk `name`\n     (see DiskService.Get for the disk referenced by `ExistingDisk.id`).\n   - When converting an ExistingDisk to a ManagedDisk, you must provide `ManagedDisk.name` and `ManagedDisk.spec`\n     exactly as they are currently defined in the disk resource.\n     Obtain the current values via `DiskService.Get` and copy them verbatim.\n     If `ManagedDisk.spec` differs from the current disk spec, the instance update will fail.\n   \n   *Cannot be set alongside managed_disk.*\n",
+							PlanModifiers:       []planmodifier.Object{},
+						},
+						"managed_disk": schema1.SingleNestedAttribute{
+							Attributes: map[string]schema1.Attribute{
+								"name": schema1.StringAttribute{
+									Validators:          []validator.String{},
+									Required:            true,
+									MarkdownDescription: ":\n\n   Name of a dependent disk.\n   Use it to convert an ExistingDisk to a dependent disk.\n   Changing the name will replace the disk and cause data loss.\n",
+									PlanModifiers:       []planmodifier.String{},
+								},
+								"labels": schema1.MapAttribute{
+									ElementType:         types.StringType,
+									Validators:          []validator.Map{},
+									Optional:            true,
+									MarkdownDescription: ":\n\n   Labels associated with disk resource.\n   \n",
+									PlanModifiers:       []planmodifier.Map{},
+								},
+								"spec": schema1.SingleNestedAttribute{
+									Attributes: map[string]schema1.Attribute{
+										"size_bytes": schema1.Int64Attribute{
+											Validators: []validator.Int64{
+												validators.OneofValidator([]string{
+													"size_bytes",
+													"size_kibibytes",
+													"size_mebibytes",
+													"size_gibibytes",
+												}, fieldNameMapInstance),
+											},
+											Optional:            true,
+											MarkdownDescription: "*Cannot be set alongside size_kibibytes, size_mebibytes or size_gibibytes.*",
+											PlanModifiers:       []planmodifier.Int64{},
+										},
+										"size_kibibytes": schema1.Int64Attribute{
+											Validators: []validator.Int64{
+												validators.OneofValidator([]string{
+													"size_bytes",
+													"size_kibibytes",
+													"size_mebibytes",
+													"size_gibibytes",
+												}, fieldNameMapInstance),
+											},
+											Optional:            true,
+											MarkdownDescription: "*Cannot be set alongside size_bytes, size_mebibytes or size_gibibytes.*",
+											PlanModifiers:       []planmodifier.Int64{},
+										},
+										"size_mebibytes": schema1.Int64Attribute{
+											Validators: []validator.Int64{
+												validators.OneofValidator([]string{
+													"size_bytes",
+													"size_kibibytes",
+													"size_mebibytes",
+													"size_gibibytes",
+												}, fieldNameMapInstance),
+											},
+											Optional:            true,
+											MarkdownDescription: "*Cannot be set alongside size_bytes, size_kibibytes or size_gibibytes.*",
+											PlanModifiers:       []planmodifier.Int64{},
+										},
+										"size_gibibytes": schema1.Int64Attribute{
+											Validators: []validator.Int64{
+												validators.OneofValidator([]string{
+													"size_bytes",
+													"size_kibibytes",
+													"size_mebibytes",
+													"size_gibibytes",
+												}, fieldNameMapInstance),
+											},
+											Optional:            true,
+											MarkdownDescription: "*Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*",
+											PlanModifiers:       []planmodifier.Int64{},
+										},
+										"block_size_bytes": schema1.Int64Attribute{
+											Validators:          []validator.Int64{},
+											Optional:            true,
+											MarkdownDescription: ":\n\n   Block size in bytes.\n   The block size must be a power of two between 4096 bytes (4 KiB) and 131072 bytes (128 KiB).\n   The default value is 4096 bytes (4 KiB).\n",
+											PlanModifiers: []planmodifier.Int64{
+												int64planmodifier.RequiresReplace(),
+											},
+										},
+										"type": schema1.StringAttribute{
+											Validators: []validator.String{
+												validators.EnumValidator(v1.DiskSpec_DiskType_value),
+											},
+											Required:            true,
+											MarkdownDescription: ":\n\n   The type of disk defines the performance and reliability characteristics of the block device.\n   For details, see https://docs.nebius.com/compute/storage/types#disks-types\n   \n   #### Supported values\n   \n   the list of available types will be clarified later, it is not final version\n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `NETWORK_SSD`\n   - `NETWORK_HDD`\n   - `NETWORK_SSD_NON_REPLICATED`\n   - `NETWORK_SSD_IO_M3`\n   \n",
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+										},
+										"source_image_id": schema1.StringAttribute{
+											Validators: []validator.String{
+												validators.OneofValidator([]string{
+													"source_image_id",
+													"source_image_family",
+												}, fieldNameMapInstance),
+											},
+											Optional:            true,
+											MarkdownDescription: "*Cannot be set alongside source_image_family.*",
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
+											},
+										},
+										"source_image_family": schema1.SingleNestedAttribute{
+											Attributes: map[string]schema1.Attribute{
+												"image_family": schema1.StringAttribute{
+													Validators:          []validator.String{},
+													Required:            true,
+													MarkdownDescription: "",
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.RequiresReplace(),
+													},
+												},
+												"parent_id": schema1.StringAttribute{
+													Validators:          []validator.String{},
+													Optional:            true,
+													MarkdownDescription: "",
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.RequiresReplace(),
+													},
+												},
+											},
+											Validators: []validator.Object{
+												validators.OneofValidator([]string{
+													"source_image_id",
+													"source_image_family",
+												}, fieldNameMapInstance),
+											},
+											Optional:            true,
+											MarkdownDescription: "*Cannot be set alongside source_image_id.*",
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+										},
+										"disk_encryption": schema1.SingleNestedAttribute{
+											Attributes: map[string]schema1.Attribute{
+												"type": schema1.StringAttribute{
+													Validators: []validator.String{
+														validators.EnumValidator(v1.DiskEncryption_DiskEncryptionType_value),
+													},
+													Optional:            true,
+													MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `DISK_ENCRYPTION_UNSPECIFIED` - No encryption is applied unless explicitly specified.\n   - `DISK_ENCRYPTION_MANAGED`:\n      Enables encryption using the platform's default root key from KMS.\n      Available for disks with NETWORK_SSD_NON_REPLICATED and NETWORK_SSD_IO_M3 types only.\n   \n   \n",
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.RequiresReplace(),
+													},
+												},
+											},
+											Validators:          []validator.Object{},
+											Optional:            true,
+											MarkdownDescription: "Defines how data on the disk is encrypted. By default, no encryption is applied.",
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.RequiresReplace(),
+											},
+										},
+										"forbid_deletion": schema1.BoolAttribute{
+											Validators:          []validator.Bool{},
+											Optional:            true,
+											MarkdownDescription: "Prevents deletion whilst set",
+											PlanModifiers:       []planmodifier.Bool{},
+										},
+									},
+									Validators:          []validator.Object{},
+									Required:            true,
+									MarkdownDescription: "Specification of a dependent disk to be created.",
+									PlanModifiers:       []planmodifier.Object{},
+								},
+							},
+							Validators: []validator.Object{
+								validators.OneofValidator([]string{
+									"existing_disk",
+									"managed_disk",
+								}, fieldNameMapInstance),
+							},
+							Optional:            true,
+							MarkdownDescription: ":\n\n   Attach a managed disk.\n   \n   Lifecycle:\n   - The disk is deleted when the instance is deleted.\n   \n   Semantics:\n   - Specifying a ManagedDisk expresses an intent to have that managed disk attached.\n   - If this intent cannot be satisfied, the entire operation fails.\n   - You can check the intent status in `instance.status.disk_attachments`.\n   \n   Updates and matching:\n   - Managed disks can be updated only via instance spec updates. Updates via DiskService are not allowed.\n   - During updates, disks are matched by `name`.\n   \n   Renaming and data loss:\n   - Changing the disk `name` triggers disk replacement (create a new disk and delete the old one),\n     which causes data loss.\n   - To rename a managed disk safely:\n     1) switch it to ExistingDisk in the instance spec, and\n     2) update/rename it via DiskService.\n   \n   Conflicts:\n   - Instance create/update fails if there is already a disk with the same `name`.\n     as requested by any ManagedDisk.\n   \n   Finding the disk ID:\n   - The disk ID is available in `instance.status.disk_attachments` after it is created.\n     Use `DiskAttachmentStatus.name` to find the desired disk which matches `name`.\n   \n   Switching to an existing (non-managed) disk:\n   - To preserve the disk after instance deletion, switch it to ExistingDisk in the instance spec,\n     use the disk ID from `instance.status.disk_attachments`.\n   \n   Deletion protection:\n   - Switching ExistingDisk to ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.\n   - Deleting an instance that has a ManagedDisk fails if `Disk.spec.deletion_protection` is enabled.\n   \n   *Cannot be set alongside existing_disk.*\n",
 							PlanModifiers:       []planmodifier.Object{},
 						},
 						"device_id": schema1.StringAttribute{
@@ -989,6 +1521,30 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: "",
 						PlanModifiers:       []planmodifier.String{},
+					},
+					"disk_attachments": schema1.ListNestedAttribute{
+						NestedObject: schema1.NestedAttributeObject{
+							Attributes: map[string]schema1.Attribute{
+								"id": schema1.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Disk ID.\n   - For ExistingDisk, this is the referenced disk ID.\n   - For ManagedDisk, may be empty while the attachment intent is still pending.\n",
+									PlanModifiers:       []planmodifier.String{},
+								},
+								"name": schema1.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Disk name used to match this status entry with the desired attachment\n   from the instance specification.\n   \n   Consistency:\n   - For ManagedDisk, this value is derived from the instance spec (ManagedDisk.name).\n   - For ExistingDisk, this value is derived from the disk resource name and may lag behind\n     in case of renaming. It is updated asynchronously and is eventually consistent.\n",
+									PlanModifiers:       []planmodifier.String{},
+								},
+								"is_managed": schema1.BoolAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Indicates whether this attachment is managed by the instance lifecycle.\n   If true, the disk is expected to be deleted when the instance is deleted.\n   If false, the disk is preserved and only detached on instance deletion.\n",
+									PlanModifiers:       []planmodifier.Bool{},
+								},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: "Status of the requested disk attachments.",
+						PlanModifiers:       []planmodifier.List{},
 					},
 				},
 				Computed:            true,
