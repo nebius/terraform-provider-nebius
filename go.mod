@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework-validators v0.19.0
 	github.com/hashicorp/terraform-plugin-go v0.31.0
 	github.com/hashicorp/terraform-plugin-log v0.10.0
-	github.com/nebius/gosdk v0.2.10
+	github.com/nebius/gosdk v0.2.11
 	github.com/osteele/liquid v1.8.1
 	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11
