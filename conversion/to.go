@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"math/big"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -904,10 +905,8 @@ func IsMeaningfulEmpty(desc protoreflect.FieldDescriptor) (
 			fmt.Sprintf("Error: %s", err.Error()))
 		return true, ret
 	}
-	for _, a := range anno {
-		if a == nebius.FieldBehavior_MEANINGFUL_EMPTY_VALUE {
-			return true, nil
-		}
+	if slices.Contains(anno, nebius.FieldBehavior_MEANINGFUL_EMPTY_VALUE) {
+		return true, nil
 	}
 	return false, nil
 }
@@ -924,10 +923,8 @@ func IsInputOnly(desc protoreflect.FieldDescriptor) (
 			fmt.Sprintf("Error: %s", err.Error()))
 		return true, ret
 	}
-	for _, a := range anno {
-		if a == nebius.FieldBehavior_INPUT_ONLY {
-			return true, nil
-		}
+	if slices.Contains(anno, nebius.FieldBehavior_INPUT_ONLY) {
+		return true, nil
 	}
 	return false, nil
 }
