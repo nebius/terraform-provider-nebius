@@ -59,7 +59,7 @@ data ... {
 
 ### Read-Only
 
-- `active` (Boolean, Deprecated)
+- `active` (Boolean, Deprecated) Specifies if the federation in active state
 - `created_at` (String) :
 
    Timestamp indicating when the resource was created.
@@ -70,6 +70,8 @@ data ... {
    Labels associated with the resource.
 - `metadata` (Attributes) :
 
+   Federation resource metadata.
+   
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
@@ -79,14 +81,17 @@ data ... {
    Positive and monotonically increases on each resource spec change (but *not* on each change of the
    resource's container(s) or status).
    Service allows zero value or current.
-- `saml_settings` (Attributes) (see [below for nested schema](#nestedatt--saml_settings))
-- `status` (Attributes) (see [below for nested schema](#nestedatt--status))
+- `saml_settings` (Attributes) SAML federation settings. (see [below for nested schema](#nestedatt--saml_settings))
+- `status` (Attributes) Federation resource status. (see [below for nested schema](#nestedatt--status))
 - `updated_at` (String) :
 
    Timestamp indicating when the resource was last updated.
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
-- `user_account_auto_creation` (Boolean)
+- `user_account_auto_creation` (Boolean) :
+
+   If false, users with access to the federation cannot sign in automatically
+   and user accounts for them must be pre-created by a federation administrator.
 
 <a id="nestedatt--metadata"></a>
 ### Nested Schema for `metadata`
@@ -98,8 +103,8 @@ data ... {
 Read-Only:
 
 - `force_authn` (Boolean) if "true", the identity provider MUST authenticate the presenter directly rather than rely on a previous security context.
-- `idp_issuer` (String)
-- `sso_url` (String)
+- `idp_issuer` (String) The unique identifier of the SAML Identity Provider. It usually matches the entityID from the IdP metadata.
+- `sso_url` (String) Identity Provider’s Single Sign-On endpoint. This is the URL where the user is redirected to start SAML login.
 
 
 <a id="nestedatt--status"></a>
@@ -107,9 +112,11 @@ Read-Only:
 
 Read-Only:
 
-- `certificates_count` (Number)
+- `certificates_count` (Number) Number of certificates attached to the SAML federation for verifying SAML responses.
 - `state` (String) :
 
+   Federation state.
+   
    #### Supported values
    
    Possible values:
@@ -117,4 +124,4 @@ Read-Only:
    - `UNSPECIFIED`
    - `ACTIVE`
    - `INACTIVE`
-- `users_count` (Number)
+- `users_count` (Number) Number of users registered in the IAM federation. This value may differ from the number of users in the identity provider.

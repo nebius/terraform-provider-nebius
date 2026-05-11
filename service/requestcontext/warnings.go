@@ -28,24 +28,20 @@ func processWarnings(
 	engine := liquid.NewEngine()
 	engine.RegisterFilter("field_name", fieldName(schemaType, fieldNameMap))
 	bindings := liquid.Bindings{}
+
+	var unsupportedToolVersionWarning *commonpb.Warning
+
 	for _, warning := range warnings.GetWarnings() {
 		if warning == nil {
 			continue
 		}
-		summaryTemplate, summaryFallback := normalizeWarningTemplate(
-			warning.GetSummary(),
-			warning.GetSummaryFallback(),
-		)
-		detailsTemplate, detailsFallback := normalizeWarningTemplate(
-			warning.GetDetails(),
-			warning.GetDetailsFallback(),
-		)
-		summary := applyWarningTemplate(
-			engine, bindings, summaryTemplate, summaryFallback,
-		)
-		details := applyWarningTemplate(
-			engine, bindings, detailsTemplate, detailsFallback,
-		)
+		if warning.GetCode() == commonpb.Warning_CODE_DEPRECATED_TOOL_VERSION {
+			unsupportedToolVersionWarning = warning
+			continue
+		}
+
+		summary, details := getSummaryAndDetails(warning, engine, bindings)
+
 		attrPath, err := warningFieldPathToTFPath(
 			warning.GetPath(),
 			schemaType,
@@ -57,7 +53,28 @@ func processWarnings(
 		}
 		diags.AddAttributeWarning(attrPath, summary, details)
 	}
+
+	if unsupportedToolVersionWarning != nil {
+		summary, details := getSummaryAndDetails(unsupportedToolVersionWarning, engine, bindings)
+		var newDiags diag.Diagnostics
+		for _, d := range diags {
+			// we search in details because gateway returns warning and an error with a summary of the warnings as an error message.
+			// terraform add an SeverityError diagnostic with a custom summary and error message as details.
+			if d.Severity() == diag.SeverityError && summary != "" && strings.Contains(d.Detail(), summary) {
+				newDiags = append(newDiags, diag.NewErrorDiagnostic(summary, details+"\n\n"+d.Detail()))
+			} else {
+				newDiags = append(newDiags, d)
+			}
+		}
+		diags = newDiags
+	}
 	return diags
+}
+
+func getSummaryAndDetails(warning *commonpb.Warning, engine *liquid.Engine, bindings liquid.Bindings) (string, string) {
+	summary := applyWarningTemplate(engine, bindings, warning.GetSummary(), warning.GetSummaryFallback())
+	details := applyWarningTemplate(engine, bindings, warning.GetDetails(), warning.GetDetailsFallback())
+	return summary, details
 }
 
 func fieldName(
@@ -74,17 +91,6 @@ func fieldName(
 			return "", err
 		}
 		return attrPath.String(), nil
-	}
-}
-
-func normalizeWarningTemplate(template, fallback string) (string, string) {
-	switch template {
-	case "":
-		return fallback, ""
-	case fallback:
-		return template, ""
-	default:
-		return template, fallback
 	}
 }
 

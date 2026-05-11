@@ -19,18 +19,23 @@ description: |-
 
 ### Optional
 
-- `active` (Boolean, Deprecated)
+- `active` (Boolean, Deprecated) Specifies if the federation in active state
 - `labels` (Map of String) :
 
    Labels associated with the resource.
 - `metadata` (Attributes) :
 
+   Federation resource metadata.
+   
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
 - `name` (String) Human readable name for the resource.
-- `saml_settings` (Attributes) (see [below for nested schema](#nestedatt--saml_settings))
-- `user_account_auto_creation` (Boolean)
+- `saml_settings` (Attributes) SAML federation settings. (see [below for nested schema](#nestedatt--saml_settings))
+- `user_account_auto_creation` (Boolean) :
+
+   If false, users with access to the federation cannot sign in automatically
+   and user accounts for them must be pre-created by a federation administrator.
 
 ### Read-Only
 
@@ -46,7 +51,7 @@ description: |-
    Positive and monotonically increases on each resource spec change (but *not* on each change of the
    resource's container(s) or status).
    Service allows zero value or current.
-- `status` (Attributes) (see [below for nested schema](#nestedatt--status))
+- `status` (Attributes) Federation resource status. (see [below for nested schema](#nestedatt--status))
 - `updated_at` (String) :
 
    Timestamp indicating when the resource was last updated.
@@ -63,8 +68,8 @@ description: |-
 Optional:
 
 - `force_authn` (Boolean) if "true", the identity provider MUST authenticate the presenter directly rather than rely on a previous security context.
-- `idp_issuer` (String)
-- `sso_url` (String)
+- `idp_issuer` (String) The unique identifier of the SAML Identity Provider. It usually matches the entityID from the IdP metadata.
+- `sso_url` (String) Identity Provider’s Single Sign-On endpoint. This is the URL where the user is redirected to start SAML login.
 
 
 <a id="nestedatt--status"></a>
@@ -72,9 +77,11 @@ Optional:
 
 Read-Only:
 
-- `certificates_count` (Number)
+- `certificates_count` (Number) Number of certificates attached to the SAML federation for verifying SAML responses.
 - `state` (String) :
 
+   Federation state.
+   
    #### Supported values
    
    Possible values:
@@ -82,4 +89,4 @@ Read-Only:
    - `UNSPECIFIED`
    - `ACTIVE`
    - `INACTIVE`
-- `users_count` (Number)
+- `users_count` (Number) Number of users registered in the IAM federation. This value may differ from the number of users in the identity provider.
