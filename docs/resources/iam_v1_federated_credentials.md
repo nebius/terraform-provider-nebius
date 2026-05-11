@@ -16,21 +16,34 @@ description: |-
 ### Required
 
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
-- `subject_id` (String) IAM subject, in which federated subject will be impersonated to. E.g. for workload identities it will be IAM service account.
+- `subject_id` (String) IAM subject (service account) that the federated subject impersonates.
 
 ### Optional
 
-- `federated_subject_id` (String) Federated subject ID.For oidc_provider subject will be calculated based on the “sub” claim of the JWT federation token.
+- `federated_subject_id` (String) :
+
+   Federated subject ID. For oidc_provider, the subject is calculated from the
+   "sub" claim of the federated JWT token.
 - `labels` (Map of String) :
 
    Labels associated with the resource.
 - `metadata` (Attributes) :
 
+   Federated credentials resource metadata.
+   
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
 - `name` (String) Human readable name for the resource.
-- `oidc_provider` (Attributes) (see [below for nested schema](#nestedatt--oidc_provider))
+- `oidc_provider` (Attributes) :
+
+   #### Inner value description
+   
+   The OIDC provider does not have to be a full OIDC provider, but it must expose
+   OIDC discovery metadata at the "/.well-known/openid-configuration" endpoint.
+   The discovery metadata must contain "jwks_uri", which points to the JSON Web
+   Key Set (JWKS). The JWKS contains public keys used to verify JSON
+   Web Tokens (JWTs) issued by the identity provider. (see [below for nested schema](#nestedatt--oidc_provider))
 
 ### Read-Only
 
@@ -46,7 +59,7 @@ description: |-
    Positive and monotonically increases on each resource spec change (but *not* on each change of the
    resource's container(s) or status).
    Service allows zero value or current.
-- `status` (Attributes) (see [below for nested schema](#nestedatt--status))
+- `status` (Attributes) Federated credentials resource status. (see [below for nested schema](#nestedatt--status))
 - `updated_at` (String) :
 
    Timestamp indicating when the resource was last updated.
@@ -62,25 +75,15 @@ description: |-
 
 Required:
 
-- `issuer_url` (String) :
-
-   It's not required provider OIDC issuer should be real OIDC provider, but should expose OIDC configuration
-   with "/.well-known/openid-configuration" endpoint. Configuration should contains the "jwks_uri" endpoint
-   where the JSON Web Key Set (JWKS) can be found; this set contains public keys used to verify
-   JSON Web Tokens (JWTs) issued by an identity provider.
-   
-   Limitations for external OIDC providers:
-   - token service limits the number of handled keys by 50. If your JWKS return more than 50,
-   the only first 50 will be used for signature verifying.
-   - response size for jwks_uri and "/.well-known/openid-configuration limited by 100KB.
+- `issuer_url` (String) OIDC-compatible JWT issuer URL.
 
 Optional:
 
 - `jwk_set_json` (String) :
 
-   Literally json, which represents JWKS with public keys for JWT verification.
-   It worth mentioned that in a case of adding/rotating keys the jwk_set_json also should be updated here.
-   Besides, the "issuer" parameter should be set even if the JWKS will be resolved locally.
+   JSON representation of a JSON Web Key Set (JWKS) with public keys used for
+   JWT signature verification.
+   If set, the token service uses this JWKS to verify token signatures.
 
 
 <a id="nestedatt--status"></a>

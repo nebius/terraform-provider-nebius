@@ -62,7 +62,7 @@ func (r *serviceFederation) DataSourceSchema() schema.Schema {
 			"metadata": schema.SingleNestedAttribute{
 				Attributes:          map[string]schema.Attribute{},
 				Computed:            true,
-				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n",
+				MarkdownDescription: ":\n\n   Federation resource metadata.\n   \n   #### Inner value description\n   \n   Common resource metadata.\n",
 			},
 			"id": schema.StringAttribute{
 				Validators:          []validator.String{},
@@ -103,22 +103,22 @@ func (r *serviceFederation) DataSourceSchema() schema.Schema {
 			},
 			"user_account_auto_creation": schema.BoolAttribute{
 				Computed:            true,
-				MarkdownDescription: "",
+				MarkdownDescription: ":\n\n   If false, users with access to the federation cannot sign in automatically\n   and user accounts for them must be pre-created by a federation administrator.\n",
 			},
 			"active": schema.BoolAttribute{
 				Computed:            true,
 				DeprecationMessage:  "'active' field ignored. Use 'Activate/Deactivate' methods to manage federation state. A newly created federation is always active by default.",
-				MarkdownDescription: "",
+				MarkdownDescription: "Specifies if the federation in active state",
 			},
 			"saml_settings": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"idp_issuer": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "The unique identifier of the SAML Identity Provider. It usually matches the entityID from the IdP metadata.",
 					},
 					"sso_url": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "Identity Provider’s Single Sign-On endpoint. This is the URL where the user is redirected to start SAML login.",
 					},
 					"force_authn": schema.BoolAttribute{
 						Computed:            true,
@@ -126,25 +126,25 @@ func (r *serviceFederation) DataSourceSchema() schema.Schema {
 					},
 				},
 				Computed:            true,
-				MarkdownDescription: "",
+				MarkdownDescription: "SAML federation settings.",
 			},
 			"status": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `ACTIVE`\n   - `INACTIVE`\n   \n",
+						MarkdownDescription: ":\n\n   Federation state.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `ACTIVE`\n   - `INACTIVE`\n   \n",
 					},
 					"users_count": schema.Int64Attribute{
 						Computed:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "Number of users registered in the IAM federation. This value may differ from the number of users in the identity provider.",
 					},
 					"certificates_count": schema.Int64Attribute{
 						Computed:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "Number of certificates attached to the SAML federation for verifying SAML responses.",
 					},
 				},
 				Computed:            true,
-				MarkdownDescription: "",
+				MarkdownDescription: "Federation resource status.",
 			},
 		},
 		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n",
@@ -160,7 +160,7 @@ func (r *serviceFederation) ResourceSchema() schema1.Schema {
 				Validators:          []validator.Object{},
 				Computed:            true,
 				Optional:            true,
-				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n",
+				MarkdownDescription: ":\n\n   Federation resource metadata.\n   \n   #### Inner value description\n   \n   Common resource metadata.\n",
 				PlanModifiers:       []planmodifier.Object{},
 			},
 			"id": schema1.StringAttribute{
@@ -211,14 +211,14 @@ func (r *serviceFederation) ResourceSchema() schema1.Schema {
 			"user_account_auto_creation": schema1.BoolAttribute{
 				Validators:          []validator.Bool{},
 				Optional:            true,
-				MarkdownDescription: "",
+				MarkdownDescription: ":\n\n   If false, users with access to the federation cannot sign in automatically\n   and user accounts for them must be pre-created by a federation administrator.\n",
 				PlanModifiers:       []planmodifier.Bool{},
 			},
 			"active": schema1.BoolAttribute{
 				Validators:          []validator.Bool{},
 				Optional:            true,
 				DeprecationMessage:  "'active' field ignored. Use 'Activate/Deactivate' methods to manage federation state. A newly created federation is always active by default.",
-				MarkdownDescription: "",
+				MarkdownDescription: "Specifies if the federation in active state",
 				PlanModifiers:       []planmodifier.Bool{},
 			},
 			"saml_settings": schema1.SingleNestedAttribute{
@@ -226,13 +226,13 @@ func (r *serviceFederation) ResourceSchema() schema1.Schema {
 					"idp_issuer": schema1.StringAttribute{
 						Validators:          []validator.String{},
 						Optional:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "The unique identifier of the SAML Identity Provider. It usually matches the entityID from the IdP metadata.",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"sso_url": schema1.StringAttribute{
 						Validators:          []validator.String{},
 						Optional:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "Identity Provider’s Single Sign-On endpoint. This is the URL where the user is redirected to start SAML login.",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"force_authn": schema1.BoolAttribute{
@@ -244,29 +244,29 @@ func (r *serviceFederation) ResourceSchema() schema1.Schema {
 				},
 				Validators:          []validator.Object{},
 				Optional:            true,
-				MarkdownDescription: "",
+				MarkdownDescription: "SAML federation settings.",
 				PlanModifiers:       []planmodifier.Object{},
 			},
 			"status": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{
 					"state": schema1.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `ACTIVE`\n   - `INACTIVE`\n   \n",
+						MarkdownDescription: ":\n\n   Federation state.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `ACTIVE`\n   - `INACTIVE`\n   \n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"users_count": schema1.Int64Attribute{
 						Computed:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "Number of users registered in the IAM federation. This value may differ from the number of users in the identity provider.",
 						PlanModifiers:       []planmodifier.Int64{},
 					},
 					"certificates_count": schema1.Int64Attribute{
 						Computed:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "Number of certificates attached to the SAML federation for verifying SAML responses.",
 						PlanModifiers:       []planmodifier.Int64{},
 					},
 				},
 				Computed:            true,
-				MarkdownDescription: "",
+				MarkdownDescription: "Federation resource status.",
 				PlanModifiers:       []planmodifier.Object{},
 			},
 		},
