@@ -1,0 +1,52 @@
+name: test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  go-test:
+    name: Go tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run Go tests
+        run: go test ./...
+
+  e2e:
+    name: E2E tests
+    runs-on: ubuntu-latest
+    env:
+      NEBIUS_E2E_CONFIG_B64: ${{ secrets.NEBIUS_E2E_CONFIG_B64 }}
+      TF_ACC: "1"
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run E2E tests
+        run: go test ./provider/impl -run '^TestE2E' -count=1 -timeout=30m
