@@ -28,6 +28,73 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_wrapper: false
+
+      - name: Run Go tests
+        run: go test ./...
+
+  prerelease-go-test:
+    name: Go tests (Terraform ${{ matrix.terraform-channel }})
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        terraform-channel:
+          - beta
+          - rc
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Resolve Terraform prerelease
+        id: terraform
+        env:
+          TERRAFORM_CHANNEL: ${{ matrix.terraform-channel }}
+        run: |
+          version="$(
+            python3 - <<'PY'
+          import json
+          import os
+          import re
+          import urllib.request
+
+          channel = os.environ["TERRAFORM_CHANNEL"]
+          pattern = re.compile(rf"^(\d+)\.(\d+)\.0-{re.escape(channel)}(\d+)$")
+          with urllib.request.urlopen("https://releases.hashicorp.com/terraform/index.json") as response:
+              releases = json.load(response)
+
+          candidates = []
+          for version in releases["versions"]:
+              match = pattern.match(version)
+              if match:
+                  candidates.append((tuple(int(part) for part in match.groups()), version))
+
+          if not candidates:
+              raise SystemExit(f"no Terraform {channel} release found")
+
+          print(max(candidates)[1])
+          PY
+          )"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Resolved Terraform $TERRAFORM_CHANNEL to $version"
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ steps.terraform.outputs.version }}
+          terraform_wrapper: false
+
       - name: Run Go tests
         run: go test ./...
 
@@ -47,6 +114,11 @@ jobs:
         with:
           go-version-file: go.mod
           cache: true
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_wrapper: false
 
       - name: Run E2E tests
         run: go test ./provider/impl -run '^TestE2E' -count=1 -timeout=30m
