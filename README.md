@@ -48,6 +48,12 @@ Validate generated docs against Terraform Registry rules:
 make docs-validate
 ```
 
+Check that generated docs are committed and up to date:
+
+```bash
+make generate-check
+```
+
 **Notes:**
 
 - `tfplugindocs` is invoked from the `tools/` helper module.
@@ -83,3 +89,5 @@ Signed multi-platform release assets are configured through:
 - [`terraform-registry-manifest.json`](terraform-registry-manifest.json)
 
 Pushing a commit to `main` with a new value in [`provider/version/version.go`](provider/version/version.go) triggers the release workflow. The workflow creates the matching `vX.Y.Z` tag if it does not already exist, publishes the release artifacts from that tag, and skips the release if the tag is already present.
+
+The release workflow can also be run manually from GitHub Actions on `main`. Manual runs publish release assets for the current `versionString` tag by default, even if the tag already exists; disable `publish_existing_tag` to keep the normal skip behavior.

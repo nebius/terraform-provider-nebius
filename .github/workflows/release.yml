@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      publish_existing_tag:
+        description: Publish release assets when the version tag already exists.
+        required: false
+        default: true
+        type: boolean
 
 concurrency:
   group: release-main
@@ -14,6 +21,7 @@ permissions:
 
 jobs:
   prepare-release:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       release_needed: ${{ steps.version.outputs.release_needed }}
@@ -31,6 +39,8 @@ jobs:
 
       - name: Read version and create tag if missing
         id: version
+        env:
+          PUBLISH_EXISTING_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_existing_tag }}
         run: |
           version="$(sed -n 's/^const versionString = "\(.*\)"$/\1/p' provider/version/version.go)"
           if [ -z "$version" ]; then
@@ -49,6 +59,12 @@ jobs:
           echo "version_tag=$version_tag" >> "$GITHUB_OUTPUT"
 
           if git rev-parse -q --verify "refs/tags/$version_tag" >/dev/null; then
+            if [ "$PUBLISH_EXISTING_TAG" = "true" ]; then
+              echo "release_needed=true" >> "$GITHUB_OUTPUT"
+              echo "Tag $version_tag already exists, publishing release assets."
+              exit 0
+            fi
+
             echo "release_needed=false" >> "$GITHUB_OUTPUT"
             echo "Tag $version_tag already exists, skipping release."
             exit 0
@@ -60,36 +76,36 @@ jobs:
           git push origin "refs/tags/$version_tag"
           echo "release_needed=true" >> "$GITHUB_OUTPUT"
 
-  ## Enable when ready to release and GPG key and secrets are set up
-  # goreleaser:
-  #   needs: prepare-release
-  #   if: needs.prepare-release.outputs.release_needed == 'true'
-  #   runs-on: ubuntu-latest
+  # Publish signed release assets for Terraform Registry ingestion.
+  goreleaser:
+    needs: prepare-release
+    if: needs.prepare-release.outputs.release_needed == 'true'
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Check out release tag
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
-  #         ref: refs/tags/${{ needs.prepare-release.outputs.version_tag }}
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: refs/tags/${{ needs.prepare-release.outputs.version_tag }}
 
-  #     - name: Import GPG key
-  #       uses: crazy-max/ghaction-import-gpg@v6
-  #       with:
-  #         gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-  #         passphrase: ${{ secrets.PASSPHRASE }}
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v7
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PGP_PASSPHRASE }}
 
-  #     - name: Set up Go
-  #       uses: actions/setup-go@v5
-  #       with:
-  #         go-version-file: go.mod
-  #         cache: true
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
 
-  #     - name: Run GoReleaser
-  #       uses: goreleaser/goreleaser-action@v6
-  #       with:
-  #         distribution: goreleaser
-  #         version: latest
-  #         args: release --clean
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
