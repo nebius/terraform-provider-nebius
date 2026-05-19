@@ -46,9 +46,7 @@ that registers in Kubernetes API and a Node object created.
 
    #### Inner value description
    
-   Common resource metadata.
-   
-   The parent_id is an ID of Cluster (see [below for nested schema](#nestedatt--metadata))
+   Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
 - `name` (String) Human readable name for the resource.
 - `strategy` (Attributes) :
 

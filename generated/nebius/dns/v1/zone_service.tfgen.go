@@ -179,16 +179,66 @@ func (r *serviceZone) GetByName(ctx context.Context, name, parentID string) (*v1
 }
 
 func (r *serviceZone) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
-	var reqCtx *requestcontext.Context
-	return "", reqCtx, fmt.Errorf("Create is unimplemented for nebius.dns.v1.ZoneService")
+	service := v12.NewZoneService(r.provider.SDK())
+	reqCtx := &requestcontext.Context{}
+	specTyped, ok := spec.(*v1.ZoneSpec)
+	if !ok {
+		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.dns.v1.ZoneSpec", spec.ProtoReflect().Descriptor().FullName())
+	}
+	req := &v1.CreateZoneRequest{
+		Spec:     specTyped,
+		Metadata: metadata,
+	}
+	op, err := service.Create(ctx, req, reqCtx.MainRequestOptions()...)
+	if err != nil {
+		return "", reqCtx, fmt.Errorf("service create: %w", err)
+	}
+	id := op.ResourceID()
+	if id == "" {
+		return "", reqCtx, fmt.Errorf("operation returned an empty ID on Create")
+	}
+	op, err = op.Wait(ctx, reqCtx.SubsequentRequestOptions()...)
+	if err != nil {
+		return id, reqCtx, fmt.Errorf("operation wait: %w", err)
+	}
+	return id, reqCtx, nil
 }
 
 func (r *serviceZone) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
-	var reqCtx *requestcontext.Context
-	return reqCtx, fmt.Errorf("Update is unimplemented for nebius.dns.v1.ZoneService")
+	service := v12.NewZoneService(r.provider.SDK())
+	reqCtx := &requestcontext.Context{}
+	specTyped, ok := spec.(*v1.ZoneSpec)
+	if !ok {
+		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.dns.v1.ZoneSpec", spec.ProtoReflect().Descriptor().FullName())
+	}
+	req := &v1.UpdateZoneRequest{
+		Spec:     specTyped,
+		Metadata: metadata,
+	}
+	op, err := service.Update(ctx, req, reqCtx.MainRequestOptions()...)
+	if err != nil {
+		return reqCtx, fmt.Errorf("service update: %w", err)
+	}
+	op, err = op.Wait(ctx, reqCtx.SubsequentRequestOptions()...)
+	if err != nil {
+		return reqCtx, fmt.Errorf("operation wait: %w", err)
+	}
+	return reqCtx, nil
 }
 
 func (r *serviceZone) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
-	var reqCtx *requestcontext.Context
-	return reqCtx, fmt.Errorf("Delete is unimplemented for nebius.dns.v1.ZoneService")
+	reqCtx := &requestcontext.Context{}
+	req := &v1.DeleteZoneRequest{
+		Id: id,
+	}
+	service := v12.NewZoneService(r.provider.SDK())
+	op, err := service.Delete(ctx, req, reqCtx.MainRequestOptions()...)
+	if err != nil {
+		return reqCtx, fmt.Errorf("service delete: %w", err)
+	}
+	op, err = op.Wait(ctx, reqCtx.SubsequentRequestOptions()...)
+	if err != nil {
+		return reqCtx, fmt.Errorf("operation wait: %w", err)
+	}
+	return reqCtx, nil
 }

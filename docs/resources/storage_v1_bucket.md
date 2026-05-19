@@ -46,6 +46,7 @@ description: |-
    - `STANDARD`
    - `ENHANCED_THROUGHPUT`
    - `INTELLIGENT`
+   - `FILESYSTEM` - Special storage class only for filesystem buckets.
 - `force_storage_class` (Boolean) Flag to force usage of default_storage_class, ignoring `x-amz-storage-class` header.
 - `labels` (Map of String) :
 
@@ -388,6 +389,7 @@ Optional:
    - `STANDARD`
    - `ENHANCED_THROUGHPUT`
    - `INTELLIGENT`
+   - `FILESYSTEM` - Special storage class only for filesystem buckets.
 
 
 <a id="nestedatt--lifecycle_configuration--rules--transition"></a>
@@ -425,6 +427,7 @@ Optional:
    - `STANDARD`
    - `ENHANCED_THROUGHPUT`
    - `INTELLIGENT`
+   - `FILESYSTEM` - Special storage class only for filesystem buckets.
 
 
 
@@ -506,6 +509,7 @@ Read-Only:
    - `STANDARD`
    - `ENHANCED_THROUGHPUT`
    - `INTELLIGENT`
+   - `FILESYSTEM` - Special storage class only for filesystem buckets.
 
 <a id="nestedatt--status--counters--counters"></a>
 ### Nested Schema for `status.counters.counters`

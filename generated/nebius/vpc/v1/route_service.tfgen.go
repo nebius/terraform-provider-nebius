@@ -165,6 +165,10 @@ func (r *serviceRoute) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "Detailed status of the next hop configuration.",
 					},
+					"type": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Indicates the route type.\n   REDISTRIBUTED routes cannot be deleted directly.\n   \n   #### Supported values\n   \n   Route type.\n   Possible values:\n   \n   - `TYPE_UNSPECIFIED`\n   - `STATIC`\n   - `REDISTRIBUTED`\n   \n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: "Current status of the route.",
@@ -334,6 +338,11 @@ func (r *serviceRoute) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: "Detailed status of the next hop configuration.",
 						PlanModifiers:       []planmodifier.Object{},
+					},
+					"type": schema1.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Indicates the route type.\n   REDISTRIBUTED routes cannot be deleted directly.\n   \n   #### Supported values\n   \n   Route type.\n   Possible values:\n   \n   - `TYPE_UNSPECIFIED`\n   - `STATIC`\n   - `REDISTRIBUTED`\n   \n",
+						PlanModifiers:       []planmodifier.String{},
 					},
 				},
 				Computed:            true,
