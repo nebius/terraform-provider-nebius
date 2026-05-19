@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: "0 3 * * *"
 
 concurrency:
   group: test-${{ github.ref }}
@@ -99,6 +101,7 @@ jobs:
 
   prerelease-go-test:
     name: Go tests (Terraform ${{ matrix.terraform-channel }})
+    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     continue-on-error: true
     strategy:
@@ -183,3 +186,25 @@ jobs:
 
       - name: Run E2E tests
         run: go test ./provider/impl -run '^TestE2E' -count=1 -timeout=30m
+
+  notify-slack-on-failure:
+    name: Notify Slack on failure
+    if: ${{ always() && (github.event_name == 'schedule' || github.ref == 'refs/heads/main') && contains(needs.*.result, 'failure') }}
+    needs:
+      - lint
+      - go-test
+      - docs-validate
+      - generate-check
+      - e2e
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post text to a Slack channel
+        uses: slackapi/slack-github-action@v3.0.3
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_OAUTH_TOKEN }}
+          payload: |
+            channel: ${{ secrets.SLACK_CHANNEL }}
+            text: |
+              🚨 Workflow *${{ github.workflow }}* failed on <${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>
+              <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>
