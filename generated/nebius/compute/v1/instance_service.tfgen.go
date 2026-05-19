@@ -447,7 +447,8 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 					},
 					"priority": schema.Int64Attribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   The value can range from 1 to 5, where 5 indicates the highest priority.\n   Affects the order in which Compute tries to preempt VMs, but does not guarantee the exact order.\n",
+						DeprecationMessage:  "Supported until 2026-05-11. It is deprecated and doesn't affect preemption behavior anymore.",
+						MarkdownDescription: "",
 					},
 				},
 				Computed:            true,
@@ -456,6 +457,10 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 			"hostname": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Instance's hostname. Used to generate default DNS record in format `<hostname>.<network_id>.compute.internal.`\n   or `<instance_id>.<network_id>.compute.internal.` if hostname is not specified.\n",
+			},
+			"nvl_instance_group_id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "NVLink Instance Group ID associated with the VM",
 			},
 			"reservation_policy": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
@@ -1337,8 +1342,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 						Validators: []validator.Int64{
 							validators.Int32Validator(),
 						},
-						Required:            true,
-						MarkdownDescription: ":\n\n   The value can range from 1 to 5, where 5 indicates the highest priority.\n   Affects the order in which Compute tries to preempt VMs, but does not guarantee the exact order.\n",
+						Optional:            true,
+						DeprecationMessage:  "Supported until 2026-05-11. It is deprecated and doesn't affect preemption behavior anymore.",
+						MarkdownDescription: "",
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.RequiresReplace(),
 						},
@@ -1357,6 +1363,12 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Instance's hostname. Used to generate default DNS record in format `<hostname>.<network_id>.compute.internal.`\n   or `<instance_id>.<network_id>.compute.internal.` if hostname is not specified.\n",
+				PlanModifiers:       []planmodifier.String{},
+			},
+			"nvl_instance_group_id": schema1.StringAttribute{
+				Validators:          []validator.String{},
+				Optional:            true,
+				MarkdownDescription: "NVLink Instance Group ID associated with the VM",
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"reservation_policy": schema1.SingleNestedAttribute{

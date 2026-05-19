@@ -63,7 +63,7 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 			"metadata": schema.SingleNestedAttribute{
 				Attributes:          map[string]schema.Attribute{},
 				Computed:            true,
-				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n   \n   The parent_id is an ID of Cluster\n",
+				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n   \n   \n",
 			},
 			"id": schema.StringAttribute{
 				Validators:          []validator.String{},
@@ -485,11 +485,13 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 	ret := schema1.Schema{
 		Attributes: map[string]schema1.Attribute{
 			"metadata": schema1.SingleNestedAttribute{
-				Attributes:          map[string]schema1.Attribute{},
-				Validators:          []validator.Object{},
+				Attributes: map[string]schema1.Attribute{},
+				Validators: []validator.Object{
+					validators.ProtoFieldValidator(&v1.NodeGroup{}, "metadata", "metadata", fieldNameMapNodeGroup),
+				},
 				Computed:            true,
 				Optional:            true,
-				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n   \n   The parent_id is an ID of Cluster\n",
+				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n   \n   \n",
 				PlanModifiers:       []planmodifier.Object{},
 			},
 			"id": schema1.StringAttribute{

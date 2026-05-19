@@ -202,7 +202,7 @@ func (r *serviceBucket) DataSourceSchema() schema.Schema {
 										},
 										"storage_class": schema.StringAttribute{
 											Computed:            true,
-											MarkdownDescription: ":\n\n   Target storage class to transit to.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   \n",
+											MarkdownDescription: ":\n\n   Target storage class to transit to.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   - `FILESYSTEM` - Special storage class only for filesystem buckets.\n   \n",
 										},
 									},
 									Computed:            true,
@@ -220,7 +220,7 @@ func (r *serviceBucket) DataSourceSchema() schema.Schema {
 										},
 										"storage_class": schema.StringAttribute{
 											Computed:            true,
-											MarkdownDescription: ":\n\n   Target storage class to transit to.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   \n",
+											MarkdownDescription: ":\n\n   Target storage class to transit to.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   - `FILESYSTEM` - Special storage class only for filesystem buckets.\n   \n",
 										},
 									},
 									Computed:            true,
@@ -307,7 +307,7 @@ func (r *serviceBucket) DataSourceSchema() schema.Schema {
 			},
 			"default_storage_class": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Storage class to use by default for uploads to the bucket. It may be overridden by `x-amz-storage-class` header.\n   If not set - STANDARD is used as a default storage class.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   \n",
+				MarkdownDescription: ":\n\n   Storage class to use by default for uploads to the bucket. It may be overridden by `x-amz-storage-class` header.\n   If not set - STANDARD is used as a default storage class.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   - `FILESYSTEM` - Special storage class only for filesystem buckets.\n   \n",
 			},
 			"force_storage_class": schema.BoolAttribute{
 				Computed:            true,
@@ -357,7 +357,7 @@ func (r *serviceBucket) DataSourceSchema() schema.Schema {
 							Attributes: map[string]schema.Attribute{
 								"storage_class": schema.StringAttribute{
 									Computed:            true,
-									MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   \n",
+									MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   - `FILESYSTEM` - Special storage class only for filesystem buckets.\n   \n",
 								},
 								"counters": schema.SingleNestedAttribute{
 									Attributes: map[string]schema.Attribute{
@@ -712,7 +712,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 												validators.EnumValidator(v1.StorageClass_value),
 											},
 											Optional:            true,
-											MarkdownDescription: ":\n\n   Target storage class to transit to.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   \n",
+											MarkdownDescription: ":\n\n   Target storage class to transit to.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   - `FILESYSTEM` - Special storage class only for filesystem buckets.\n   \n",
 											PlanModifiers:       []planmodifier.String{},
 										},
 									},
@@ -745,7 +745,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 												validators.EnumValidator(v1.StorageClass_value),
 											},
 											Optional:            true,
-											MarkdownDescription: ":\n\n   Target storage class to transit to.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   \n",
+											MarkdownDescription: ":\n\n   Target storage class to transit to.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   - `FILESYSTEM` - Special storage class only for filesystem buckets.\n   \n",
 											PlanModifiers:       []planmodifier.String{},
 										},
 									},
@@ -885,7 +885,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 					validators.EnumValidator(v1.StorageClass_value),
 				},
 				Optional:            true,
-				MarkdownDescription: ":\n\n   Storage class to use by default for uploads to the bucket. It may be overridden by `x-amz-storage-class` header.\n   If not set - STANDARD is used as a default storage class.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   \n",
+				MarkdownDescription: ":\n\n   Storage class to use by default for uploads to the bucket. It may be overridden by `x-amz-storage-class` header.\n   If not set - STANDARD is used as a default storage class.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   - `FILESYSTEM` - Special storage class only for filesystem buckets.\n   \n",
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"force_storage_class": schema1.BoolAttribute{
@@ -968,7 +968,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 							Attributes: map[string]schema1.Attribute{
 								"storage_class": schema1.StringAttribute{
 									Computed:            true,
-									MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   \n",
+									MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   - `FILESYSTEM` - Special storage class only for filesystem buckets.\n   \n",
 									PlanModifiers:       []planmodifier.String{},
 								},
 								"counters": schema1.SingleNestedAttribute{

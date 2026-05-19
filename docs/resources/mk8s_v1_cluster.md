@@ -136,6 +136,11 @@ Optional:
 Read-Only:
 
 - `control_plane` (Attributes) (see [below for nested schema](#nestedatt--status--control_plane))
+- `events` (Attributes List) :
+
+   #### Inner value description
+   
+   A resource event that has occurred (more or less in the same way) multiple times across a service-defined aggregation interval (see [below for nested schema](#nestedatt--status--events))
 - `reconciling` (Boolean) Show that changes are in flight
 - `state` (String) :
 
@@ -183,3 +188,57 @@ Read-Only:
 
 - `private_endpoint` (String) DNS name or IP address accessible from the user VPC.
 - `public_endpoint` (String) DNS name or IP address accessible from the Internet.
+
+
+
+<a id="nestedatt--status--events"></a>
+### Nested Schema for `status.events`
+
+Read-Only:
+
+- `first_occurred_at` (String) :
+
+   Time of the first occurrence of a recurrent event
+   
+   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
+- `last_occurrence` (Attributes) :
+
+   Last occurrence of a recurrent event
+   
+   #### Inner value description
+   
+   Represents an API Resource-related event which is potentially important to the end-user. What exactly constitutes an *event* to be
+   reported is service-dependent (see [below for nested schema](#nestedatt--status--events--last_occurrence))
+- `occurrence_count` (Number) The number of times this event has occurred between `first_occurred_at` and `last_occurrence.occurred_at`. Must be > 0
+
+<a id="nestedatt--status--events--last_occurrence"></a>
+### Nested Schema for `status.events.last_occurrence`
+
+Read-Only:
+
+- `code` (String) Event code (unique within the API service), in UpperCamelCase, e.g. `"DiskAttached"`
+- `level` (String) :
+
+   Severity level for the event
+   
+   #### Supported values
+   
+   Possible values:
+   
+   - `UNSPECIFIED` - Unspecified event severity level
+   - `DEBUG` - A debug event providing detailed insight. Such events are used to debug problems with specific resource(s) and process(es)
+   - `INFO` - A normal event or state change. Informs what is happening with the API resource. Does not require user attention or interaction
+   - `WARN`:
+      Warning event. Indicates a potential or minor problem with the API resource and/or the corresponding processes. Needs user attention,
+      but requires no immediate action (yet)
+   
+   - `ERROR` - Error event. Indicates a serious problem with the API resource and/or the corresponding processes. Requires immediate user action
+- `message` (String) :
+
+   A human-readable message describing what has happened
+   (and suggested actions for the user, if this is a `WARN` or `ERROR` level event)
+- `occurred_at` (String) :
+
+   Time at which the event has occurred
+   
+   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`

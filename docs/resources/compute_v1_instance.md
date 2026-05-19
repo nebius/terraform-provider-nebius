@@ -63,6 +63,7 @@ description: |-
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
 - `name` (String) Human readable name for the resource.
+- `nvl_instance_group_id` (String) NVLink Instance Group ID associated with the VM
 - `preemptible` (Attributes) :
 
    Include these parameters to create a Preemptible VM and omit them to create a Regular VM
@@ -455,10 +456,10 @@ Required:
    
    - `UNSPECIFIED`
    - `STOP`
-- `priority` (Number) :
 
-   The value can range from 1 to 5, where 5 indicates the highest priority.
-   Affects the order in which Compute tries to preempt VMs, but does not guarantee the exact order.
+Optional:
+
+- `priority` (Number, Deprecated)
 
 
 <a id="nestedatt--reservation_policy"></a>

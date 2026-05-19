@@ -197,6 +197,46 @@ func (r *serviceCluster) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "",
 					},
+					"events": schema.ListNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"first_occurred_at": schema.StringAttribute{
+									CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Time of the first occurrence of a recurrent event\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+								},
+								"last_occurrence": schema.SingleNestedAttribute{
+									Attributes: map[string]schema.Attribute{
+										"occurred_at": schema.StringAttribute{
+											CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+											Computed:            true,
+											MarkdownDescription: ":\n\n   Time at which the event has occurred\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+										},
+										"level": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: ":\n\n   Severity level for the event\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED` - Unspecified event severity level\n   - `DEBUG` - A debug event providing detailed insight. Such events are used to debug problems with specific resource(s) and process(es)\n   - `INFO` - A normal event or state change. Informs what is happening with the API resource. Does not require user attention or interaction\n   - `WARN`:\n      Warning event. Indicates a potential or minor problem with the API resource and/or the corresponding processes. Needs user attention,\n      but requires no immediate action (yet)\n   \n   - `ERROR` - Error event. Indicates a serious problem with the API resource and/or the corresponding processes. Requires immediate user action\n   \n",
+										},
+										"code": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Event code (unique within the API service), in UpperCamelCase, e.g. `\"DiskAttached\"`",
+										},
+										"message": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: ":\n\n   A human-readable message describing what has happened\n   (and suggested actions for the user, if this is a `WARN` or `ERROR` level event)\n",
+										},
+									},
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Last occurrence of a recurrent event\n   \n   #### Inner value description\n   \n   Represents an API Resource-related event which is potentially important to the end-user. What exactly constitutes an *event* to be\n   reported is service-dependent\n",
+								},
+								"occurrence_count": schema.Int64Attribute{
+									Computed:            true,
+									MarkdownDescription: "The number of times this event has occurred between `first_occurred_at` and `last_occurrence.occurred_at`. Must be > 0",
+								},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   #### Inner value description\n   \n   A resource event that has occurred (more or less in the same way) multiple times across a service-defined aggregation interval\n",
+					},
 					"reconciling": schema.BoolAttribute{
 						Computed:            true,
 						MarkdownDescription: "Show that changes are in flight",
@@ -401,6 +441,54 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: "",
 						PlanModifiers:       []planmodifier.Object{},
+					},
+					"events": schema1.ListNestedAttribute{
+						NestedObject: schema1.NestedAttributeObject{
+							Attributes: map[string]schema1.Attribute{
+								"first_occurred_at": schema1.StringAttribute{
+									CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Time of the first occurrence of a recurrent event\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+									PlanModifiers:       []planmodifier.String{},
+								},
+								"last_occurrence": schema1.SingleNestedAttribute{
+									Attributes: map[string]schema1.Attribute{
+										"occurred_at": schema1.StringAttribute{
+											CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+											Computed:            true,
+											MarkdownDescription: ":\n\n   Time at which the event has occurred\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+											PlanModifiers:       []planmodifier.String{},
+										},
+										"level": schema1.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: ":\n\n   Severity level for the event\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED` - Unspecified event severity level\n   - `DEBUG` - A debug event providing detailed insight. Such events are used to debug problems with specific resource(s) and process(es)\n   - `INFO` - A normal event or state change. Informs what is happening with the API resource. Does not require user attention or interaction\n   - `WARN`:\n      Warning event. Indicates a potential or minor problem with the API resource and/or the corresponding processes. Needs user attention,\n      but requires no immediate action (yet)\n   \n   - `ERROR` - Error event. Indicates a serious problem with the API resource and/or the corresponding processes. Requires immediate user action\n   \n",
+											PlanModifiers:       []planmodifier.String{},
+										},
+										"code": schema1.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Event code (unique within the API service), in UpperCamelCase, e.g. `\"DiskAttached\"`",
+											PlanModifiers:       []planmodifier.String{},
+										},
+										"message": schema1.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: ":\n\n   A human-readable message describing what has happened\n   (and suggested actions for the user, if this is a `WARN` or `ERROR` level event)\n",
+											PlanModifiers:       []planmodifier.String{},
+										},
+									},
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Last occurrence of a recurrent event\n   \n   #### Inner value description\n   \n   Represents an API Resource-related event which is potentially important to the end-user. What exactly constitutes an *event* to be\n   reported is service-dependent\n",
+									PlanModifiers:       []planmodifier.Object{},
+								},
+								"occurrence_count": schema1.Int64Attribute{
+									Computed:            true,
+									MarkdownDescription: "The number of times this event has occurred between `first_occurred_at` and `last_occurrence.occurred_at`. Must be > 0",
+									PlanModifiers:       []planmodifier.Int64{},
+								},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   #### Inner value description\n   \n   A resource event that has occurred (more or less in the same way) multiple times across a service-defined aggregation interval\n",
+						PlanModifiers:       []planmodifier.List{},
 					},
 					"reconciling": schema1.BoolAttribute{
 						Computed:            true,

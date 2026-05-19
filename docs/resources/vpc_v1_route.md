@@ -129,6 +129,19 @@ Read-Only:
    
    - `STATE_UNSPECIFIED` - The state is unknown or not yet set.
    - `READY` - The route is configured and operational.
+- `type` (String) :
+
+   Indicates the route type.
+   REDISTRIBUTED routes cannot be deleted directly.
+   
+   #### Supported values
+   
+   Route type.
+   Possible values:
+   
+   - `TYPE_UNSPECIFIED`
+   - `STATIC`
+   - `REDISTRIBUTED`
 
 <a id="nestedatt--status--next_hop"></a>
 ### Nested Schema for `status.next_hop`
