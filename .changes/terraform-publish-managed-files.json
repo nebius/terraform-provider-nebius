@@ -71,6 +71,7 @@
     "generated/nebius/billing/v1alpha1.tfgen.go",
     "generated/nebius/billing/v1alpha1/billing_group_service.tfgen.go",
     "generated/nebius/billing/v1alpha1/billing_report_exporter_service.tfgen.go",
+    "generated/nebius/billing/v1alpha1/budget_service.tfgen.go",
     "generated/nebius/billing/v1alpha1/calculator_service.tfgen.go",
     "generated/nebius/billing/v1alpha1/contract_price_service.tfgen.go",
     "generated/nebius/billing/v1alpha1/currency_service.tfgen.go",
