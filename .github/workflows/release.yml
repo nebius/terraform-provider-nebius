@@ -105,48 +105,10 @@ jobs:
         env:
           RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
           RELEASE_VERSION: ${{ needs.prepare-release.outputs.version }}
-        run: |
-          python3 - <<'PY'
-          import os
-          import re
-          from pathlib import Path
-
-          version = os.environ["RELEASE_VERSION"]
-          release_notes_path = Path(os.environ["RELEASE_NOTES_PATH"])
-          changelog_path = Path("CHANGELOG.md")
-          changelog_lines = changelog_path.read_text(encoding="utf-8").splitlines()
-          heading_pattern = re.compile(
-              r"^##\s+v?([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)(?:\s+\([^)]*\))?\s*$"
-          )
-
-          start = None
-          end = None
-          for index, line in enumerate(changelog_lines):
-              match = heading_pattern.match(line)
-              if not match:
-                  continue
-
-              if start is None:
-                  if match.group(1) == version:
-                      start = index
-                  continue
-
-              end = index
-              break
-
-          if start is None:
-              raise SystemExit(f"CHANGELOG.md does not contain a release section for version {version}")
-
-          if end is None:
-              end = len(changelog_lines)
-
-          release_notes = "\n".join(changelog_lines[start:end]).strip()
-          if not release_notes:
-              raise SystemExit(f"CHANGELOG.md release section for version {version} is empty")
-
-          release_notes_path.write_text(release_notes + "\n", encoding="utf-8")
-          print(f"Extracted CHANGELOG.md section for version {version} to {release_notes_path}")
-          PY
+        run: >
+          python3 .github/scripts/extract-release-notes.py
+          --version "$RELEASE_VERSION"
+          --output "$RELEASE_NOTES_PATH"
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
