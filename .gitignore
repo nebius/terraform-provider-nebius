@@ -7,3 +7,18 @@ coverage.out
 *.test
 .DS_Store
 .codex
+
+# Python local artifacts.
+__pycache__/
+*.py[cod]
+*$py.class
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.venv/
+venv/
+*.egg-info/

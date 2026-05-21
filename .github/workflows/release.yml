@@ -101,12 +101,26 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Extract release notes from changelog
+        env:
+          RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
+          RELEASE_VERSION: ${{ needs.prepare-release.outputs.version }}
+        run: >
+          python3 .github/scripts/extract-release-notes.py
+          --version "$RELEASE_VERSION"
+          --output "$RELEASE_NOTES_PATH"
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           version: latest
-          args: release --clean
+          args: release --clean --release-notes ${{ runner.temp }}/release-notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
