@@ -101,6 +101,11 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
       - name: Extract release notes from changelog
         env:
           RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
