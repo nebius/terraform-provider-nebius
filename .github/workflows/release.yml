@@ -83,6 +83,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check out workflow code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Extract release notes from changelog
+        env:
+          RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
+          RELEASE_VERSION: ${{ needs.prepare-release.outputs.version }}
+        run: >
+          python3 .github/scripts/extract-release-notes.py
+          --version "$RELEASE_VERSION"
+          --output "$RELEASE_NOTES_PATH"
+
       - name: Check out release tag
         uses: actions/checkout@v4
         with:
@@ -101,20 +120,6 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.14"
-
-      - name: Extract release notes from changelog
-        env:
-          RELEASE_NOTES_PATH: ${{ runner.temp }}/release-notes.md
-          RELEASE_VERSION: ${{ needs.prepare-release.outputs.version }}
-        run: >
-          python3 .github/scripts/extract-release-notes.py
-          --version "$RELEASE_VERSION"
-          --output "$RELEASE_NOTES_PATH"
-
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -124,8 +129,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  notify-slack-on-failure:
-    name: Notify Slack on failure
+  notify-slack-on-release-failure:
+    name: Notify Slack on release failure
     if: ${{ always() && contains(needs.*.result, 'failure') }}
     needs:
       - prepare-release
@@ -140,5 +145,8 @@ jobs:
           payload: |
             channel: ${{ secrets.SLACK_CHANNEL }}
             text: |
-              🚨 Workflow *${{ github.workflow }}* failed on <${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>
+              🚨 Release workflow *${{ github.workflow }}* failed on <${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>
+              Version: `${{ needs.prepare-release.outputs.version || 'unknown' }}`
+              Tag: `${{ needs.prepare-release.outputs.version_tag || 'unknown' }}`
+              Jobs: prepare-release=${{ needs.prepare-release.result }}, goreleaser=${{ needs.goreleaser.result }}
               <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>
