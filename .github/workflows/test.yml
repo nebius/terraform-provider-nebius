@@ -114,15 +114,18 @@ jobs:
 
     steps:
       - name: Check out code
+        if: ${{ !env.ACT }}
         uses: actions/checkout@v4
 
       - name: Set up Go
+        if: ${{ !env.ACT }}
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
           cache: true
 
       - name: Resolve Terraform prerelease
+        if: ${{ !env.ACT }}
         id: terraform
         env:
           TERRAFORM_CHANNEL: ${{ matrix.terraform-channel }}
@@ -155,12 +158,14 @@ jobs:
           echo "Resolved Terraform $TERRAFORM_CHANNEL to $version"
 
       - name: Set up Terraform
+        if: ${{ !env.ACT }}
         uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ steps.terraform.outputs.version }}
           terraform_wrapper: false
 
       - name: Run Go tests
+        if: ${{ !env.ACT }}
         run: go test ./...
 
   e2e:
