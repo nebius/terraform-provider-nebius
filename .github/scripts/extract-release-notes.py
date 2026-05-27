@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract a versioned CHANGELOG.md section for GoReleaser release notes."""
+"""Prepare GoReleaser release notes from CHANGELOG.md."""
 
 import argparse
 import re
@@ -11,6 +11,14 @@ VERSION_HEADING_PATTERN = re.compile(
     r"(?P<version>[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)"
     r"(?:\s+\([^)]*\))?\s*$"
 )
+
+
+def default_release_notes(version: str) -> str:
+    return f"""## {version}
+
+NOTES:
+
+* internal improvements"""
 
 
 def parse_args() -> argparse.Namespace:
@@ -54,7 +62,7 @@ def extract_release_notes(changelog: Path, version: str) -> str:
             break
 
     if start is None:
-        raise SystemExit(f"{changelog} does not contain a release section for version {version}")
+        return default_release_notes(version)
 
     if end is None:
         end = len(changelog_lines)
@@ -70,7 +78,7 @@ def main() -> None:
     args = parse_args()
     release_notes = extract_release_notes(args.changelog, args.version)
     args.output.write_text(release_notes + "\n", encoding="utf-8")
-    print(f"Extracted {args.changelog} section for version {args.version} to {args.output}")
+    print(f"Wrote release notes for version {args.version} to {args.output}")
 
 
 if __name__ == "__main__":

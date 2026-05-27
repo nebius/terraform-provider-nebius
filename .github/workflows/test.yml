@@ -97,6 +97,7 @@ jobs:
           terraform_wrapper: false
 
       - name: Check generated files are up to date
+        if: ${{ !env.ACT }}
         run: make generate-check
 
   prerelease-go-test:
