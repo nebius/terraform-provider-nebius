@@ -14,15 +14,11 @@ VERSION_HEADING_PATTERN = re.compile(
 
 
 def default_release_notes(version: str) -> str:
-    return "\n".join(
-        [
-            f"## {version}",
-            "",
-            "NOTES:",
-            "",
-            "* internal improvements",
-        ],
-    )
+    return f"""## {version}
+
+NOTES:
+
+* internal improvements"""
 
 
 def parse_args() -> argparse.Namespace:
