@@ -359,6 +359,19 @@ Optional:
 
    Prefix identifying one or more objects to which the rule applies.
    If prefix is empty, the rule applies to all objects in the bucket.
+- `tags` (Attributes List) :
+
+   Tags to filter objects by their tagging. Rule applies only to objects that
+   match all tags in a filter. (see [below for nested schema](#nestedatt--lifecycle_configuration--rules--filter--tags))
+
+<a id="nestedatt--lifecycle_configuration--rules--filter--tags"></a>
+### Nested Schema for `lifecycle_configuration.rules.filter.tags`
+
+Optional:
+
+- `key` (String)
+- `value` (String)
+
 
 
 <a id="nestedatt--lifecycle_configuration--rules--noncurrent_version_expiration"></a>
