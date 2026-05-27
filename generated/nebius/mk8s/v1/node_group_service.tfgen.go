@@ -364,7 +364,7 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 					"drain_timeout": schema.StringAttribute{
 						CustomType:          wellknown.WellKnownByName("google.protobuf.Duration").Type().(basetypes.StringTypable),
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Maximum amount of time that the service will spend on attempting gracefully draining a node (evicting it's pods), before\n   falling back to pod deletion.\n   By default, node can be drained unlimited time.\n   Important consequence of that is if PodDisruptionBudget doesn't allow to evict a pod,\n   then NodeGroup update with node re-creation will hung on that pod eviction.\n   Note, that it is different from `kubectl drain --timeout`\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
+						MarkdownDescription: ":\n\n   Maximum amount of time that the service will spend attempting to gracefully drain a node\n   (evicting its pods) before falling back to pod deletion.\n   A value of 0 (or when field is omitted) means no timeout: the node can be drained for an unlimited time.\n   Important consequence of that is if PodDisruptionBudget doesn't allow evicting a pod,\n   then NodeGroup update with node re-creation will hang on that pod eviction.\n   Note that this is different from `kubectl drain --timeout`, which gives up and returns an error.\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
 					},
 				},
 				Computed:            true,
@@ -466,6 +466,45 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 						},
 						Computed:            true,
 						MarkdownDescription: ":\n\n   #### Inner value description\n   \n   A resource event that has occurred (more or less in the same way) multiple times across a service-defined aggregation interval\n",
+					},
+					"strategy": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"max_unavailable": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"percent": schema.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside count.*",
+									},
+									"count": schema.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside percent.*",
+									},
+								},
+								Computed:            true,
+								MarkdownDescription: ":\n\n   The maximum number of nodes that can be simultaneously unavailable during the update process.\n   \n   This value can be specified either as an absolute number (for example 3) or as a percentage of the desired\n   number of nodes (for example 5%).\n   \n   When specified as a percentage, the actual number is calculated by rounding down to the nearest whole number.\n   This value cannot be 0 if `max_surge` is also set to 0.\n   \n   Defaults to 0.\n   \n   Example: If set to 20%, up to 20% of the nodes can be taken offline at once during the update,\n   ensuring that at least 80% of the desired nodes remain operational.\n",
+							},
+							"max_surge": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"percent": schema.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside count.*",
+									},
+									"count": schema.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside percent.*",
+									},
+								},
+								Computed:            true,
+								MarkdownDescription: ":\n\n   The maximum number of additional nodes that can be provisioned above the desired number of nodes during the update process.\n   \n   This value can be specified either as an absolute number (for example 3) or as a percentage of the desired\n   number of nodes (for example 5%).\n   \n   When specified as a percentage, the actual number is calculated by rounding up to the nearest whole number.\n   This value cannot be 0 if `max_unavailable` is also set to 0.\n   \n   Defaults to 1.\n   \n   Example: If set to 25%, the node group can scale up by an additional 25% during the update,\n   allowing new nodes to be added before old nodes are removed, which helps minimize workload disruption.\n   \n   NOTE:\n   \n   it is user responsibility to ensure that there are enough quota for provision nodes above the desired number.\n   Available quota effectively limits `max_surge`.\n   In case of not enough quota even for one extra node, update operation will hung because of quota exhausted error.\n   Such error will be visible in Operation.progress_data.\n",
+							},
+							"drain_timeout": schema.StringAttribute{
+								CustomType:          wellknown.WellKnownByName("google.protobuf.Duration").Type().(basetypes.StringTypable),
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Maximum amount of time that the service will spend attempting to gracefully drain a node\n   (evicting its pods) before falling back to pod deletion.\n   A value of 0 (or when field is omitted) means no timeout: the node can be drained for an unlimited time.\n   Important consequence of that is if PodDisruptionBudget doesn't allow evicting a pod,\n   then NodeGroup update with node re-creation will hang on that pod eviction.\n   Note that this is different from `kubectl drain --timeout`, which gives up and returns an error.\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Deployment strategy used by the service for node group rollouts and node deletions.\n   It includes default values applied by the service. A drain_timeout value of 0 means\n   that node draining is not time-limited.\n",
 					},
 					"reconciling": schema.BoolAttribute{
 						Computed:            true,
@@ -1032,7 +1071,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							validators.ProtoFieldValidator(&v1.NodeGroupDeploymentStrategy{}, "drain_timeout", "drain_timeout", fieldNameMapNodeGroup),
 						},
 						Optional:            true,
-						MarkdownDescription: ":\n\n   Maximum amount of time that the service will spend on attempting gracefully draining a node (evicting it's pods), before\n   falling back to pod deletion.\n   By default, node can be drained unlimited time.\n   Important consequence of that is if PodDisruptionBudget doesn't allow to evict a pod,\n   then NodeGroup update with node re-creation will hung on that pod eviction.\n   Note, that it is different from `kubectl drain --timeout`\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
+						MarkdownDescription: ":\n\n   Maximum amount of time that the service will spend attempting to gracefully drain a node\n   (evicting its pods) before falling back to pod deletion.\n   A value of 0 (or when field is omitted) means no timeout: the node can be drained for an unlimited time.\n   Important consequence of that is if PodDisruptionBudget doesn't allow evicting a pod,\n   then NodeGroup update with node re-creation will hang on that pod eviction.\n   Note that this is different from `kubectl drain --timeout`, which gives up and returns an error.\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 				},
@@ -1175,6 +1214,53 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   #### Inner value description\n   \n   A resource event that has occurred (more or less in the same way) multiple times across a service-defined aggregation interval\n",
 						PlanModifiers:       []planmodifier.List{},
+					},
+					"strategy": schema1.SingleNestedAttribute{
+						Attributes: map[string]schema1.Attribute{
+							"max_unavailable": schema1.SingleNestedAttribute{
+								Attributes: map[string]schema1.Attribute{
+									"percent": schema1.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside count.*",
+										PlanModifiers:       []planmodifier.Int64{},
+									},
+									"count": schema1.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside percent.*",
+										PlanModifiers:       []planmodifier.Int64{},
+									},
+								},
+								Computed:            true,
+								MarkdownDescription: ":\n\n   The maximum number of nodes that can be simultaneously unavailable during the update process.\n   \n   This value can be specified either as an absolute number (for example 3) or as a percentage of the desired\n   number of nodes (for example 5%).\n   \n   When specified as a percentage, the actual number is calculated by rounding down to the nearest whole number.\n   This value cannot be 0 if `max_surge` is also set to 0.\n   \n   Defaults to 0.\n   \n   Example: If set to 20%, up to 20% of the nodes can be taken offline at once during the update,\n   ensuring that at least 80% of the desired nodes remain operational.\n",
+								PlanModifiers:       []planmodifier.Object{},
+							},
+							"max_surge": schema1.SingleNestedAttribute{
+								Attributes: map[string]schema1.Attribute{
+									"percent": schema1.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside count.*",
+										PlanModifiers:       []planmodifier.Int64{},
+									},
+									"count": schema1.Int64Attribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside percent.*",
+										PlanModifiers:       []planmodifier.Int64{},
+									},
+								},
+								Computed:            true,
+								MarkdownDescription: ":\n\n   The maximum number of additional nodes that can be provisioned above the desired number of nodes during the update process.\n   \n   This value can be specified either as an absolute number (for example 3) or as a percentage of the desired\n   number of nodes (for example 5%).\n   \n   When specified as a percentage, the actual number is calculated by rounding up to the nearest whole number.\n   This value cannot be 0 if `max_unavailable` is also set to 0.\n   \n   Defaults to 1.\n   \n   Example: If set to 25%, the node group can scale up by an additional 25% during the update,\n   allowing new nodes to be added before old nodes are removed, which helps minimize workload disruption.\n   \n   NOTE:\n   \n   it is user responsibility to ensure that there are enough quota for provision nodes above the desired number.\n   Available quota effectively limits `max_surge`.\n   In case of not enough quota even for one extra node, update operation will hung because of quota exhausted error.\n   Such error will be visible in Operation.progress_data.\n",
+								PlanModifiers:       []planmodifier.Object{},
+							},
+							"drain_timeout": schema1.StringAttribute{
+								CustomType:          wellknown.WellKnownByName("google.protobuf.Duration").Type().(basetypes.StringTypable),
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Maximum amount of time that the service will spend attempting to gracefully drain a node\n   (evicting its pods) before falling back to pod deletion.\n   A value of 0 (or when field is omitted) means no timeout: the node can be drained for an unlimited time.\n   Important consequence of that is if PodDisruptionBudget doesn't allow evicting a pod,\n   then NodeGroup update with node re-creation will hang on that pod eviction.\n   Note that this is different from `kubectl drain --timeout`, which gives up and returns an error.\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
+								PlanModifiers:       []planmodifier.String{},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Deployment strategy used by the service for node group rollouts and node deletions.\n   It includes default values applied by the service. A drain_timeout value of 0 means\n   that node draining is not time-limited.\n",
+						PlanModifiers:       []planmodifier.Object{},
 					},
 					"reconciling": schema1.BoolAttribute{
 						Computed:            true,

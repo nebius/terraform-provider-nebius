@@ -138,6 +138,22 @@ func (r *serviceBucket) DataSourceSchema() schema.Schema {
 											Computed:            true,
 											MarkdownDescription: "Maximum object size to which the rule applies.",
 										},
+										"tags": schema.ListNestedAttribute{
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"key": schema.StringAttribute{
+														Computed:            true,
+														MarkdownDescription: "",
+													},
+													"value": schema.StringAttribute{
+														Computed:            true,
+														MarkdownDescription: "",
+													},
+												},
+											},
+											Computed:            true,
+											MarkdownDescription: ":\n\n   Tags to filter objects by their tagging. Rule applies only to objects that\n   match all tags in a filter.\n",
+										},
 									},
 									Computed:            true,
 									MarkdownDescription: ":\n\n   The Filter is used to identify objects that a Lifecycle Rule applies to.\n   The Lifecycle Rule will apply to any object matching all of the predicates\n   configured inside (using logical AND).\n",
@@ -575,6 +591,31 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 											Optional:            true,
 											MarkdownDescription: "Maximum object size to which the rule applies.",
 											PlanModifiers:       []planmodifier.Int64{},
+										},
+										"tags": schema1.ListNestedAttribute{
+											NestedObject: schema1.NestedAttributeObject{
+												Attributes: map[string]schema1.Attribute{
+													"key": schema1.StringAttribute{
+														Validators:          []validator.String{},
+														Computed:            true,
+														Optional:            true,
+														MarkdownDescription: "",
+														PlanModifiers:       []planmodifier.String{},
+													},
+													"value": schema1.StringAttribute{
+														Validators:          []validator.String{},
+														Computed:            true,
+														Optional:            true,
+														MarkdownDescription: "",
+														PlanModifiers:       []planmodifier.String{},
+													},
+												},
+											},
+											Validators:          []validator.List{},
+											Computed:            true,
+											Optional:            true,
+											MarkdownDescription: ":\n\n   Tags to filter objects by their tagging. Rule applies only to objects that\n   match all tags in a filter.\n",
+											PlanModifiers:       []planmodifier.List{},
 										},
 									},
 									Validators:          []validator.Object{},

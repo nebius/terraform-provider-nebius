@@ -475,12 +475,12 @@ Optional:
 
 - `drain_timeout` (String) :
 
-   Maximum amount of time that the service will spend on attempting gracefully draining a node (evicting it's pods), before
-   falling back to pod deletion.
-   By default, node can be drained unlimited time.
-   Important consequence of that is if PodDisruptionBudget doesn't allow to evict a pod,
-   then NodeGroup update with node re-creation will hung on that pod eviction.
-   Note, that it is different from `kubectl drain --timeout`
+   Maximum amount of time that the service will spend attempting to gracefully drain a node
+   (evicting its pods) before falling back to pod deletion.
+   A value of 0 (or when field is omitted) means no timeout: the node can be drained for an unlimited time.
+   Important consequence of that is if PodDisruptionBudget doesn't allow evicting a pod,
+   then NodeGroup update with node re-creation will hang on that pod eviction.
+   Note that this is different from `kubectl drain --timeout`, which gives up and returns an error.
    
    Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.
 - `max_surge` (Attributes) :
@@ -571,6 +571,11 @@ Read-Only:
    - `PROVISIONING`
    - `RUNNING`
    - `DELETING`
+- `strategy` (Attributes) :
+
+   Deployment strategy used by the service for node group rollouts and node deletions.
+   It includes default values applied by the service. A drain_timeout value of 0 means
+   that node draining is not time-limited. (see [below for nested schema](#nestedatt--status--strategy))
 - `target_node_count` (Number) :
 
    Desired total number of nodes that should be in the node group.
@@ -633,3 +638,73 @@ Read-Only:
    Time at which the event has occurred
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
+
+
+
+<a id="nestedatt--status--strategy"></a>
+### Nested Schema for `status.strategy`
+
+Read-Only:
+
+- `drain_timeout` (String) :
+
+   Maximum amount of time that the service will spend attempting to gracefully drain a node
+   (evicting its pods) before falling back to pod deletion.
+   A value of 0 (or when field is omitted) means no timeout: the node can be drained for an unlimited time.
+   Important consequence of that is if PodDisruptionBudget doesn't allow evicting a pod,
+   then NodeGroup update with node re-creation will hang on that pod eviction.
+   Note that this is different from `kubectl drain --timeout`, which gives up and returns an error.
+   
+   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.
+- `max_surge` (Attributes) :
+
+   The maximum number of additional nodes that can be provisioned above the desired number of nodes during the update process.
+   
+   This value can be specified either as an absolute number (for example 3) or as a percentage of the desired
+   number of nodes (for example 5%).
+   
+   When specified as a percentage, the actual number is calculated by rounding up to the nearest whole number.
+   This value cannot be 0 if `max_unavailable` is also set to 0.
+   
+   Defaults to 1.
+   
+   Example: If set to 25%, the node group can scale up by an additional 25% during the update,
+   allowing new nodes to be added before old nodes are removed, which helps minimize workload disruption.
+   
+   NOTE:
+   
+   it is user responsibility to ensure that there are enough quota for provision nodes above the desired number.
+   Available quota effectively limits `max_surge`.
+   In case of not enough quota even for one extra node, update operation will hung because of quota exhausted error.
+   Such error will be visible in Operation.progress_data. (see [below for nested schema](#nestedatt--status--strategy--max_surge))
+- `max_unavailable` (Attributes) :
+
+   The maximum number of nodes that can be simultaneously unavailable during the update process.
+   
+   This value can be specified either as an absolute number (for example 3) or as a percentage of the desired
+   number of nodes (for example 5%).
+   
+   When specified as a percentage, the actual number is calculated by rounding down to the nearest whole number.
+   This value cannot be 0 if `max_surge` is also set to 0.
+   
+   Defaults to 0.
+   
+   Example: If set to 20%, up to 20% of the nodes can be taken offline at once during the update,
+   ensuring that at least 80% of the desired nodes remain operational. (see [below for nested schema](#nestedatt--status--strategy--max_unavailable))
+
+<a id="nestedatt--status--strategy--max_surge"></a>
+### Nested Schema for `status.strategy.max_surge`
+
+Read-Only:
+
+- `count` (Number) *Cannot be set alongside percent.*
+- `percent` (Number) *Cannot be set alongside count.*
+
+
+<a id="nestedatt--status--strategy--max_unavailable"></a>
+### Nested Schema for `status.strategy.max_unavailable`
+
+Read-Only:
+
+- `count` (Number) *Cannot be set alongside percent.*
+- `percent` (Number) *Cannot be set alongside count.*

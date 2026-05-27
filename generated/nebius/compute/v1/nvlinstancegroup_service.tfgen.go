@@ -323,8 +323,25 @@ func (r *serviceNVLInstanceGroup) Create(ctx context.Context, metadata *v11.Reso
 }
 
 func (r *serviceNVLInstanceGroup) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
-	var reqCtx *requestcontext.Context
-	return reqCtx, fmt.Errorf("Update is unimplemented for nebius.compute.v1.NVLInstanceGroupService")
+	service := v12.NewNVLInstanceGroupService(r.provider.SDK())
+	reqCtx := &requestcontext.Context{}
+	specTyped, ok := spec.(*v1.NVLInstanceGroupSpec)
+	if !ok {
+		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.NVLInstanceGroupSpec", spec.ProtoReflect().Descriptor().FullName())
+	}
+	req := &v1.UpdateNVLInstanceGroupRequest{
+		Spec:     specTyped,
+		Metadata: metadata,
+	}
+	op, err := service.Update(ctx, req, reqCtx.MainRequestOptions()...)
+	if err != nil {
+		return reqCtx, fmt.Errorf("service update: %w", err)
+	}
+	op, err = op.Wait(ctx, reqCtx.SubsequentRequestOptions()...)
+	if err != nil {
+		return reqCtx, fmt.Errorf("operation wait: %w", err)
+	}
+	return reqCtx, nil
 }
 
 func (r *serviceNVLInstanceGroup) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
