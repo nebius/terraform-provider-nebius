@@ -13,15 +13,14 @@ NOTES:
 
 IMPROVEMENTS:
 
-* No longer deprecated resources and data sources: [nebius_compute_v1alpha1_disk](./docs/resources/compute_v1alpha1_disk), [nebius_compute_v1alpha1_filesystem](./docs/resources/compute_v1alpha1_filesystem), [nebius_compute_v1alpha1_gpu_cluster](./docs/resources/compute_v1alpha1_gpu_cluster), [nebius_compute_v1alpha1_instance](./docs/resources/compute_v1alpha1_instance).
-* No longer deprecated data sources: [nebius_compute_v1alpha1_image](./docs/data-sources/compute_v1alpha1_image).
-* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group):
+
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group.md):
     * Added: `status.strategy`
-* Changed attributes for resource [nebius_storage_v1_bucket](./docs/resources/storage_v1_bucket):
+* Changed attributes for resource [nebius_storage_v1_bucket](./docs/resources/storage_v1_bucket.md):
     * Added: `lifecycle_configuration.rules.filter.tags`
-* Changed attributes for data source [nebius_mk8s_v1_node_group](./docs/data-sources/mk8s_v1_node_group):
+* Changed attributes for data source [nebius_mk8s_v1_node_group](./docs/data-sources/mk8s_v1_node_group.md):
     * Added: `status.strategy`
-* Changed attributes for data source [nebius_storage_v1_bucket](./docs/data-sources/storage_v1_bucket):
+* Changed attributes for data source [nebius_storage_v1_bucket](./docs/data-sources/storage_v1_bucket.md):
     * Added: `lifecycle_configuration.rules.filter.tags`
 
 BREAKING CHANGES:
