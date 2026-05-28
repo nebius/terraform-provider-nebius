@@ -2,12 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 0.6.8 (May 28, 2026)
 
 NOTES:
 
 * changelog: Add versioned changelog entries for recent Terraform Registry releases.
 * release: Added release-notes extraction and appending.
+* provider: Update Nebius Go SDK to `v0.2.20`.
+* deps: Update `google.golang.org/grpc` from `v1.81.0` to `v1.81.1`.
+
+IMPROVEMENTS:
+
+* No longer deprecated resources and data sources: [nebius_compute_v1alpha1_disk](./docs/resources/compute_v1alpha1_disk), [nebius_compute_v1alpha1_filesystem](./docs/resources/compute_v1alpha1_filesystem), [nebius_compute_v1alpha1_gpu_cluster](./docs/resources/compute_v1alpha1_gpu_cluster), [nebius_compute_v1alpha1_instance](./docs/resources/compute_v1alpha1_instance).
+* No longer deprecated data sources: [nebius_compute_v1alpha1_image](./docs/data-sources/compute_v1alpha1_image).
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group):
+    * Added: `status.strategy`
+* Changed attributes for resource [nebius_storage_v1_bucket](./docs/resources/storage_v1_bucket):
+    * Added: `lifecycle_configuration.rules.filter.tags`
+* Changed attributes for data source [nebius_mk8s_v1_node_group](./docs/data-sources/mk8s_v1_node_group):
+    * Added: `status.strategy`
+* Changed attributes for data source [nebius_storage_v1_bucket](./docs/data-sources/storage_v1_bucket):
+    * Added: `lifecycle_configuration.rules.filter.tags`
+
+BREAKING CHANGES:
+
+* Removed resources and data sources: `nebius_compute_v1alpha1_disk`, `nebius_compute_v1alpha1_filesystem`, `nebius_compute_v1alpha1_gpu_cluster`, `nebius_compute_v1alpha1_instance`.
+* Removed data sources: `nebius_compute_v1alpha1_image`.
 
 ## 0.6.7 (May 20, 2026)
 
