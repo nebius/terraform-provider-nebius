@@ -34,7 +34,7 @@ NOTES:
 
 * provider: Update Nebius Go SDK to `v0.2.17` [GH-26]
 * docs: Remove the completed post-publication checklist from the public repository [GH-24]
-* ci: Add Slack failure notifications for release, test, and sync auto-approval workflows [GH-25]
+* ci: Add workflow failure notifications for release, test, and sync auto-approval workflows [GH-25]
 * ci: Run the main test workflow nightly and limit Terraform prerelease matrix checks to pull requests [GH-25]
 
 ## 0.6.6 (May 19, 2026)

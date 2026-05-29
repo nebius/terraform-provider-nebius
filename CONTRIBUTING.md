@@ -1,17 +1,17 @@
 # Contributing
 
-Thank you for taking the time to contribute. We do read issues and pull requests, and we value outside contributions.
+Thank you for taking the time to contribute. We read issues and pull requests and value outside contributions.
 
 ## Important Note About This Repository
 
-This repository is a public mirror of the source we use for day-to-day development.
+This repository is a public mirror of the development repository.
 
 Because of that:
 
-- Pull requests to this mirror may be closed without being merged here.
-- A closed pull request does not necessarily mean the change was rejected.
-- If a contribution is a good fit, we may port or re-apply it in the internal source repository and publish it later through the mirror.
-- When that happens, the public git history, `AUTHORS` file, or `CHANGELOG.md` may not list the original contributor by name.
+* Pull requests to this mirror may be closed without being merged here.
+* A closed pull request does not necessarily mean the change was rejected.
+* If a contribution is a good fit, we may port or re-apply it in the development repository and publish it later through the mirror.
+* When that happens, the public git history, `AUTHORS` file or `CHANGELOG.md` may not list the original contributor by name.
 
 We want to be explicit about this so contributors can make an informed decision before spending time on a change.
 

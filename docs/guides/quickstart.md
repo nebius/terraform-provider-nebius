@@ -1,84 +1,155 @@
 ---
 page_title: "Nebius Provider: Quickstart"
 description: |-
-  A minimal end-to-end example for installing, authenticating, and applying the Nebius Terraform provider.
+  A minimal end-to-end example for installing, authenticating and applying the Nebius Terraform provider.
 ---
 
 # Quickstart
 
-This quickstart shows the smallest practical flow for creating a Nebius resource with Terraform.
+Nebius AI Cloud provides several interfaces to manage cloud resources. In addition to the web console and CLI commands, you can use the Terraform provider by Nebius AI Cloud.
 
-## Before you start
+Terraform is most useful when you need to create and maintain multiple resources simultaneously. The example below shows how to get started with the provider by creating a Container Registry registry.
 
-- Install Terraform.
-- Create a Nebius service account with the permissions needed for the resources you want to manage.
-- Create an authorized key for that service account.
-- Export the service-account credentials as environment variables.
+## Install required tools
 
-For local development you can also authenticate with a user token or CLI profile, but service accounts are the recommended default.
+Before you start:
 
-## 1. Create the Terraform working directory
+* Install Terraform.
+* Install `jq`.
+* Install and configure the Nebius AI Cloud CLI.
 
-```bash
-mkdir nebius-terraform-quickstart
-cd nebius-terraform-quickstart
-```
+The CLI and `jq` are only required for the setup commands in this example.
 
-## 2. Add provider configuration
+## Configure access and credentials
 
-Create `terraform.tf`:
+In this example, Terraform applies configurations on behalf of a Nebius AI Cloud service account. Alternatively, you can authenticate with your user account. For details, see [authentication](authentication.md).
 
-```hcl
-terraform {
-  required_providers {
-    nebius = {
-      source = "nebius/nebius"
-    }
-  }
-}
-```
+To configure access for the service account:
 
-Create `providers.tf`:
+1. Create a service account and save its ID to an environment variable:
 
-```hcl
-provider "nebius" {
-  service_account = {
-    account_id_env       = "NB_SA_ID"
-    public_key_id_env    = "NB_AUTHKEY_PUBLIC_ID"
-    private_key_file_env = "NB_AUTHKEY_PRIVATE_PATH"
-  }
-}
-```
+   ```bash
+   export SA_ID=$(nebius iam service-account create \
+     --name terraform-sa --format json \
+     | jq -r '.metadata.id')
+   ```
 
-## 3. Initialize Terraform
+1. Grant edit access to the service account:
 
-```bash
-terraform init
-```
+   1. Get the tenant ID from the web console or with the Nebius AI Cloud CLI.
 
-## 4. Add a resource
+   1. Get the ID of the default `editors` group:
 
-Create `main.tf`:
+      ```bash
+      export EDITORS_GROUP_ID=$(nebius iam group get-by-name \
+        --name editors --parent-id <tenant_ID> --format json \
+        | jq -r '.metadata.id')
+      ```
 
-```hcl
-resource "nebius_registry_v1_registry" "example" {
-  name        = "example-registry"
-  parent_id   = "<project-id>"
-  description = "Registry managed by Terraform"
-}
-```
+      If Terraform must manage users and group memberships, use the `admins` group instead of `editors`.
 
-Replace `<project-id>` with the target project ID.
+   1. Add the service account to the group:
 
-## 5. Validate and apply
+      ```bash
+      nebius iam group-membership create \
+        --parent-id $EDITORS_GROUP_ID \
+        --member-id $SA_ID
+      ```
 
-```bash
-terraform validate
-terraform apply
-```
+1. Create an authorized key:
 
-## Next steps
+   1. Generate a key pair:
 
-- Review [authentication options](authentication.md).
-- Review [sensitive-value handling](sensitive-values.md) before managing secrets.
-- Add version constraints for the provider before using it in shared environments.
+      ```bash
+      mkdir -p ~/.nebius/authkey
+      export AUTHKEY_PRIVATE_PATH=~/.nebius/authkey/private.pem
+      export AUTHKEY_PUBLIC_PATH=~/.nebius/authkey/public.pem
+      openssl genrsa -out $AUTHKEY_PRIVATE_PATH 4096
+      openssl rsa -in $AUTHKEY_PRIVATE_PATH \
+        -outform PEM -pubout -out $AUTHKEY_PUBLIC_PATH
+      ```
+
+   1. Upload the public key to create the authorized key and save its ID to an environment variable:
+
+      ```bash
+      export AUTHKEY_PUBLIC_ID=$(nebius iam auth-public-key create \
+        --account-service-account-id $SA_ID \
+        --data "$(cat $AUTHKEY_PUBLIC_PATH)" \
+        --format json | jq -r '.metadata.id')
+      ```
+
+## Initialize a working directory
+
+The configuration files for each infrastructure that you deploy with Terraform should be in their own working directory. This is where you run the Terraform CLI commands.
+
+1. Create the working directory:
+
+   ```bash
+   mkdir nebius-terraform-quickstart
+   cd nebius-terraform-quickstart
+   ```
+
+1. Create `terraform.tf`:
+
+   ```hcl
+   terraform {
+     required_providers {
+       nebius = {
+         source  = "nebius/nebius"
+         version = ">= 0.6.8"
+       }
+     }
+   }
+   ```
+
+1. Create `providers.tf`:
+
+   ```hcl
+   provider "nebius" {
+     service_account = {
+       private_key_file_env = "AUTHKEY_PRIVATE_PATH"
+       public_key_id_env    = "AUTHKEY_PUBLIC_ID"
+       account_id_env       = "SA_ID"
+     }
+   }
+   ```
+
+1. Initialize Terraform:
+
+   ```bash
+   terraform init
+   ```
+
+## Create resources
+
+After your working directory is initialized, define and build your infrastructure:
+
+1. Create `main.tf`:
+
+   ```hcl
+   resource "nebius_registry_v1_registry" "my-registry" {
+     name        = "my-registry"
+     parent_id   = "<project_ID>"
+     description = "My registry"
+   }
+   ```
+
+   `parent_id` is the target project ID.
+
+1. Validate the configuration:
+
+   ```bash
+   terraform validate
+   ```
+
+1. If the configuration is valid, apply it:
+
+   ```bash
+   terraform apply
+   ```
+
+## See also
+
+* [Install the provider](install.md)
+* [Authentication](authentication.md)
+* [Working with sensitive values](sensitive-values.md)

@@ -6,15 +6,18 @@ See the [full documentation on installation, how-tos and usage here](https://doc
 
 ## Contributing
 
-External contributions are appreciated. This repository is a public mirror, so pull requests may be closed without being merged directly here even when a change is later ported internally and published back to the mirror. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow note.
+External contributions are appreciated. This repository is a public mirror, so pull requests may be closed without being merged directly here even when a change is later published back to the mirror. See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow note.
 
+## Support
+
+For help with the provider, issue triage, paid customer escalation, urgent patch scenarios, release cadence, credentials, state, logs, diagnostics, imports and deprecations, see [SUPPORT.md](SUPPORT.md). Report suspected vulnerabilities through the private process in [SECURITY.md](SECURITY.md).
 
 ## Build
 
 Prerequisites:
 
-- Go `1.26.1`
-- `git`
+* Go `1.26.1`
+* `git`
 
 Build the provider locally:
 
@@ -34,7 +37,7 @@ Then, copy the `TF_REATTACH_PROVIDERS` string from the output and run your Terra
 
 ## Documentation Generation
 
-Terraform Registry documentation is generated from the provider schema, templates, and example configurations.
+Terraform Registry documentation is generated from the provider schema, templates and example configurations.
 
 Generate docs:
 
@@ -56,9 +59,9 @@ make generate-check
 
 **Notes:**
 
-- `tfplugindocs` is invoked from the `tools/` helper module.
-- If Terraform is not already installed locally, `tfplugindocs` may download it automatically during documentation generation.
-- Generated documentation is written to `docs/`.
+* `tfplugindocs` is invoked from the `tools/` helper module.
+* If Terraform is not already installed locally, `tfplugindocs` may download it automatically during documentation generation.
+* Generated documentation is written to `docs/`.
 
 ## Example Provider Configuration
 
@@ -68,7 +71,8 @@ Minimal token-based configuration:
 terraform {
   required_providers {
     nebius = {
-      source = "nebius/nebius"
+      source  = "nebius/nebius"
+      version = ">= 0.6.8"
     }
   }
 }
@@ -84,10 +88,10 @@ Additional examples live in [`examples/provider/`](examples/provider).
 
 Signed multi-platform release assets are configured through:
 
-- [`.goreleaser.yml`](.goreleaser.yml)
-- [`.github/workflows/release.yml`](.github/workflows/release.yml)
-- [`terraform-registry-manifest.json`](terraform-registry-manifest.json)
+* [`.goreleaser.yml`](.goreleaser.yml)
+* [`.github/workflows/release.yml`](.github/workflows/release.yml)
+* [`terraform-registry-manifest.json`](terraform-registry-manifest.json)
 
-Pushing a commit to `main` with a new value in [`provider/version/version.go`](provider/version/version.go) triggers the release workflow. The workflow creates the matching `vX.Y.Z` tag if it does not already exist, publishes the release artifacts from that tag, and skips the release if the tag is already present.
+Pushing a commit to `main` with a new value in [`provider/version/version.go`](provider/version/version.go) triggers the release workflow. The workflow creates the matching `vX.Y.Z` tag if it does not already exist, publishes the release artifacts from that tag and skips the release if the tag is already present.
 
 The release workflow can also be run manually from GitHub Actions on `main`. Manual runs publish release assets for the current `versionString` tag by default, even if the tag already exists; disable `publish_existing_tag` to keep the normal skip behavior.
