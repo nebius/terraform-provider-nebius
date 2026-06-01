@@ -42,9 +42,44 @@ After initialization, you can add Nebius resources and data sources to the direc
 
 If your project uses the provider from a Nebius custom registry, move it to the HashiCorp registry.
 
+> **Note**
+> The custom registry provider version `0.5.217` corresponds to the HashiCorp registry provider version `0.6.8`.
+
 To move the provider:
 
-1. In `required_providers`, replace the custom registry source with the HashiCorp registry source:
+1. Before changing the provider source, upgrade to the most recent custom registry provider version. Keep the custom registry source that the project already uses, update the version constraint and run `terraform init -upgrade`.
+
+   For the current custom registry hostname:
+
+   ```hcl
+   terraform {
+     required_providers {
+       nebius = {
+         source  = "terraform-provider.storage.eu-north1.nebius.cloud/nebius/nebius"
+         version = ">= 0.5.217"
+       }
+     }
+   }
+   ```
+
+   For the older custom registry hostname:
+
+   ```hcl
+   terraform {
+     required_providers {
+       nebius = {
+         source  = "terraform-provider-nebius.storage.ai.nebius.cloud/nebius/nebius"
+         version = ">= 0.5.217"
+       }
+     }
+   }
+   ```
+
+   ```bash
+   terraform init -upgrade
+   ```
+
+1. In `required_providers`, replace the custom registry source with the HashiCorp registry source and the corresponding most recent HashiCorp registry provider version:
 
    ```hcl
    terraform {
@@ -57,7 +92,7 @@ To move the provider:
    }
    ```
 
-   Use the `0.6` provider version that corresponds to the `0.5` version currently used in the project. The `0.5` and `0.6` streams were released in parallel during the registry migration, so do not use the latest version unless the project already permits it. Prefer an explicit constraint, such as `>= 0.6.8`.
+   Use the `0.6` provider version that corresponds to the `0.5` version currently used in the project. For example, after upgrading to `0.5.217` in the custom registry, use `0.6.8` in the HashiCorp registry. Prefer an explicit constraint, such as `>= 0.6.8`.
 
 1. From the root module or workspace that owns the Terraform state, replace the provider address in the state:
 
@@ -76,6 +111,8 @@ To move the provider:
    ```
 
    The `terraform state replace-provider` command updates the provider source address for all matching resources in the state and creates a state backup before saving changes.
+
+   After this command, all resources in the state that used the custom registry provider are managed through the HashiCorp registry provider.
 
 1. Refresh the provider version selection and lock file:
 
