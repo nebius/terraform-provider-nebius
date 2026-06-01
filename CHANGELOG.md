@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.9 (June 1, 2026)
+
+NOTES:
+
+* Internal improvements.
+
 ## 0.6.8 (May 28, 2026)
 
 NOTES:
