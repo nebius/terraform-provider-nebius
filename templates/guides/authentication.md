@@ -6,15 +6,19 @@ description: |-
 
 # Authentication
 
-To manage Nebius resources with Terraform, provide credentials through the provider configuration. You can authenticate as either a service account or a user account.
+To manage Nebius AI Cloud resources with Terraform, provide credentials through the provider configuration. You can authenticate as either a service account or a user account.
 
-If both a service-account configuration and a user token are present, the token-based user authentication takes precedence.
+Service accounts are the recommended choice for CI, automation and shared Terraform workflows. If both service-account credentials and user-account credentials are present in a Terraform configuration, the provider authenticates as the user account.
 
-Service accounts are the recommended choice for CI, automation, and shared Terraform workflows.
-
-## Service Account Authentication
+## Authenticate with a service account
 
 Use a service account when Terraform is running outside an interactive user session.
+
+Before using a service account in the provider:
+
+1. Create a service account if you have not already.
+1. Add the service account to a group with the permissions needed for the resources you want to manage. In most cases, a group with the `editor` role is enough. Use the `admin` role only if Terraform must manage other accounts' group memberships.
+1. Create an authorized key for the service account.
 
 You can specify service-account credentials directly:
 
@@ -33,53 +37,71 @@ Or indirectly through environment variables:
 ```hcl
 provider "nebius" {
   service_account = {
-    account_id_env       = "NB_SA_ID"
-    public_key_id_env    = "NB_AUTHKEY_PUBLIC_ID"
-    private_key_file_env = "NB_AUTHKEY_PRIVATE_PATH"
+    account_id_env       = "SA_ID"
+    public_key_id_env    = "AUTHKEY_ID"
+    private_key_file_env = "AUTHKEY_PRIV_PATH"
   }
 }
 ```
 
 ```bash
-export NB_SA_ID=serviceaccount-e00a0b1c**********
-export NB_AUTHKEY_PUBLIC_ID=publickey-e00z9y8x**********
-export NB_AUTHKEY_PRIVATE_PATH=~/.nebius/authkey/private.pem
+export SA_ID=serviceaccount-e00a0b1c**********
+export AUTHKEY_ID=publickey-e00z9y8x**********
+export AUTHKEY_PRIV_PATH=~/.nebius/authkey/private.pem
 ```
+
+The following credentials are required in `service_account`:
+
+* Service account ID, in `account_id` or `account_id_env`. You can get it with:
+
+  ```bash
+  nebius iam service-account get-by-name \
+    --name <service_account_name> \
+    --format json | jq -r '.metadata.id'
+  ```
+
+  Alternatively, use `nebius iam service-account list` and get the ID from `.items[*].metadata.id`.
+
+* Authorized key ID, in `public_key_id` or `public_key_id_env`. You can list authorized keys created for the service account with:
+
+  ```bash
+  nebius iam auth-public-key list-by-account \
+    --account-service-account-id <service_account_ID> \
+    --format json
+  ```
+
+* Path to the private key that you used to create the authorized key, in `private_key_file` or `private_key_file_env`.
 
 The provider also supports `credentials_file` and `credentials_file_env` if you prefer to point at a credentials file instead of specifying individual fields.
 
-## User Account Authentication
+## Authenticate with a user account
 
-Use user-account authentication mainly for local development.
+Use user-account authentication mainly for local development. User account authentication uses access tokens. The lifetime of an access token is 12 hours.
 
-### IAM Token
+To get an access token:
 
-Use an IAM token when you already have a token issuance flow outside Terraform.
+1. Install and configure the Nebius AI Cloud CLI.
+1. Run:
 
-```terraform
+   ```bash
+   nebius iam get-access-token
+   ```
+
+You can specify the token in the `NEBIUS_IAM_TOKEN` environment variable:
+
+```bash
+NEBIUS_IAM_TOKEN=<access_token> terraform apply
+```
+
+Or in the provider configuration:
+
+```hcl
 provider "nebius" {
-  token = var.nebius_iam_token
+  token = "<access_token>"
 }
 ```
 
-You can also set the token through the `NEBIUS_IAM_TOKEN` environment variable.
+## See also
 
-### CLI Profile
-
-Use a Nebius CLI profile when local operators already authenticate through the Nebius CLI and want Terraform to reuse that context:
-
-```terraform
-provider "nebius" {
-  profile = {
-    name = "default"
-  }
-}
-```
-
-The profile block reads Nebius CLI configuration and is most useful on developer machines.
-
-## Choosing a Method
-
-- Prefer service accounts for CI and production automation.
-- Prefer CLI profiles for local development.
-- Prefer short-lived IAM tokens over long-lived credentials when integrating with external secret management.
+* [Quickstart](quickstart.md)
+* [Provider configuration](../index.md#schema)

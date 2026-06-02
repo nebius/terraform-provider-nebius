@@ -12,10 +12,11 @@ The Nebius AI Cloud provider for Terraform offers a declarative way to manage yo
 
 Use these guides first:
 
-- [Quickstart](guides/quickstart.md)
-- [Install the provider](guides/install.md)
-- [Authentication](guides/authentication.md)
-- [Working with sensitive values](guides/sensitive-values.md)
+* [Quickstart](guides/quickstart.md)
+* [Install the provider](guides/install.md)
+* [Authentication](guides/authentication.md)
+* [Working with sensitive values](guides/sensitive-values.md)
+* [Storing Terraform state in Object Storage](guides/store-terraform-state.md)
 
 Service accounts are the recommended authentication method for automation and shared Terraform workflows.
 
@@ -25,16 +26,17 @@ Service accounts are the recommended authentication method for automation and sh
 terraform {
   required_providers {
     nebius = {
-      source = "nebius/nebius"
+      source  = "nebius/nebius"
+      version = ">= 0.6.8"
     }
   }
 }
 
 provider "nebius" {
   service_account = {
-    account_id_env       = "NB_SA_ID"
-    public_key_id_env    = "NB_AUTHKEY_PUBLIC_ID"
-    private_key_file_env = "NB_AUTHKEY_PRIVATE_PATH"
+    account_id_env       = "SA_ID"
+    public_key_id_env    = "AUTHKEY_PUBLIC_ID"
+    private_key_file_env = "AUTHKEY_PRIVATE_PATH"
   }
 }
 ```
