@@ -138,7 +138,7 @@ data ... {
 - `service_account_id` (String) :
 
    Unique identifier of the service account associated with this instance.
-   For details, see https://docs.nebius.dev/en/iam/about-iam/concepts/service-accounts
+   For details, see https://docs.nebius.com/iam/service-accounts/manage
 - `status` (Attributes) (see [below for nested schema](#nestedatt--status))
 - `stopped` (Boolean) Indicates whether the instance should be stopped.
 - `updated_at` (String) :

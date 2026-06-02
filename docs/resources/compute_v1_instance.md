@@ -88,7 +88,7 @@ description: |-
 - `service_account_id` (String) :
 
    Unique identifier of the service account associated with this instance.
-   For details, see https://docs.nebius.dev/en/iam/about-iam/concepts/service-accounts
+   For details, see https://docs.nebius.com/iam/service-accounts/manage
 - `stopped` (Boolean) Indicates whether the instance should be stopped.
 
 ### Read-Only

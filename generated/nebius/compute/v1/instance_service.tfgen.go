@@ -106,7 +106,7 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 			},
 			"service_account_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Unique identifier of the service account associated with this instance.\n   For details, see https://docs.nebius.dev/en/iam/about-iam/concepts/service-accounts\n",
+				MarkdownDescription: ":\n\n   Unique identifier of the service account associated with this instance.\n   For details, see https://docs.nebius.com/iam/service-accounts/manage\n",
 			},
 			"resources": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
@@ -678,7 +678,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 			"service_account_id": schema1.StringAttribute{
 				Validators:          []validator.String{},
 				Optional:            true,
-				MarkdownDescription: ":\n\n   Unique identifier of the service account associated with this instance.\n   For details, see https://docs.nebius.dev/en/iam/about-iam/concepts/service-accounts\n",
+				MarkdownDescription: ":\n\n   Unique identifier of the service account associated with this instance.\n   For details, see https://docs.nebius.com/iam/service-accounts/manage\n",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
