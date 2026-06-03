@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.11 (June 3, 2026)
+
+NOTES:
+
+* Internal improvements.
+
 ## 0.6.10 (June 2, 2026)
 
 NOTES:

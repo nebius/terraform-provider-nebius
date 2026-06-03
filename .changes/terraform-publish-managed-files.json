@@ -32,6 +32,7 @@
     "generated/nebius/ai.tfgen.go",
     "generated/nebius/ai/registry.tfgenx.go",
     "generated/nebius/ai/v1.tfgen.go",
+    "generated/nebius/ai/v1/devpod_service.tfgen.go",
     "generated/nebius/ai/v1/endpoint_service.tfgen.go",
     "generated/nebius/ai/v1/image_service.tfgen.go",
     "generated/nebius/ai/v1/job_service.tfgen.go",
