@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.12 (June 4, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.22`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_compute_v1_disk](./docs/resources/compute_v1_disk.md):
+    * Added: `status.managed_by`
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group.md):
+    * Added: `template.max_pods`
+* Changed attributes for data source [nebius_compute_v1_disk](./docs/data-sources/compute_v1_disk.md):
+    * Added: `status.managed_by`
+* Changed attributes for data source [nebius_mk8s_v1_node_group](./docs/data-sources/mk8s_v1_node_group.md):
+    * Added: `template.max_pods`
+
 ## 0.6.11 (June 3, 2026)
 
 NOTES:
