@@ -136,6 +136,12 @@ Optional:
 
    local_disks enables the provisioning of fast local drives.
    This type of storage is strictly ephemeral: on node restart, all data is erased, similar to RAM. (see [below for nested schema](#nestedatt--template--local_disks))
+- `max_pods` (Number) :
+
+   The maximum number of Pods per node for your cluster. If omitted, MK8S assigns the default value of 110. When you
+   configure the maximum number of Pods per node for the cluster, MK8S uses this value to allocate a CIDR range for every node
+   in group. The node CIDR prefix is calculated as `32 - ceil(log2(2 * max_pods))`, i.e. the smallest IPv4 subnet whose total address
+   count is at least `2 * max_pods`. Not all IPs are usable for workload Pods because some of them are consumed by system Pods.
 - `metadata` (Attributes) (see [below for nested schema](#nestedatt--template--metadata))
 - `network_interfaces` (Attributes List) (see [below for nested schema](#nestedatt--template--network_interfaces))
 - `os` (String) :

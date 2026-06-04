@@ -210,6 +210,10 @@ func (r *serviceDisk) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "Indicates resources that prevent the disk from being attached as read-write.",
 					},
+					"managed_by": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Indicates whether the disk is deleted along with an instance.\n   Set only for disks declared in the instance spec.\n   If set, the value is the instance ID that manages this disk's lifecycle (the disk is deleted when that instance is deleted).\n   To change this value, update the instance specification (see AttachedDiskSpec.type).\n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: "",
@@ -476,6 +480,11 @@ func (r *serviceDisk) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: "Indicates resources that prevent the disk from being attached as read-write.",
 						PlanModifiers:       []planmodifier.Object{},
+					},
+					"managed_by": schema1.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Indicates whether the disk is deleted along with an instance.\n   Set only for disks declared in the instance spec.\n   If set, the value is the instance ID that manages this disk's lifecycle (the disk is deleted when that instance is deleted).\n   To change this value, update the instance specification (see AttachedDiskSpec.type).\n",
+						PlanModifiers:       []planmodifier.String{},
 					},
 				},
 				Computed:            true,

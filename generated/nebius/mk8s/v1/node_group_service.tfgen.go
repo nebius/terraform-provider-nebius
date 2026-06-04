@@ -327,6 +327,10 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   local_disks enables the provisioning of fast local drives.\n   This type of storage is strictly ephemeral: on node restart, all data is erased, similar to RAM.\n",
 					},
+					"max_pods": schema.Int64Attribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   The maximum number of Pods per node for your cluster. If omitted, MK8S assigns the default value of 110. When you\n   configure the maximum number of Pods per node for the cluster, MK8S uses this value to allocate a CIDR range for every node\n   in group. The node CIDR prefix is calculated as `32 - ceil(log2(2 * max_pods))`, i.e. the smallest IPv4 subnet whose total address\n   count is at least `2 * max_pods`. Not all IPs are usable for workload Pods because some of them are consumed by system Pods.\n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Parameters for Kubernetes Node object and Nebius Compute Instance\n   If not written opposite a NodeTemplate field update will cause NodeGroup roll-out according NodeGroupDeploymentStrategy.\n",
@@ -988,6 +992,14 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						Optional:            true,
 						MarkdownDescription: ":\n\n   local_disks enables the provisioning of fast local drives.\n   This type of storage is strictly ephemeral: on node restart, all data is erased, similar to RAM.\n",
 						PlanModifiers:       []planmodifier.Object{},
+					},
+					"max_pods": schema1.Int64Attribute{
+						Validators: []validator.Int64{
+							validators.ProtoFieldValidator(&v1.NodeTemplate{}, "max_pods", "max_pods", fieldNameMapNodeGroup),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   The maximum number of Pods per node for your cluster. If omitted, MK8S assigns the default value of 110. When you\n   configure the maximum number of Pods per node for the cluster, MK8S uses this value to allocate a CIDR range for every node\n   in group. The node CIDR prefix is calculated as `32 - ceil(log2(2 * max_pods))`, i.e. the smallest IPv4 subnet whose total address\n   count is at least `2 * max_pods`. Not all IPs are usable for workload Pods because some of them are consumed by system Pods.\n",
+						PlanModifiers:       []planmodifier.Int64{},
 					},
 				},
 				Validators:          []validator.Object{},

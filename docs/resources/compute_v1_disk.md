@@ -132,6 +132,12 @@ Read-Only:
 
 - `block_size_bytes` (Number)
 - `lock_state` (Attributes) Indicates resources that prevent the disk from being attached as read-write. (see [below for nested schema](#nestedatt--status--lock_state))
+- `managed_by` (String) :
+
+   Indicates whether the disk is deleted along with an instance.
+   Set only for disks declared in the instance spec.
+   If set, the value is the instance ID that manages this disk's lifecycle (the disk is deleted when that instance is deleted).
+   To change this value, update the instance specification (see AttachedDiskSpec.type).
 - `read_only_attachments` (List of String)
 - `read_write_attachment` (String) :
 
