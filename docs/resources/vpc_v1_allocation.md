@@ -194,6 +194,18 @@ Read-Only:
 
 - `instance_id` (String) ID of the Compute instance network interface belongs to.
 - `name` (String) Network interface name
+- `type` (String) :
+
+   Type of allocation attachment on the network interface.
+   
+   #### Supported values
+   
+   Possible values:
+   
+   - `TYPE_UNSPECIFIED`
+   - `PRIMARY` - Allocation is attached as the interface private IPv4 address.
+   - `ALIAS` - Allocation is attached as an IP alias.
+   - `PUBLIC` - Allocation is attached as the interface public IPv4 address.
 
 
 

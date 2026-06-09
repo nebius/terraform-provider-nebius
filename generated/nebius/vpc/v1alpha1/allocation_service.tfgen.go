@@ -170,6 +170,10 @@ func (r *serviceAllocation) DataSourceSchema() schema.Schema {
 										Computed:            true,
 										MarkdownDescription: "Network interface name",
 									},
+									"type": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: ":\n\n   Type of allocation attachment on the network interface.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `TYPE_UNSPECIFIED`\n   - `PRIMARY` - Allocation is attached as the interface private IPv4 address.\n   - `ALIAS` - Allocation is attached as an IP alias.\n   - `PUBLIC` - Allocation is attached as the interface public IPv4 address.\n   \n",
+									},
 								},
 								Computed:            true,
 								MarkdownDescription: "*Cannot be set alongside load_balancer.*",
@@ -380,6 +384,11 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 									"name": schema1.StringAttribute{
 										Computed:            true,
 										MarkdownDescription: "Network interface name",
+										PlanModifiers:       []planmodifier.String{},
+									},
+									"type": schema1.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: ":\n\n   Type of allocation attachment on the network interface.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `TYPE_UNSPECIFIED`\n   - `PRIMARY` - Allocation is attached as the interface private IPv4 address.\n   - `ALIAS` - Allocation is attached as an IP alias.\n   - `PUBLIC` - Allocation is attached as the interface public IPv4 address.\n   \n",
 										PlanModifiers:       []planmodifier.String{},
 									},
 								},

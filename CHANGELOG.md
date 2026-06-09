@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.13 (June 9, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.24`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_vpc_v1_allocation](./docs/resources/vpc_v1_allocation.md):
+    * Added: `status.assignment.network_interface.type`
+* Changed attributes for resource [nebius_vpc_v1alpha1_allocation](./docs/resources/vpc_v1alpha1_allocation.md):
+    * Added: `status.assignment.network_interface.type`
+* Changed attributes for data source [nebius_vpc_v1_allocation](./docs/data-sources/vpc_v1_allocation.md):
+    * Added: `status.assignment.network_interface.type`
+* Changed attributes for data source [nebius_vpc_v1alpha1_allocation](./docs/data-sources/vpc_v1alpha1_allocation.md):
+    * Added: `status.assignment.network_interface.type`
+
 ## 0.6.12 (June 4, 2026)
 
 NOTES:
