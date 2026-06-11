@@ -119,6 +119,11 @@ Required:
 Read-Only:
 
 - `next_hop` (Attributes) Detailed status of the next hop configuration. (see [below for nested schema](#nestedatt--status--next_hop))
+- `priority` (Number) :
+
+   Indicates priority of the route.
+   That is 0 or a positive number.
+   Lower value = higher priority; 0 is the highest priority.
 - `state` (String) :
 
    Current state of the route.

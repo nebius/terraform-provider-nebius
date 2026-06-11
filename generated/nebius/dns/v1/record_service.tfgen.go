@@ -7,9 +7,14 @@ import (
 	fmt "fmt"
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource"
 	schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	resource "github.com/hashicorp/terraform-plugin-framework/resource"
+	schema1 "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	planmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	stringplanmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
 	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
 	v1 "github.com/nebius/gosdk/proto/nebius/dns/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/dns/v1"
@@ -17,6 +22,7 @@ import (
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -24,10 +30,17 @@ func init() {
 	DatasourceFactories = append(
 		DatasourceFactories, newDataSourceRecord,
 	)
+	ResourceFactories = append(
+		ResourceFactories, newResourceRecord,
+	)
 }
 
 func newDataSourceRecord(provider provider.Provider) datasource.DataSource {
 	return service.NewDataSource(newServiceRecord(provider), provider)
+}
+
+func newResourceRecord(provider provider.Provider) resource.Resource {
+	return service.NewResource(newServiceRecord(provider), provider)
 }
 
 type serviceRecord struct {
@@ -131,6 +144,132 @@ func (r *serviceRecord) DataSourceSchema() schema.Schema {
 		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n\n\nAPI Resource: DNS *Resource Record* (RR), an information entry about a specific domain\n\nEach record is contained within a DNS zone, which is a container for DNS data of a specific domain, and, possibly, its subdomains\nDNS zones are represented in this API by the `Zone` API Resource which is managed by the `ZoneService`",
 	}
 	return ret
+}
+
+func (r *serviceRecord) ResourceSchema() schema1.Schema {
+	ret := schema1.Schema{
+		Attributes: map[string]schema1.Attribute{
+			"metadata": schema1.SingleNestedAttribute{
+				Attributes:          map[string]schema1.Attribute{},
+				Validators:          []validator.Object{},
+				Computed:            true,
+				Optional:            true,
+				MarkdownDescription: ":\n\n   DNS record metadata\n   `metadata.parent_id` must be a DNS zone ID\n   \n   #### Inner value description\n   \n   Common resource metadata.\n",
+				PlanModifiers:       []planmodifier.Object{},
+			},
+			"id": schema1.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"name": schema1.StringAttribute{
+				Validators:          []validator.String{},
+				Optional:            true,
+				MarkdownDescription: "Human readable name for the resource.",
+				PlanModifiers:       []planmodifier.String{},
+			},
+			"parent_id": schema1.StringAttribute{
+				Validators:          []validator.String{},
+				Required:            true,
+				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"resource_version": schema1.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n   \n",
+				PlanModifiers:       []planmodifier.Int64{},
+			},
+			"created_at": schema1.StringAttribute{
+				CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+				Computed:            true,
+				MarkdownDescription: ":\n\n   Timestamp indicating when the resource was created.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+				PlanModifiers:       []planmodifier.String{},
+			},
+			"updated_at": schema1.StringAttribute{
+				CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+				Computed:            true,
+				MarkdownDescription: ":\n\n   Timestamp indicating when the resource was last updated.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+				PlanModifiers:       []planmodifier.String{},
+			},
+			"labels": schema1.MapAttribute{
+				ElementType:         types.StringType,
+				Validators:          []validator.Map{},
+				Optional:            true,
+				MarkdownDescription: ":\n\n   Labels associated with the resource.\n   \n",
+				PlanModifiers:       []planmodifier.Map{},
+			},
+			"relative_name": schema1.StringAttribute{
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.RecordSpec{}, "relative_name", "relative_name", fieldNameMapRecord),
+				},
+				Required:            true,
+				MarkdownDescription: ":\n\n   Zone-relative name of this record (e.g., `www` for `www.<parent zone's domain name>`)\n   Use `@` for records in zone apex (that is, records that have the same domain name as the zone itself)\n   To see the resolved absolute domain name, see `Record.status.effective_fqdn`\n",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"type": schema1.StringAttribute{
+				Validators: []validator.String{
+					validators.EnumValidator(v1.RecordSpec_RecordType_value),
+				},
+				Required:            true,
+				MarkdownDescription: ":\n\n   Record type\n   \n   #### Supported values\n   \n   DNS Record type\n   Possible values:\n   \n   - `RECORD_TYPE_UNSPECIFIED` - Record type is not specified\n   - `A` - `A` record: IPv4 address\n   - `AAAA` - `AAAA` record: IPv6 address\n   - `PTR` - `PTR` record: mapping from IP address to a domain name\n   - `CNAME` - `CNAME` record: an alias for a *canonical domain name*\n   - `MX` - `MX` record: mail server information (domain name, priority)\n   - `TXT` - `TXT` record: text data, typically used to verify e-mail addresses, websites and TLS certificates\n   - `SRV` - `SRV` record: information about a network service (domain name, port, weight)\n   - `NS` - `NS` record: domain name of an authoritative nameserver for this DNS zone, or one of its subzones\n   - `SOA` - `SOA` record: administrative information about this DNS zone\n   - `CAA` - `CAA` record: certificate issuance settings for this DNS zone and its subzones\n   - `SVCB` - `SVCB` record: service binding. See [RFC 9460, section 2.3](https://www.rfc-editor.org/rfc/rfc9460.html#section-2.3)\n   - `HTTPS`:\n      `HTTPS` record: service binding with HTTPS protocol configuration.\n      See [RFC 9460, section 9.1](https://www.rfc-editor.org/rfc/rfc9460.html#section-9.1)\n   \n   \n",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"ttl": schema1.Int64Attribute{
+				Validators:          []validator.Int64{},
+				Optional:            true,
+				MarkdownDescription: "Record TTL. If absent or negative, will be assumed to be the default value (`600`)",
+				PlanModifiers:       []planmodifier.Int64{},
+			},
+			"data": schema1.StringAttribute{
+				Validators:          []validator.String{},
+				Required:            true,
+				MarkdownDescription: ":\n\n   Record data in text format\n   \n   This should be the RDATA part of this Resource Record's\n   [presentation (zonefile) format](https://datatracker.ietf.org/doc/html/rfc9499#name-resource-records).\n   E.g., `10 xyz.tuv` for a `@ 600 IN MX 10 xyz.tuv.` resource record in a zonefile\n",
+				PlanModifiers:       []planmodifier.String{},
+			},
+			"deletion_protection": schema1.BoolAttribute{
+				Validators:          []validator.Bool{},
+				Optional:            true,
+				MarkdownDescription: ":\n\n   Mark this record as delete-protected\n   Delete-protected records can *only* be deleted by explicitly calling `RecordService/Delete` API with `force` flag set to `true`\n",
+				PlanModifiers:       []planmodifier.Bool{},
+			},
+			"status": schema1.SingleNestedAttribute{
+				Attributes: map[string]schema1.Attribute{
+					"zone_domain_name": schema1.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Domain name of this record's parent zone including `.` at the end, e.g. `example.com.`",
+						PlanModifiers:       []planmodifier.String{},
+					},
+					"effective_fqdn": schema1.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Fully-qualified domain name of this record including `.` at the end, e.g. `www.example.com.`",
+						PlanModifiers:       []planmodifier.String{},
+					},
+					"reconciling": schema1.BoolAttribute{
+						Computed:            true,
+						MarkdownDescription: "Indicates whether there is a running Operation for this Record",
+						PlanModifiers:       []planmodifier.Bool{},
+					},
+				},
+				Computed:            true,
+				MarkdownDescription: ":\n\n   DNS record status, including e.g. its effective FQDN (fully-qualified domain name)\n   \n   #### Inner value description\n   \n   DNS record status\n",
+				PlanModifiers:       []planmodifier.Object{},
+			},
+		},
+		MarkdownDescription: "API Resource: DNS *Resource Record* (RR), an information entry about a specific domain\n\nEach record is contained within a DNS zone, which is a container for DNS data of a specific domain, and, possibly, its subdomains\nDNS zones are represented in this API by the `Zone` API Resource which is managed by the `ZoneService`",
+	}
+	return ret
+}
+
+func (r *serviceRecord) WriteOnlyFields() (*mask.Mask, error) {
+	return nil, nil
 }
 
 func (r *serviceRecord) StatusMessage() proto.Message {

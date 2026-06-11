@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.14 (June 11, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.25`.
+
+FEATURES:
+
+* Added new resources: [nebius_dns_v1_record](./docs/resources/dns_v1_record.md), [nebius_dns_v1_zone](./docs/resources/dns_v1_zone.md).
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_vpc_v1_route](./docs/resources/vpc_v1_route.md):
+    * Added: `status.priority`
+* Changed attributes for data source [nebius_vpc_v1_route](./docs/data-sources/vpc_v1_route.md):
+    * Added: `status.priority`
+
 ## 0.6.13 (June 9, 2026)
 
 NOTES:

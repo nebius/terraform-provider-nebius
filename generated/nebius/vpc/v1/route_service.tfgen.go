@@ -169,6 +169,10 @@ func (r *serviceRoute) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Indicates the route type.\n   REDISTRIBUTED routes cannot be deleted directly.\n   \n   #### Supported values\n   \n   Route type.\n   Possible values:\n   \n   - `TYPE_UNSPECIFIED`\n   - `STATIC`\n   - `REDISTRIBUTED`\n   \n",
 					},
+					"priority": schema.Int64Attribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Indicates priority of the route.\n   That is 0 or a positive number.\n   Lower value = higher priority; 0 is the highest priority.\n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: "Current status of the route.",
@@ -343,6 +347,11 @@ func (r *serviceRoute) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Indicates the route type.\n   REDISTRIBUTED routes cannot be deleted directly.\n   \n   #### Supported values\n   \n   Route type.\n   Possible values:\n   \n   - `TYPE_UNSPECIFIED`\n   - `STATIC`\n   - `REDISTRIBUTED`\n   \n",
 						PlanModifiers:       []planmodifier.String{},
+					},
+					"priority": schema1.Int64Attribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Indicates priority of the route.\n   That is 0 or a positive number.\n   Lower value = higher priority; 0 is the highest priority.\n",
+						PlanModifiers:       []planmodifier.Int64{},
 					},
 				},
 				Computed:            true,

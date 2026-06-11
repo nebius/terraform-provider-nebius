@@ -59,6 +59,16 @@ type GetByNameInterface interface {
 	)
 }
 
+type GetByNameWithRegionInterface interface {
+	GetByNameWithRegion(ctx context.Context, name, parentID, region string) (
+		*common.ResourceMetadata,
+		proto.Message,
+		proto.Message,
+		*requestcontext.Context,
+		error,
+	)
+}
+
 type commonDataSource struct {
 	implementation DataSourceInterface
 }
@@ -146,6 +156,7 @@ func (r *commonDataSource) getFromServer(ctx context.Context, data types.Object)
 	additionalGetters := r.implementation.GetAdditionalGetters()
 
 	getByNameable, hasGBN := r.implementation.(GetByNameInterface)
+	getByNameWithRegion, hasGBNRegion := r.implementation.(GetByNameWithRegionInterface)
 
 	needToBeSet := "the `id`"
 
@@ -162,10 +173,22 @@ func (r *commonDataSource) getFromServer(ctx context.Context, data types.Object)
 		if diag.HasError() {
 			return nil, nil, nil, nil, diags
 		}
+		var pregion *string
+		if hasGBNRegion {
+			pregion, diag = getOptionalPStringFromObject(ctx, data, constants.FieldRegion, path.Empty())
+			diags.Append(diag...)
+			if diag.HasError() {
+				return nil, nil, nil, nil, diags
+			}
+		}
 
 		if ppid != nil && pname != nil {
+			allowedFields := []string{constants.FieldName, constants.FieldParentID}
+			if hasGBNRegion {
+				allowedFields = append(allowedFields, constants.FieldRegion)
+			}
 			otherFields := whatIsSetBut(
-				data, constants.FieldName, constants.FieldParentID,
+				data, allowedFields...,
 			)
 			if len(otherFields) > 0 {
 				diags.AddError(
@@ -193,6 +216,18 @@ func (r *commonDataSource) getFromServer(ctx context.Context, data types.Object)
 						" name, or set other fields instead",
 				)
 				return nil, nil, nil, nil, diags
+			}
+			if hasGBNRegion {
+				region := ""
+				if pregion != nil {
+					region = *pregion
+				}
+				metadata, spec, status, reqCtx, err := getByNameWithRegion.GetByNameWithRegion(
+					ctx, *pname, *ppid, region,
+				)
+				return metadata, spec, status, reqCtx, ErrorToDiag(
+					diags, err, "datasource reading by name failed",
+				)
 			}
 			metadata, spec, status, reqCtx, err := getByNameable.GetByName(
 				ctx, *pname, *ppid,
