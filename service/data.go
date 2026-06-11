@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"sort"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -15,6 +16,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"github.com/nebius/gosdk/constants"
 	"github.com/nebius/gosdk/proto/fieldmask/mask"
@@ -80,6 +82,16 @@ func getPStringFromObject(ctx context.Context, data types.Object, name string, r
 	return valStr.ValueStringPointer(), diags
 }
 
+func getOptionalPStringFromObject(ctx context.Context, data types.Object, name string, root path.Path) (
+	*string, diag.Diagnostics,
+) {
+	if _, ok := data.Attributes()[name]; !ok {
+		return nil, nil
+	}
+
+	return getPStringFromObject(ctx, data, name, root)
+}
+
 func ErrorToDiag(
 	diags diag.Diagnostics,
 	err error,
@@ -137,6 +149,17 @@ func getIDFromObject(
 	return *pstr, diags
 }
 
+func metadataUnwrappedFields(nameMap map[string]map[string]string) []protoreflect.Name {
+	fields := slices.Clone(constants.MetadataUnwrapped)
+	if metadataFields, ok := nameMap[constants.MetadataMessageFullName]; ok {
+		if metadataFields[constants.FieldRegion] == constants.FieldRegion &&
+			!slices.Contains(fields, protoreflect.Name(constants.FieldRegion)) {
+			fields = append(fields, constants.FieldRegion)
+		}
+	}
+	return fields
+}
+
 func metadataFromTF(
 	ctx context.Context, data types.Object, nameMap map[string]map[string]string,
 ) (*common.ResourceMetadata, diag.Diagnostics) {
@@ -176,7 +199,12 @@ func metadataFromTF(
 			return nil, diags
 		}
 	}
-	for _, fieldName := range constants.MetadataUnwrapped {
+	for _, fieldName := range metadataUnwrappedFields(nameMap) {
+		if fieldName == constants.FieldRegion {
+			if _, ok := data.Attributes()[string(fieldName)]; !ok {
+				continue
+			}
+		}
 		fieldPath := mask.NewFieldPath(mask.FieldKey(fieldName))
 		val, _, err := protobuf.GetAtFieldPath(metadata, fieldPath)
 		if err != nil {
@@ -235,12 +263,16 @@ func convertToObject(
 			)
 		}
 
+		unwrappedFields := metadataUnwrappedFields(nameMap)
 		tempAttrs := map[string]attr.Value{}
 		tempTypes := map[string]attr.Type{}
-		for _, fieldName := range constants.MetadataUnwrapped {
+		for _, fieldName := range unwrappedFields {
 			mdAttr, ok1 := attrs[string(fieldName)]
 			mdType, ok2 := attrTypes[string(fieldName)]
 			if !ok1 || !ok2 {
+				if fieldName == constants.FieldRegion {
+					continue
+				}
 				diags.AddError("field not found",
 					fmt.Sprintf(
 						"%q not found in the state object but was required",
@@ -263,7 +295,7 @@ func convertToObject(
 			"md1":      fmt.Sprint(mdAttr),
 			"md2":      fmt.Sprint(tmpObj),
 		})
-		for _, fieldName := range constants.MetadataUnwrapped {
+		for _, fieldName := range unwrappedFields {
 			if mdAttr, ok := tmpObj.Attributes()[string(fieldName)]; ok {
 				attrs[string(fieldName)] = mdAttr
 			}
