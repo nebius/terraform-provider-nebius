@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.15 (June 15, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.26`.
+
+FEATURES:
+
+* Added new resources and data sources: [nebius_kms_v1_asymmetric_key](./docs/resources/kms_v1_asymmetric_key.md), [nebius_kms_v1_symmetric_key](./docs/resources/kms_v1_symmetric_key.md).
+
 ## 0.6.14 (June 11, 2026)
 
 NOTES:

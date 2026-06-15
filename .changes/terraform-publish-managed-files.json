@@ -181,6 +181,7 @@
     "generated/nebius/iam/v1/federation_service.tfgen.go",
     "generated/nebius/iam/v1/group_mapping_service.tfgen.go",
     "generated/nebius/iam/v1/group_membership_service.tfgen.go",
+    "generated/nebius/iam/v1/group_projection_service.tfgen.go",
     "generated/nebius/iam/v1/group_service.tfgen.go",
     "generated/nebius/iam/v1/impersonation_account_service.tfgen.go",
     "generated/nebius/iam/v1/intent_service.tfgen.go",
