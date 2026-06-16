@@ -116,7 +116,13 @@ func (r *serviceCluster) DataSourceSchema() schema.Schema {
 					"endpoints": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
 							"public_endpoint": schema.SingleNestedAttribute{
-								Attributes:          map[string]schema.Attribute{},
+								Attributes: map[string]schema.Attribute{
+									"allowed_cidrs": schema.ListAttribute{
+										ElementType:         types.StringType,
+										Computed:            true,
+										MarkdownDescription: ":\n\n   List of CIDR blocks from which access to public endpoint is allowed.\n   If field is not set, or list is empty, it means that access is not restricted at all.\n",
+									},
+								},
 								Computed:            true,
 								MarkdownDescription: "Public endpoint specification. When set, a public endpoint is created.",
 							},
@@ -330,7 +336,17 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 					"endpoints": schema1.SingleNestedAttribute{
 						Attributes: map[string]schema1.Attribute{
 							"public_endpoint": schema1.SingleNestedAttribute{
-								Attributes:          map[string]schema1.Attribute{},
+								Attributes: map[string]schema1.Attribute{
+									"allowed_cidrs": schema1.ListAttribute{
+										ElementType: types.StringType,
+										Validators: []validator.List{
+											validators.ProtoFieldValidator(&v1.PublicEndpointSpec{}, "allowed_cidrs", "allowed_cidrs", fieldNameMapCluster),
+										},
+										Optional:            true,
+										MarkdownDescription: ":\n\n   List of CIDR blocks from which access to public endpoint is allowed.\n   If field is not set, or list is empty, it means that access is not restricted at all.\n",
+										PlanModifiers:       []planmodifier.List{},
+									},
+								},
 								Validators:          []validator.Object{},
 								Optional:            true,
 								MarkdownDescription: "Public endpoint specification. When set, a public endpoint is created.",

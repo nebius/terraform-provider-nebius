@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.16 (June 16, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.27`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_mk8s_v1_cluster](./docs/resources/mk8s_v1_cluster.md):
+    * Added: `control_plane.endpoints.public_endpoint.allowed_cidrs`
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group.md):
+    * Added: `template.network_interfaces.security_groups`
+* Changed attributes for data source [nebius_mk8s_v1_cluster](./docs/data-sources/mk8s_v1_cluster.md):
+    * Added: `control_plane.endpoints.public_endpoint.allowed_cidrs`
+* Changed attributes for data source [nebius_mk8s_v1_node_group](./docs/data-sources/mk8s_v1_node_group.md):
+    * Added: `template.network_interfaces.security_groups`
+
 ## 0.6.15 (June 15, 2026)
 
 NOTES:
