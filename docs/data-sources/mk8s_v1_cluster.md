@@ -135,6 +135,13 @@ Read-Only:
 <a id="nestedatt--control_plane--endpoints--public_endpoint"></a>
 ### Nested Schema for `control_plane.endpoints.public_endpoint`
 
+Read-Only:
+
+- `allowed_cidrs` (List of String) :
+
+   List of CIDR blocks from which access to public endpoint is allowed.
+   If field is not set, or list is empty, it means that access is not restricted at all.
+
 
 
 <a id="nestedatt--control_plane--karpenter"></a>

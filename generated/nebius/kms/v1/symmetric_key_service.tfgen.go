@@ -213,7 +213,9 @@ func (r *serviceSymmetricKey) ResourceSchema() schema1.Schema {
 				},
 			},
 			"description": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.SymmetricKeySpec{}, "description", "description", fieldNameMapSymmetricKey),
+				},
 				Optional:            true,
 				MarkdownDescription: "Description of the key.",
 				PlanModifiers: []planmodifier.String{

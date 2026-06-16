@@ -674,6 +674,7 @@ Read-Only:
    #### Inner value description
    
    Describes a public IP address. (see [below for nested schema](#nestedatt--template--network_interfaces--public_ip_address))
+- `security_groups` (Attributes List) User provided VPC Security Groups which will be assigned to all nodes of this NodeGroup. (see [below for nested schema](#nestedatt--template--network_interfaces--security_groups))
 - `subnet_id` (String) :
 
    Nebius VPC Subnet ID that will be attached to a node cloud instance network interface.
@@ -682,6 +683,14 @@ Read-Only:
 
 <a id="nestedatt--template--network_interfaces--public_ip_address"></a>
 ### Nested Schema for `template.network_interfaces.public_ip_address`
+
+
+<a id="nestedatt--template--network_interfaces--security_groups"></a>
+### Nested Schema for `template.network_interfaces.security_groups`
+
+Read-Only:
+
+- `id` (String)
 
 
 

@@ -237,6 +237,18 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 									Computed:            true,
 									MarkdownDescription: ":\n\n   Nebius VPC Subnet ID that will be attached to a node cloud instance network interface.\n   By default Cluster control plane subnet_id used.\n   Subnet should be located in the same network with control plane.\n",
 								},
+								"security_groups": schema.ListNestedAttribute{
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											"id": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "",
+											},
+										},
+									},
+									Computed:            true,
+									MarkdownDescription: "User provided VPC Security Groups which will be assigned to all nodes of this NodeGroup.",
+								},
 							},
 						},
 						Computed:            true,
@@ -841,6 +853,24 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 									Optional:            true,
 									MarkdownDescription: ":\n\n   Nebius VPC Subnet ID that will be attached to a node cloud instance network interface.\n   By default Cluster control plane subnet_id used.\n   Subnet should be located in the same network with control plane.\n",
 									PlanModifiers:       []planmodifier.String{},
+								},
+								"security_groups": schema1.ListNestedAttribute{
+									NestedObject: schema1.NestedAttributeObject{
+										Attributes: map[string]schema1.Attribute{
+											"id": schema1.StringAttribute{
+												Validators:          []validator.String{},
+												Computed:            true,
+												Optional:            true,
+												MarkdownDescription: "",
+												PlanModifiers:       []planmodifier.String{},
+											},
+										},
+									},
+									Validators:          []validator.List{},
+									Computed:            true,
+									Optional:            true,
+									MarkdownDescription: "User provided VPC Security Groups which will be assigned to all nodes of this NodeGroup.",
+									PlanModifiers:       []planmodifier.List{},
 								},
 							},
 						},

@@ -208,7 +208,9 @@ func (r *serviceAsymmetricKey) ResourceSchema() schema1.Schema {
 				},
 			},
 			"description": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.AsymmetricKeySpec{}, "description", "description", fieldNameMapAsymmetricKey),
+				},
 				Optional:            true,
 				MarkdownDescription: "Description of the key.",
 				PlanModifiers: []planmodifier.String{
