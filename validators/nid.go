@@ -43,6 +43,14 @@ func ParentNIDValidator(allowedTypes []string) *nidValidator {
 	}
 }
 
+func ListNIDValidator(allowedTypes []string) validator.List {
+	return NIDValidator(allowedTypes)
+}
+
+func MapNIDValidator(allowedTypes []string) validator.Map {
+	return NIDValidator(allowedTypes)
+}
+
 func (v *nidValidator) Description(ctx context.Context) string {
 	return v.MarkdownDescription(ctx)
 }
