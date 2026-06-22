@@ -107,6 +107,7 @@ type config struct {
 	DomainEnv           types.String      `tfsdk:"domain_env"`
 	AddressTemplate     types.Object      `tfsdk:"address_template"`
 	AddressTemplateEnv  types.String      `tfsdk:"address_template_env"`
+	Impersonate         types.String      `tfsdk:"impersonate_service_account_id"`
 	ServiceAccount      types.Object      `tfsdk:"service_account"`
 	ModuleName          types.String      `tfsdk:"module_name"`
 	VersionedEphemerals types.Dynamic     `tfsdk:"versioned_ephemeral_values"`
@@ -254,6 +255,10 @@ func (p *internalProvider) Schema(
 							"16 characters",
 					),
 				},
+			},
+			"impersonate_service_account_id": schema.StringAttribute{
+				Optional:    true,
+				Description: "Service account ID to impersonate.",
 			},
 			"service_account": schema.SingleNestedAttribute{
 				Optional: true,
@@ -538,6 +543,9 @@ func (p *internalProvider) parseProfile(
 	if isKnown(profile.ClientID) {
 		opts = append(opts, reader.WithClientID(profile.ClientID.ValueString()))
 	}
+	if isKnown(providerCfg.Impersonate) {
+		opts = append(opts, reader.WithImpersonate(providerCfg.Impersonate.ValueString()))
+	}
 
 	cfg := reader.NewConfigReader(opts...)
 	if err := cfg.Load(ctx); err != nil {
@@ -549,6 +557,22 @@ func (p *internalProvider) parseProfile(
 	}
 	p.parentID = cfg.ParentID()
 	return cfg, diags
+}
+
+func (p *internalProvider) newImpersonatedBearerTokener(
+	serviceAccountID string,
+	tokener auth.BearerTokener,
+) auth.BearerTokener {
+	return auth.NewExchangeImpersonatedBearerTokener(
+		serviceAccountID,
+		tokener,
+		func() (iampb.TokenExchangeServiceClient, error) {
+			if p.sdk == nil {
+				return nil, errors.New("SDK is not initialized")
+			}
+			return iam.NewTokenExchangeService(p.sdk), nil
+		},
+	)
 }
 
 func isInfoEnabled(level string) bool {
@@ -723,6 +747,13 @@ func (p *internalProvider) Configure(
 	}
 
 	if tokener != nil {
+		if isKnown(data.Impersonate) {
+			// cache is necessary if the tool sends multiple requests during one
+			// execution, as terraform does
+			tokener = auth.NewCachedBearerTokener(
+				p.newImpersonatedBearerTokener(data.Impersonate.ValueString(), tokener),
+			)
+		}
 
 		options = append(options, gosdk.WithCredentials(
 			gosdk.CustomTokener(tokener),

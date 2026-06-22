@@ -238,6 +238,7 @@ func (r *serviceSymmetricKey) ResourceSchema() schema1.Schema {
 				Validators: []validator.String{
 					validators.ProtoFieldValidator(&v1.SymmetricKeySpec{}, "rotation_period", "rotation_period", fieldNameMapSymmetricKey),
 				},
+				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Key rotation period.\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
 				PlanModifiers: []planmodifier.String{
