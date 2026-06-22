@@ -54,6 +54,7 @@ provider "nebius" {
 - `auth_timeout` (String) timeout for each Nebius SDK request including authentication, default 15m0s, as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`
 - `domain` (String) custom domain name (overrides domain_env)
 - `domain_env` (String) env variable name to obtain custom domain name
+- `impersonate_service_account_id` (String) Service account ID to impersonate.
 - `module_name` (String) it is suggested to set this value to your module name if the provider is initialized in one, does not affect any behaviors
 - `no_credentials` (Boolean) do not authenticate
 - `parent_id` (String) Parent ID if it is not read from the profile, or if you want to overwrite it.

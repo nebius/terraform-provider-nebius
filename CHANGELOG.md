@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.18 (June 22, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.29`.
+
+IMPROVEMENTS:
+
+* Changed [provider](docs/index.md) attributes:
+    * Added: `impersonate_service_account_id`
+* Changed attributes for resource [nebius_kms_v1_symmetric_key](./docs/resources/kms_v1_symmetric_key.md):
+    * Became computed: `rotation_period`
+
 ## 0.6.17 (June 18, 2026)
 
 NOTES:
