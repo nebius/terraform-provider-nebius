@@ -109,6 +109,10 @@ func (r *serviceNVLInstanceGroup) DataSourceSchema() schema.Schema {
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Type of the NVLink InstanceGroup (corresponds to the Compute platform)\n   \n   #### Supported values\n   \n   Type of the NVLink InstanceGroup.\n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `GB200`\n   - `GB300`\n   \n",
 			},
+			"size": schema.Int64Attribute{
+				Computed:            true,
+				MarkdownDescription: "Maximum number of instances in the NVLink InstanceGroup",
+			},
 			"status": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"instances": schema.MapNestedAttribute{
@@ -213,6 +217,16 @@ func (r *serviceNVLInstanceGroup) ResourceSchema() schema1.Schema {
 				MarkdownDescription: ":\n\n   Type of the NVLink InstanceGroup (corresponds to the Compute platform)\n   \n   #### Supported values\n   \n   Type of the NVLink InstanceGroup.\n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `GB200`\n   - `GB300`\n   \n",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"size": schema1.Int64Attribute{
+				Validators: []validator.Int64{
+					validators.ProtoFieldValidator(&v1.NVLInstanceGroupSpec{}, "size", "size", fieldNameMapNVLInstanceGroup),
+				},
+				Required:            true,
+				MarkdownDescription: "Maximum number of instances in the NVLink InstanceGroup",
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.RequiresReplace(),
 				},
 			},
 			"status": schema1.SingleNestedAttribute{

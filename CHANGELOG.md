@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.19 (June 23, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.30`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_compute_v1_nvl_instance_group](./docs/resources/compute_v1_nvl_instance_group.md):
+    * Added: `size`
+* Changed attributes for data source [nebius_compute_v1_nvl_instance_group](./docs/data-sources/compute_v1_nvl_instance_group.md):
+    * Added: `size`
+
 ## 0.6.18 (June 22, 2026)
 
 NOTES:

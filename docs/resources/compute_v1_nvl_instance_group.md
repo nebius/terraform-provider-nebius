@@ -16,6 +16,7 @@ Represents an NVLink InstanceGroup.
 ### Required
 
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
+- `size` (Number) Maximum number of instances in the NVLink InstanceGroup
 
 ### Optional
 

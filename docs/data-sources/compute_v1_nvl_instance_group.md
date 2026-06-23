@@ -83,6 +83,7 @@ Represents an NVLink InstanceGroup.
    Positive and monotonically increases on each resource spec change (but *not* on each change of the
    resource's container(s) or status).
    Service allows zero value or current.
+- `size` (Number) Maximum number of instances in the NVLink InstanceGroup
 - `status` (Attributes) (see [below for nested schema](#nestedatt--status))
 - `type` (String) :
 
