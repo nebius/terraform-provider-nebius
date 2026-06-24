@@ -85,9 +85,7 @@ that registers in Kubernetes API and a Node object created.
    Number of nodes in the group. Can be changed manually at any time.
    
    *Cannot be set alongside autoscaling.*
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

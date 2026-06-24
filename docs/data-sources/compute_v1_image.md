@@ -78,9 +78,7 @@ data ... {
 - `description` (String)
 - `image_family` (String)
 - `image_family_human_readable` (String) human readable name for image family
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

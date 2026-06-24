@@ -28,9 +28,7 @@ resource "nebius_mysterybox_v1_secret" "app" {
 ### Optional
 
 - `description` (String) Description of the secret.
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

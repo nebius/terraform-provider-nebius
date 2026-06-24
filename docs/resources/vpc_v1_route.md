@@ -29,9 +29,7 @@ specifying the path that traffic should take based on destination addresses.
 ### Optional
 
 - `description` (String) Optional description of the route.
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    `metadata.parent_id` represents the RouteTable.

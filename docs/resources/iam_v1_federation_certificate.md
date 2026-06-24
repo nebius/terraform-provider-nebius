@@ -21,9 +21,7 @@ description: |-
 
 - `data` (String)
 - `description` (String)
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

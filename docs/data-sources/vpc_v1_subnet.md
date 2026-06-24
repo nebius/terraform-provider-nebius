@@ -79,9 +79,7 @@ Subnet uses pools to organize address space.
 
    Public IPv4 address pools for this subnet.
    If unspecified, pools from the associated network are used. (see [below for nested schema](#nestedatt--ipv4_public_pools))
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    Metadata for the subnet resource.

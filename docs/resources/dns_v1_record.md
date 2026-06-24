@@ -64,9 +64,7 @@ DNS zones are represented in this API by the `Zone` API Resource which is manage
 
    Mark this record as delete-protected
    Delete-protected records can *only* be deleted by explicitly calling `RecordService/Delete` API with `force` flag set to `true`
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    DNS record metadata

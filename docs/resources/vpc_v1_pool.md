@@ -58,12 +58,8 @@ resource "nebius_vpc_v1_pool" "private" {
 
 ### Optional
 
-- `cidrs` (Attributes List) :
-
-   CIDR blocks defined by the pool. (see [below for nested schema](#nestedatt--cidrs))
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `cidrs` (Attributes List) CIDR blocks defined by the pool. (see [below for nested schema](#nestedatt--cidrs))
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    Metadata associated with the Pool.

@@ -80,9 +80,7 @@ data ... {
 
    Instance's hostname. Used to generate default DNS record in format `<hostname>.<network_id>.compute.internal.`
    or `<instance_id>.<network_id>.compute.internal.` if hostname is not specified.
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `local_disks` (Attributes) :
 
    Local disks are meaningfully different from regular (remote) disks:
@@ -233,9 +231,7 @@ Read-Only:
 
 Read-Only:
 
-- `labels` (Map of String) :
-
-   Labels associated with disk resource.
+- `labels` (Map of String) Labels associated with disk resource.
 - `name` (String) :
 
    Name of a dependent disk.
@@ -587,9 +583,7 @@ Read-Only:
 
 Read-Only:
 
-- `labels` (Map of String) :
-
-   Labels associated with disk resource.
+- `labels` (Map of String) Labels associated with disk resource.
 - `name` (String) :
 
    Name of a dependent disk.

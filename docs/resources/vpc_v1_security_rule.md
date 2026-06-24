@@ -87,9 +87,7 @@ resource "nebius_vpc_v1_security_rule" "allow_https" {
    Defines match for incoming traffic.
    
    *Cannot be set alongside egress.* (see [below for nested schema](#nestedatt--ingress))
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    `metadata.parent_id` represents the SecurityGroup.

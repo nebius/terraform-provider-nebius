@@ -43,9 +43,7 @@ data ... {
    Timestamp indicating when the resource was created.
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `member_id` (String) Member of the group. Can be tenant user account id or service account id.
 - `metadata` (Attributes) :
 
@@ -95,9 +93,7 @@ Read-Only:
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `id` (String) Identifier for the resource, unique for its resource type.
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `name` (String) Human readable name for the resource.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `resource_version` (Number) :

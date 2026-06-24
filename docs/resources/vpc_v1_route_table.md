@@ -24,9 +24,7 @@ and contains rules for routing traffic to different destinations.
 
 ### Optional
 
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    `metadata.parent_id` represents the Project.

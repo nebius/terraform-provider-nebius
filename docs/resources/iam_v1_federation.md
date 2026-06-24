@@ -20,9 +20,7 @@ description: |-
 ### Optional
 
 - `active` (Boolean, Deprecated) Specifies if the federation in active state
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    Federation resource metadata.

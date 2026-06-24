@@ -28,9 +28,7 @@ resource "nebius_registry_v1_registry" "app" {
 ### Optional
 
 - `description` (String)
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    This is metadata about the resource, such as its id, name, labels, etc.

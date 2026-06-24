@@ -88,7 +88,7 @@ func (r *serviceSecurityRule) DataSourceSchema() schema.Schema {
 			},
 			"resource_version": schema.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n   \n",
+				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n",
 			},
 			"created_at": schema.StringAttribute{
 				CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
@@ -103,7 +103,7 @@ func (r *serviceSecurityRule) DataSourceSchema() schema.Schema {
 			"labels": schema.MapAttribute{
 				ElementType:         types.StringType,
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Labels associated with the resource.\n   \n",
+				MarkdownDescription: "Labels associated with the resource.",
 			},
 			"access": schema.StringAttribute{
 				Computed:            true,
@@ -259,7 +259,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 			},
 			"resource_version": schema1.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n   \n",
+				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n",
 				PlanModifiers:       []planmodifier.Int64{},
 			},
 			"created_at": schema1.StringAttribute{
@@ -278,7 +278,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 				ElementType:         types.StringType,
 				Validators:          []validator.Map{},
 				Optional:            true,
-				MarkdownDescription: ":\n\n   Labels associated with the resource.\n   \n",
+				MarkdownDescription: "Labels associated with the resource.",
 				PlanModifiers:       []planmodifier.Map{},
 			},
 			"access": schema1.StringAttribute{

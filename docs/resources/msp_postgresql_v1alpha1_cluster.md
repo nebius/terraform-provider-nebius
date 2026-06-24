@@ -67,9 +67,7 @@ resource "nebius_msp_postgresql_v1alpha1_cluster" "postgres" {
 
 - `backup` (Attributes) (see [below for nested schema](#nestedatt--backup))
 - `description` (String) Description of the PostgreSQL cluster.
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

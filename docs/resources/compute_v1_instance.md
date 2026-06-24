@@ -83,9 +83,7 @@ resource "nebius_compute_v1_instance" "vm" {
 
    Instance's hostname. Used to generate default DNS record in format `<hostname>.<network_id>.compute.internal.`
    or `<instance_id>.<network_id>.compute.internal.` if hostname is not specified.
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `local_disks` (Attributes) :
 
    Local disks are meaningfully different from regular (remote) disks:
@@ -332,9 +330,7 @@ Required:
 
 Optional:
 
-- `labels` (Map of String) :
-
-   Labels associated with disk resource.
+- `labels` (Map of String) Labels associated with disk resource.
 
 <a id="nestedatt--boot_disk--managed_disk--spec"></a>
 ### Nested Schema for `boot_disk.managed_disk.spec`
@@ -625,9 +621,7 @@ Required:
 
 Optional:
 
-- `labels` (Map of String) :
-
-   Labels associated with disk resource.
+- `labels` (Map of String) Labels associated with disk resource.
 
 <a id="nestedatt--secondary_disks--managed_disk--spec"></a>
 ### Nested Schema for `secondary_disks.managed_disk.spec`

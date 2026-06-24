@@ -86,7 +86,7 @@ func (r *serviceTransfer) DataSourceSchema() schema.Schema {
 			},
 			"resource_version": schema.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n   \n",
+				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n",
 			},
 			"created_at": schema.StringAttribute{
 				CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
@@ -101,7 +101,7 @@ func (r *serviceTransfer) DataSourceSchema() schema.Schema {
 			"labels": schema.MapAttribute{
 				ElementType:         types.StringType,
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Labels associated with the resource.\n   \n",
+				MarkdownDescription: "Labels associated with the resource.",
 			},
 			"source": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
@@ -314,6 +314,10 @@ func (r *serviceTransfer) DataSourceSchema() schema.Schema {
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Overwrite strategy set logic of overwrite already existed objects in destination bucket.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `OVERWRITE_STRATEGY_UNSPECIFIED`\n   - `NEVER`:\n      Never overwrite objects that exist in the destination.\n      If object exists in destination bucket, skip it.\n      Safest option to prevent any data loss.\n   \n   - `IF_NEWER`:\n      Overwrite only if source object is newer than destination.\n      Comparison based on Last-Modified timestamp.\n      Recommended for incremental sync scenarios.\n      If touch_unmanaged flag isn't set, we do not overwrite objects that haven't been created by Data Transfer service.\n   \n   \n",
 			},
+			"enable_deletes_in_destination": schema.BoolAttribute{
+				Computed:            true,
+				MarkdownDescription: ":\n\n   If enable_deletes_in_destination flag is set, service will delete objects that exist in destination, but don't exist in source.\n   If touch_unmanaged flag isn't set, we do not delete objects that haven't been created by Data Transfer service.\n",
+			},
 			"touch_unmanaged": schema.BoolAttribute{
 				Computed:            true,
 				MarkdownDescription: ":\n\n   If touch_unmanaged flag is set, service will be allowed to overwrite and delete from destination objects that were not\n   created by Data Transfer Service. If this flag is false, Data Transfer Service will never overwrite or delete objects\n   that haven't been created by Data Transfer service.\n",
@@ -388,6 +392,10 @@ func (r *serviceTransfer) DataSourceSchema() schema.Schema {
 								Computed:            true,
 								MarkdownDescription: "Number of objects transferred during this iteration.",
 							},
+							"objects_deleted_count": schema.Int64Attribute{
+								Computed:            true,
+								MarkdownDescription: "Number of objects deleted from destination bucket during this iteration.",
+							},
 							"objects_transferred_size": schema.Int64Attribute{
 								Computed:            true,
 								MarkdownDescription: "Total size of objects transferred during this iteration.",
@@ -405,7 +413,7 @@ func (r *serviceTransfer) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "",
 			},
 		},
-		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n\n\nTransfer that migrates data from other providers or across different regions of Nebius Object Storage.\nTransfer consists of consecutive iterations where the service lists objects in the source bucket and\nmoves those that need to be transferred according to the specified overwrite strategy and touch unmanaged flag value.\nAfter an iteration completes, the transfer will stop if its stop condition is met. Otherwise,\nit will wait for the defined inter-iteration interval before starting the next iteration.",
+		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n\n\nTransfer that migrates data from other providers or across different regions of Nebius Object Storage.\nTransfer consists of consecutive iterations where the service lists objects in the source bucket and\nmoves those that need to be transferred according to the specified overwrite strategy and touch unmanaged flag value.\nIf the enable deletes in destination flag is set, the service also lists destination bucket and deletes\nobjects which do not exist in the source bucket according to the touch unmanaged flag value.\nAfter an iteration completes, the transfer will stop if its stop condition is met. Otherwise,\nit will wait for the defined inter-iteration interval before starting the next iteration.",
 	}
 	return ret
 }
@@ -444,7 +452,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 			},
 			"resource_version": schema1.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n   \n",
+				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n",
 				PlanModifiers:       []planmodifier.Int64{},
 			},
 			"created_at": schema1.StringAttribute{
@@ -463,7 +471,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 				ElementType:         types.StringType,
 				Validators:          []validator.Map{},
 				Optional:            true,
-				MarkdownDescription: ":\n\n   Labels associated with the resource.\n   \n",
+				MarkdownDescription: "Labels associated with the resource.",
 				PlanModifiers:       []planmodifier.Map{},
 			},
 			"source": schema1.SingleNestedAttribute{
@@ -985,6 +993,14 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
+			"enable_deletes_in_destination": schema1.BoolAttribute{
+				Validators:          []validator.Bool{},
+				Optional:            true,
+				MarkdownDescription: ":\n\n   If enable_deletes_in_destination flag is set, service will delete objects that exist in destination, but don't exist in source.\n   If touch_unmanaged flag isn't set, we do not delete objects that haven't been created by Data Transfer service.\n",
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplace(),
+				},
+			},
 			"touch_unmanaged": schema1.BoolAttribute{
 				Validators:          []validator.Bool{},
 				Optional:            true,
@@ -1078,6 +1094,11 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 								MarkdownDescription: "Number of objects transferred during this iteration.",
 								PlanModifiers:       []planmodifier.Int64{},
 							},
+							"objects_deleted_count": schema1.Int64Attribute{
+								Computed:            true,
+								MarkdownDescription: "Number of objects deleted from destination bucket during this iteration.",
+								PlanModifiers:       []planmodifier.Int64{},
+							},
 							"objects_transferred_size": schema1.Int64Attribute{
 								Computed:            true,
 								MarkdownDescription: "Total size of objects transferred during this iteration.",
@@ -1099,7 +1120,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.Object{},
 			},
 		},
-		MarkdownDescription: "Transfer that migrates data from other providers or across different regions of Nebius Object Storage.\nTransfer consists of consecutive iterations where the service lists objects in the source bucket and\nmoves those that need to be transferred according to the specified overwrite strategy and touch unmanaged flag value.\nAfter an iteration completes, the transfer will stop if its stop condition is met. Otherwise,\nit will wait for the defined inter-iteration interval before starting the next iteration.",
+		MarkdownDescription: "Transfer that migrates data from other providers or across different regions of Nebius Object Storage.\nTransfer consists of consecutive iterations where the service lists objects in the source bucket and\nmoves those that need to be transferred according to the specified overwrite strategy and touch unmanaged flag value.\nIf the enable deletes in destination flag is set, the service also lists destination bucket and deletes\nobjects which do not exist in the source bucket according to the touch unmanaged flag value.\nAfter an iteration completes, the transfer will stop if its stop condition is met. Otherwise,\nit will wait for the defined inter-iteration interval before starting the next iteration.",
 	}
 	if r.provider.WriteOnlyFieldsSupported() {
 		ret.Attributes["sensitive"] = schema1.SingleNestedAttribute{
