@@ -28,9 +28,7 @@ resource "nebius_iam_v1_service_account" "terraform" {
 ### Optional
 
 - `description` (String)
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

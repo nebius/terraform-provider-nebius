@@ -34,9 +34,7 @@ An asymmetric KMS key that may contain several versions of the cryptographic mat
 ### Optional
 
 - `description` (String) Description of the key.
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

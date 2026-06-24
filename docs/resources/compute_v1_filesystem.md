@@ -39,9 +39,7 @@ description: |-
    The block size must be a power of two between 4096 bytes (4 KiB) and 131072 bytes (128 KiB).
    The default value is 4096 bytes (4 KiB).
 - `forbid_deletion` (Boolean) Prevents deletion whilst set
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

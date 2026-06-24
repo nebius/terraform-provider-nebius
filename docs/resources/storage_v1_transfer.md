@@ -4,6 +4,8 @@ description: |-
   Transfer that migrates data from other providers or across different regions of Nebius Object Storage.
   Transfer consists of consecutive iterations where the service lists objects in the source bucket and
   moves those that need to be transferred according to the specified overwrite strategy and touch unmanaged flag value.
+  If the enable deletes in destination flag is set, the service also lists destination bucket and deletes
+  objects which do not exist in the source bucket according to the touch unmanaged flag value.
   After an iteration completes, the transfer will stop if its stop condition is met. Otherwise,
   it will wait for the defined inter-iteration interval before starting the next iteration.
 ---
@@ -13,6 +15,8 @@ description: |-
 Transfer that migrates data from other providers or across different regions of Nebius Object Storage.
 Transfer consists of consecutive iterations where the service lists objects in the source bucket and
 moves those that need to be transferred according to the specified overwrite strategy and touch unmanaged flag value.
+If the enable deletes in destination flag is set, the service also lists destination bucket and deletes
+objects which do not exist in the source bucket according to the touch unmanaged flag value.
 After an iteration completes, the transfer will stop if its stop condition is met. Otherwise,
 it will wait for the defined inter-iteration interval before starting the next iteration.
 
@@ -105,6 +109,10 @@ resource "nebius_storage_v1_transfer" "copy" {
 
 - `after_n_empty_iterations` (Attributes) *Cannot be set alongside after_one_iteration or infinite.* (see [below for nested schema](#nestedatt--after_n_empty_iterations))
 - `after_one_iteration` (Attributes) *Cannot be set alongside after_n_empty_iterations or infinite.* (see [below for nested schema](#nestedatt--after_one_iteration))
+- `enable_deletes_in_destination` (Boolean) :
+
+   If enable_deletes_in_destination flag is set, service will delete objects that exist in destination, but don't exist in source.
+   If touch_unmanaged flag isn't set, we do not delete objects that haven't been created by Data Transfer service.
 - `infinite` (Attributes) :
 
    Infinite transfers do not stop automatically and can be stopped manually by the user.
@@ -116,9 +124,7 @@ resource "nebius_storage_v1_transfer" "copy" {
    Default is 15 minutes if not specified.
    
    Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `limiters` (Attributes) :
 
    Limiters applied to source bucket operations. These limits include all operations
@@ -564,6 +570,7 @@ Read-Only:
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `error` (Attributes) Human-readable error description. Populated only if state is FAILED. (see [below for nested schema](#nestedatt--status--last_iteration--error))
+- `objects_deleted_count` (Number) Number of objects deleted from destination bucket during this iteration.
 - `objects_transferred_count` (Number) Number of objects transferred during this iteration.
 - `objects_transferred_size` (Number) Total size of objects transferred during this iteration.
 - `sequence_number` (Number) Sequence number of the iteration in the transfer, starting from 1.

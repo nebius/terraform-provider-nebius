@@ -68,9 +68,7 @@ data ... {
 
    The identifier of the physical InfiniBand fabric to connect GPU instances to.
    For details, see https://docs.nebius.com/compute/clusters/gpu#fabrics
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

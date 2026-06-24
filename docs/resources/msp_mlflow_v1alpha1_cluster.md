@@ -51,9 +51,7 @@ resource "nebius_msp_mlflow_v1alpha1_cluster" "mlflow" {
 
 - `admin_password` (String, Sensitive) MLflow admin password.
 - `description` (String) Description of the cluster.
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

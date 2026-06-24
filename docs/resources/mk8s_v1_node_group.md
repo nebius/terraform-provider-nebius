@@ -66,9 +66,7 @@ resource "nebius_mk8s_v1_node_group" "default" {
    Number of nodes in the group. Can be changed manually at any time.
    
    *Cannot be set alongside autoscaling.*
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

@@ -37,9 +37,7 @@ resource "nebius_mk8s_v1_cluster" "cluster" {
 ### Optional
 
 - `kube_network` (Attributes) Defines kubernetes network configuration, like IP allocation. (see [below for nested schema](#nestedatt--kube_network))
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

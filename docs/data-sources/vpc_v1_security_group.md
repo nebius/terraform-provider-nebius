@@ -73,9 +73,7 @@ Security group applies implicit deny at the end (traffic not matched by any rule
    Timestamp indicating when the resource was created.
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    `metadata.parent_id` represents the Project.

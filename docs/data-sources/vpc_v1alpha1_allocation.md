@@ -66,9 +66,7 @@ data ... {
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `ipv4_private` (Attributes) *Cannot be set alongside ipv4_public.* (see [below for nested schema](#nestedatt--ipv4_private))
 - `ipv4_public` (Attributes) *Cannot be set alongside ipv4_private.* (see [below for nested schema](#nestedatt--ipv4_public))
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    Metadata for the Allocation.

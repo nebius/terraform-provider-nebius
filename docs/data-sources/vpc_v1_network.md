@@ -83,9 +83,7 @@ Networks facilitate communication between subnets.
 
    Pools for public IPv4 addresses.
    Default public pool will be used if not specified. (see [below for nested schema](#nestedatt--ipv4_public_pools))
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    Metadata for the network resource.

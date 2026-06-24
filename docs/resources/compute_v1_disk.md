@@ -55,9 +55,7 @@ resource "nebius_compute_v1_disk" "boot" {
    The default value is 4096 bytes (4 KiB).
 - `disk_encryption` (Attributes) Defines how data on the disk is encrypted. By default, no encryption is applied. (see [below for nested schema](#nestedatt--disk_encryption))
 - `forbid_deletion` (Boolean) Prevents deletion whilst set
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

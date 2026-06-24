@@ -39,9 +39,7 @@ A Resource Record is represented in this API by the `Record` API Resource which 
 
 ### Optional
 
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    DNS zone metadata

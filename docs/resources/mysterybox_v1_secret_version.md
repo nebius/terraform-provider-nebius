@@ -49,9 +49,7 @@ resource "nebius_mysterybox_v1_secret_version" "current" {
 ### Optional
 
 - `description` (String) Description of the version.
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

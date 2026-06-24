@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.20 (June 24, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.31`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_storage_v1_transfer](./docs/resources/storage_v1_transfer.md):
+    * Added: `enable_deletes_in_destination`, `status.last_iteration.objects_deleted_count`
+* Changed attributes for data source [nebius_storage_v1_transfer](./docs/data-sources/storage_v1_transfer.md):
+    * Added: `enable_deletes_in_destination`, `status.last_iteration.objects_deleted_count`
+
 ## 0.6.19 (June 23, 2026)
 
 NOTES:

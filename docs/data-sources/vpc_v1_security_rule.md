@@ -100,9 +100,7 @@ match source, and ports.
    Defines match for incoming traffic.
    
    *Cannot be set alongside egress.* (see [below for nested schema](#nestedatt--ingress))
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    `metadata.parent_id` represents the SecurityGroup.

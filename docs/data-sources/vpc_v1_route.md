@@ -78,9 +78,7 @@ specifying the path that traffic should take based on destination addresses.
    Each destination CIDR must be unique within a route table.
    When multiple routes match a destination IP, the route with the longest
    matching prefix (most specific match) is selected. (see [below for nested schema](#nestedatt--destination))
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    `metadata.parent_id` represents the RouteTable.

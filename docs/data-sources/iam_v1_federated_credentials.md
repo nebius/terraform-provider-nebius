@@ -68,9 +68,7 @@ data ... {
 
    Federated subject ID. For oidc_provider, the subject is calculated from the
    "sub" claim of the federated JWT token.
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    Federated credentials resource metadata.

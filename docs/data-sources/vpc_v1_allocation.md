@@ -78,9 +78,7 @@ data ... {
    Public IPv4 address configuration for the allocation.
    
    *Cannot be set alongside ipv4_private.* (see [below for nested schema](#nestedatt--ipv4_public))
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    Metadata for the Allocation.

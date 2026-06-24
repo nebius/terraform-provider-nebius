@@ -23,9 +23,7 @@ NodeGroup represents Kubernetes node pool
 - `auto_repair` (Attributes) Parameters for nodes auto repair. (see [below for nested schema](#nestedatt--auto_repair))
 - `autoscaling` (Attributes) *Cannot be set alongside fixed_node_count.* (see [below for nested schema](#nestedatt--autoscaling))
 - `fixed_node_count` (Number) *Cannot be set alongside autoscaling.*
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    #### Inner value description

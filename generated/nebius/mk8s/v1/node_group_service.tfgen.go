@@ -63,7 +63,7 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 			"metadata": schema.SingleNestedAttribute{
 				Attributes:          map[string]schema.Attribute{},
 				Computed:            true,
-				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n   \n   \n",
+				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n",
 			},
 			"id": schema.StringAttribute{
 				Validators:          []validator.String{},
@@ -85,7 +85,7 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 			},
 			"resource_version": schema.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n   \n",
+				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n",
 			},
 			"created_at": schema.StringAttribute{
 				CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
@@ -100,7 +100,7 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 			"labels": schema.MapAttribute{
 				ElementType:         types.StringType,
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Labels associated with the resource.\n   \n",
+				MarkdownDescription: "Labels associated with the resource.",
 			},
 			"version": schema.StringAttribute{
 				Computed:            true,
@@ -319,7 +319,7 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 									},
 								},
 								Computed:            true,
-								MarkdownDescription: ":\n\n   Requests passthrough local disks from the host.\n   Topology of the provided disks is preserved during stop and start\n   for every instance of a specific platform and preset in the region.\n   \n   \n",
+								MarkdownDescription: ":\n\n   Requests passthrough local disks from the host.\n   Topology of the provided disks is preserved during stop and start\n   for every instance of a specific platform and preset in the region.\n",
 							},
 							"config": schema.SingleNestedAttribute{
 								Attributes: map[string]schema.Attribute{
@@ -546,7 +546,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 				},
 				Computed:            true,
 				Optional:            true,
-				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n   \n   \n",
+				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n",
 				PlanModifiers:       []planmodifier.Object{},
 			},
 			"id": schema1.StringAttribute{
@@ -572,7 +572,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 			},
 			"resource_version": schema1.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n   \n",
+				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n",
 				PlanModifiers:       []planmodifier.Int64{},
 			},
 			"created_at": schema1.StringAttribute{
@@ -591,7 +591,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 				ElementType:         types.StringType,
 				Validators:          []validator.Map{},
 				Optional:            true,
-				MarkdownDescription: ":\n\n   Labels associated with the resource.\n   \n",
+				MarkdownDescription: "Labels associated with the resource.",
 				PlanModifiers:       []planmodifier.Map{},
 			},
 			"version": schema1.StringAttribute{
@@ -976,7 +976,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 								},
 								Validators:          []validator.Object{},
 								Optional:            true,
-								MarkdownDescription: ":\n\n   Requests passthrough local disks from the host.\n   Topology of the provided disks is preserved during stop and start\n   for every instance of a specific platform and preset in the region.\n   \n   \n",
+								MarkdownDescription: ":\n\n   Requests passthrough local disks from the host.\n   Topology of the provided disks is preserved during stop and start\n   for every instance of a specific platform and preset in the region.\n",
 								PlanModifiers:       []planmodifier.Object{},
 							},
 							"config": schema1.SingleNestedAttribute{

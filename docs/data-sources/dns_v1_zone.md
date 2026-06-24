@@ -89,9 +89,7 @@ A Resource Record is represented in this API by the `Record` API Resource which 
 
    Fully qualified domain name of this zone, including `.` at the end
    Cannot be changed after creating the zone
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    DNS zone metadata

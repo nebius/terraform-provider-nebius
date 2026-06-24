@@ -27,9 +27,7 @@ resource "nebius_quotas_v1_quota_allowance" "bucket_count" {
 
 ### Optional
 
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `limit` (Number) Total amount of resources allocated.
 - `metadata` (Attributes) :
 

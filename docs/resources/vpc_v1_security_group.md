@@ -32,9 +32,7 @@ resource "nebius_vpc_v1_security_group" "web" {
 
 ### Optional
 
-- `labels` (Map of String) :
-
-   Labels associated with the resource.
+- `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 
    `metadata.parent_id` represents the Project.
