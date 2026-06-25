@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.21 (June 25, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.32`.
+
+FEATURES:
+
+* Added new resources and data sources: [nebius_tunnel_v1_tunnel](./docs/resources/tunnel_v1_tunnel.md).
+
 ## 0.6.20 (June 24, 2026)
 
 NOTES:
