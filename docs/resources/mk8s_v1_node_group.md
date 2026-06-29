@@ -142,6 +142,7 @@ Optional:
    count is at least `2 * max_pods`. Not all IPs are usable for workload Pods because some of them are consumed by system Pods.
 - `metadata` (Attributes) (see [below for nested schema](#nestedatt--template--metadata))
 - `network_interfaces` (Attributes List) (see [below for nested schema](#nestedatt--template--network_interfaces))
+- `nvlink` (Attributes) NVLinkSpec configures NVLink settings for the NodeGroup. (see [below for nested schema](#nestedatt--template--nvlink))
 - `os` (String) :
 
    OS version that will be used to create the boot disk of Compute Instances in the NodeGroup.
@@ -398,6 +399,14 @@ Optional:
 
 - `id` (String)
 
+
+
+<a id="nestedatt--template--nvlink"></a>
+### Nested Schema for `template.nvlink`
+
+Optional:
+
+- `nvl_instance_group_id` (String) Existing NVLInstanceGroup ID to use.
 
 
 <a id="nestedatt--template--preemptible"></a>

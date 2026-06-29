@@ -294,6 +294,16 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Configures whether the nodes in the group are preemptible.\n   Set to empty value to enable preemptible nodes.\n",
 					},
+					"nvlink": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"nvl_instance_group_id": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "Existing NVLInstanceGroup ID to use.",
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: "NVLinkSpec configures NVLink settings for the NodeGroup.",
+					},
 					"reservation_policy": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
 							"policy": schema.StringAttribute{
@@ -938,6 +948,24 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						Validators:          []validator.Object{},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   Configures whether the nodes in the group are preemptible.\n   Set to empty value to enable preemptible nodes.\n",
+						PlanModifiers:       []planmodifier.Object{},
+					},
+					"nvlink": schema1.SingleNestedAttribute{
+						Attributes: map[string]schema1.Attribute{
+							"nvl_instance_group_id": schema1.StringAttribute{
+								Validators:          []validator.String{},
+								Optional:            true,
+								MarkdownDescription: "Existing NVLInstanceGroup ID to use.",
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.RequiresReplace(),
+								},
+							},
+						},
+						Validators: []validator.Object{
+							validators.ProtoFieldValidator(&v1.NodeTemplate{}, "nvlink", "nvlink", fieldNameMapNodeGroup),
+						},
+						Optional:            true,
+						MarkdownDescription: "NVLinkSpec configures NVLink settings for the NodeGroup.",
 						PlanModifiers:       []planmodifier.Object{},
 					},
 					"reservation_policy": schema1.SingleNestedAttribute{

@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.22 (June 29, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.33`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group.md):
+    * Added: `template.nvlink`
+* Changed attributes for resource [nebius_vpc_v1_subnet](./docs/resources/vpc_v1_subnet.md):
+    * Added: `status.ipv4_private_pools`, `status.ipv4_public_pools`
+    * Deprecated: `status.ipv4_private_cidrs`, `status.ipv4_public_cidrs`
+* Changed attributes for data source [nebius_mk8s_v1_node_group](./docs/data-sources/mk8s_v1_node_group.md):
+    * Added: `template.nvlink`
+* Changed attributes for data source [nebius_vpc_v1_subnet](./docs/data-sources/vpc_v1_subnet.md):
+    * Added: `status.ipv4_private_pools`, `status.ipv4_public_pools`
+    * Deprecated: `status.ipv4_private_cidrs`, `status.ipv4_public_cidrs`
+
 ## 0.6.21 (June 25, 2026)
 
 NOTES:

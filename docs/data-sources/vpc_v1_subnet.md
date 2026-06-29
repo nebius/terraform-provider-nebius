@@ -215,8 +215,16 @@ Read-Only:
 
 Read-Only:
 
-- `ipv4_private_cidrs` (List of String) CIDR blocks.
-- `ipv4_public_cidrs` (List of String) CIDR blocks.
+- `ipv4_private_cidrs` (List of String, Deprecated) :
+
+   CIDR blocks.
+   Deprecated: Use `ipv4_private_pools.cidrs` instead.
+- `ipv4_private_pools` (Attributes List) Private IPv4 pools available for allocations in this subnet. (see [below for nested schema](#nestedatt--status--ipv4_private_pools))
+- `ipv4_public_cidrs` (List of String, Deprecated) :
+
+   CIDR blocks.
+   Deprecated: Use `ipv4_public_pools.cidrs` instead.
+- `ipv4_public_pools` (Attributes List) Public IPv4 pools available for allocations in this subnet. (see [below for nested schema](#nestedatt--status--ipv4_public_pools))
 - `route_table` (Attributes) :
 
    Information about the route table associated with this subnet.
@@ -234,6 +242,24 @@ Read-Only:
    - `CREATING` - Subnet is being created.
    - `READY` - Subnet is ready for use.
    - `DELETING` - Subnet is being deleted.
+
+<a id="nestedatt--status--ipv4_private_pools"></a>
+### Nested Schema for `status.ipv4_private_pools`
+
+Read-Only:
+
+- `cidrs` (List of String) CIDR blocks sourced from this pool.
+- `pool_id` (String) ID of the pool available for allocations in this subnet.
+
+
+<a id="nestedatt--status--ipv4_public_pools"></a>
+### Nested Schema for `status.ipv4_public_pools`
+
+Read-Only:
+
+- `cidrs` (List of String) CIDR blocks sourced from this pool.
+- `pool_id` (String) ID of the pool available for allocations in this subnet.
+
 
 <a id="nestedatt--status--route_table"></a>
 ### Nested Schema for `status.route_table`
