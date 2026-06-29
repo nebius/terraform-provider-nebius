@@ -195,12 +195,14 @@ func (r *serviceSubnet) DataSourceSchema() schema.Schema {
 					"ipv4_private_cidrs": schema.ListAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						MarkdownDescription: "CIDR blocks.",
+						DeprecationMessage:  "Supported until 2027-02-01. Use `ipv4_private_pools.cidrs` instead.",
+						MarkdownDescription: ":\n\n   CIDR blocks.\n   Deprecated: Use `ipv4_private_pools.cidrs` instead.\n",
 					},
 					"ipv4_public_cidrs": schema.ListAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						MarkdownDescription: "CIDR blocks.",
+						DeprecationMessage:  "Supported until 2027-02-01. Use `ipv4_public_pools.cidrs` instead.",
+						MarkdownDescription: ":\n\n   CIDR blocks.\n   Deprecated: Use `ipv4_public_pools.cidrs` instead.\n",
 					},
 					"route_table": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
@@ -215,6 +217,40 @@ func (r *serviceSubnet) DataSourceSchema() schema.Schema {
 						},
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Information about the route table associated with this subnet.\n   Can be either a custom route table or the network's default route table.\n",
+					},
+					"ipv4_private_pools": schema.ListNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"pool_id": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: "ID of the pool available for allocations in this subnet.",
+								},
+								"cidrs": schema.ListAttribute{
+									ElementType:         types.StringType,
+									Computed:            true,
+									MarkdownDescription: "CIDR blocks sourced from this pool.",
+								},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: "Private IPv4 pools available for allocations in this subnet.",
+					},
+					"ipv4_public_pools": schema.ListNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"pool_id": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: "ID of the pool available for allocations in this subnet.",
+								},
+								"cidrs": schema.ListAttribute{
+									ElementType:         types.StringType,
+									Computed:            true,
+									MarkdownDescription: "CIDR blocks sourced from this pool.",
+								},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: "Public IPv4 pools available for allocations in this subnet.",
 					},
 				},
 				Computed:            true,
@@ -434,13 +470,15 @@ func (r *serviceSubnet) ResourceSchema() schema1.Schema {
 					"ipv4_private_cidrs": schema1.ListAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						MarkdownDescription: "CIDR blocks.",
+						DeprecationMessage:  "Supported until 2027-02-01. Use `ipv4_private_pools.cidrs` instead.",
+						MarkdownDescription: ":\n\n   CIDR blocks.\n   Deprecated: Use `ipv4_private_pools.cidrs` instead.\n",
 						PlanModifiers:       []planmodifier.List{},
 					},
 					"ipv4_public_cidrs": schema1.ListAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						MarkdownDescription: "CIDR blocks.",
+						DeprecationMessage:  "Supported until 2027-02-01. Use `ipv4_public_pools.cidrs` instead.",
+						MarkdownDescription: ":\n\n   CIDR blocks.\n   Deprecated: Use `ipv4_public_pools.cidrs` instead.\n",
 						PlanModifiers:       []planmodifier.List{},
 					},
 					"route_table": schema1.SingleNestedAttribute{
@@ -459,6 +497,46 @@ func (r *serviceSubnet) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Information about the route table associated with this subnet.\n   Can be either a custom route table or the network's default route table.\n",
 						PlanModifiers:       []planmodifier.Object{},
+					},
+					"ipv4_private_pools": schema1.ListNestedAttribute{
+						NestedObject: schema1.NestedAttributeObject{
+							Attributes: map[string]schema1.Attribute{
+								"pool_id": schema1.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: "ID of the pool available for allocations in this subnet.",
+									PlanModifiers:       []planmodifier.String{},
+								},
+								"cidrs": schema1.ListAttribute{
+									ElementType:         types.StringType,
+									Computed:            true,
+									MarkdownDescription: "CIDR blocks sourced from this pool.",
+									PlanModifiers:       []planmodifier.List{},
+								},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: "Private IPv4 pools available for allocations in this subnet.",
+						PlanModifiers:       []planmodifier.List{},
+					},
+					"ipv4_public_pools": schema1.ListNestedAttribute{
+						NestedObject: schema1.NestedAttributeObject{
+							Attributes: map[string]schema1.Attribute{
+								"pool_id": schema1.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: "ID of the pool available for allocations in this subnet.",
+									PlanModifiers:       []planmodifier.String{},
+								},
+								"cidrs": schema1.ListAttribute{
+									ElementType:         types.StringType,
+									Computed:            true,
+									MarkdownDescription: "CIDR blocks sourced from this pool.",
+									PlanModifiers:       []planmodifier.List{},
+								},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: "Public IPv4 pools available for allocations in this subnet.",
+						PlanModifiers:       []planmodifier.List{},
 					},
 				},
 				Computed:            true,
