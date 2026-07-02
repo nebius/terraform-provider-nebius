@@ -6,7 +6,7 @@ import (
 	"github.com/blang/semver/v4"
 )
 
-const versionString = "0.6.22"
+const versionString = "0.6.23"
 
 func BuildVersion() (string, error) {
 	_, err := semver.Parse(versionString)

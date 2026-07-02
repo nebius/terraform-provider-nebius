@@ -526,10 +526,16 @@ Optional:
 
    Maximum amount of time that the service will spend attempting to gracefully drain a node
    (evicting its pods) before falling back to pod deletion.
-   A value of 0 (or when field is omitted) means no timeout: the node can be drained for an unlimited time.
+   A value of 0 means no timeout: the node can be drained for an unlimited time.
    Important consequence of that is if PodDisruptionBudget doesn't allow evicting a pod,
    then NodeGroup update with node re-creation will hang on that pod eviction.
    Note that this is different from `kubectl drain --timeout`, which gives up and returns an error.
+   
+   On 2026-08-01, defaults to 0.
+   IMPORTANT: starting from Q3 2026 new default is 10m;
+   for new clusters it will default to 10m,
+   node groups in existing clusters will be gradually migrated during Q3 to the default of 10m as well.
+   To get the actual value for your node group, please see 'strategy' in its status.
    
    Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.
 - `max_surge` (Attributes) :
@@ -542,7 +548,11 @@ Optional:
    When specified as a percentage, the actual number is calculated by rounding up to the nearest whole number.
    This value cannot be 0 if `max_unavailable` is also set to 0.
    
-   Defaults to 1.
+   On 2026-08-01, defaults to 1.
+   IMPORTANT: starting from Q3 2026 new default is 0;
+   for new clusters it will default to 0,
+   node groups in existing clusters will be gradually migrated during Q3 to the default of 0 as well.
+   To get the actual value for your node group, please see 'strategy' in its status.
    
    Example: If set to 25%, the node group can scale up by an additional 25% during the update,
    allowing new nodes to be added before old nodes are removed, which helps minimize workload disruption.
@@ -563,7 +573,11 @@ Optional:
    When specified as a percentage, the actual number is calculated by rounding down to the nearest whole number.
    This value cannot be 0 if `max_surge` is also set to 0.
    
-   Defaults to 0.
+   On 2026-08-01, defaults to 0.
+   IMPORTANT: starting from Q3 2026 new default is 1;
+   for new clusters it will default to 1,
+   node groups in existing clusters will be gradually migrated during Q3 to the default of 1 as well.
+   To get the actual value for your node group, please see 'strategy' in its status.
    
    Example: If set to 20%, up to 20% of the nodes can be taken offline at once during the update,
    ensuring that at least 80% of the desired nodes remain operational. (see [below for nested schema](#nestedatt--strategy--max_unavailable))
@@ -699,10 +713,16 @@ Read-Only:
 
    Maximum amount of time that the service will spend attempting to gracefully drain a node
    (evicting its pods) before falling back to pod deletion.
-   A value of 0 (or when field is omitted) means no timeout: the node can be drained for an unlimited time.
+   A value of 0 means no timeout: the node can be drained for an unlimited time.
    Important consequence of that is if PodDisruptionBudget doesn't allow evicting a pod,
    then NodeGroup update with node re-creation will hang on that pod eviction.
    Note that this is different from `kubectl drain --timeout`, which gives up and returns an error.
+   
+   On 2026-08-01, defaults to 0.
+   IMPORTANT: starting from Q3 2026 new default is 10m;
+   for new clusters it will default to 10m,
+   node groups in existing clusters will be gradually migrated during Q3 to the default of 10m as well.
+   To get the actual value for your node group, please see 'strategy' in its status.
    
    Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.
 - `max_surge` (Attributes) :
@@ -715,7 +735,11 @@ Read-Only:
    When specified as a percentage, the actual number is calculated by rounding up to the nearest whole number.
    This value cannot be 0 if `max_unavailable` is also set to 0.
    
-   Defaults to 1.
+   On 2026-08-01, defaults to 1.
+   IMPORTANT: starting from Q3 2026 new default is 0;
+   for new clusters it will default to 0,
+   node groups in existing clusters will be gradually migrated during Q3 to the default of 0 as well.
+   To get the actual value for your node group, please see 'strategy' in its status.
    
    Example: If set to 25%, the node group can scale up by an additional 25% during the update,
    allowing new nodes to be added before old nodes are removed, which helps minimize workload disruption.
@@ -736,7 +760,11 @@ Read-Only:
    When specified as a percentage, the actual number is calculated by rounding down to the nearest whole number.
    This value cannot be 0 if `max_surge` is also set to 0.
    
-   Defaults to 0.
+   On 2026-08-01, defaults to 0.
+   IMPORTANT: starting from Q3 2026 new default is 1;
+   for new clusters it will default to 1,
+   node groups in existing clusters will be gradually migrated during Q3 to the default of 1 as well.
+   To get the actual value for your node group, please see 'strategy' in its status.
    
    Example: If set to 20%, up to 20% of the nodes can be taken offline at once during the update,
    ensuring that at least 80% of the desired nodes remain operational. (see [below for nested schema](#nestedatt--status--strategy--max_unavailable))
