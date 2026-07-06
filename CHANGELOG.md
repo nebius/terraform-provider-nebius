@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.24 (July 6, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.35`.
+
+FEATURES:
+
+* Added new resources and data sources: [nebius_compute_v1_disk_snapshot](./docs/resources/compute_v1_disk_snapshot.md).
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_compute_v1_disk](./docs/resources/compute_v1_disk.md):
+    * Added: `status.lock_state.snapshots`
+* Changed attributes for data source [nebius_compute_v1_disk](./docs/data-sources/compute_v1_disk.md):
+    * Added: `status.lock_state.snapshots`
+
 ## 0.6.23 (July 2, 2026)
 
 NOTES:
