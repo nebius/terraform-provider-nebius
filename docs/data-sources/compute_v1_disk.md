@@ -199,3 +199,7 @@ Read-Only:
 
    Disk is locked for deletion and for read-write operations while image is being created.
    Here is the list of these images.
+- `snapshots` (List of String) :
+
+   Disk is locked only for deletion while snapshot is being created.
+   Here is the list of these snapshots.
