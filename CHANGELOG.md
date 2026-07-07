@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.25 (July 7, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.36`.
+* deps: Update `google.golang.org/genproto/googleapis/rpc` from `v0.0.0-20260319201613-d00831a3d3e7` to `v0.0.0-20260414002931-afd174a4e478`.
+* deps: Update `google.golang.org/grpc` from `v1.81.1` to `v1.82.0`.
+
 ## 0.6.24 (July 6, 2026)
 
 NOTES:
