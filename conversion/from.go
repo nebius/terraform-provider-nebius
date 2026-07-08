@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -26,6 +27,17 @@ import (
 
 func init() {
 	anytf.DynamicMessageFromTF = MessageFromDynamic //nolint:reassign // update global var to avoid cyclic imports
+}
+
+func isNilProtoMessage(msg proto.Message) bool {
+	if msg == nil {
+		return true
+	}
+	value := reflect.ValueOf(msg)
+	if value.Kind() == reflect.Pointer {
+		return value.IsNil()
+	}
+	return false
 }
 
 func unsupportedTypeConversionDiag(ctx context.Context, from attr.Value, to protoreflect.FieldDescriptor, attrPath path.Path) diag.Diagnostics {
@@ -297,8 +309,14 @@ func messageValueFromTF(
 			}
 			res, unkInner, d := wt.FromValue(ctx, from)
 			unk = ctypes.AppendUnknownMask(unk, mask.FieldPath{}, unkInner)
+			if d.HasError() {
+				return newField, d, unk, false, true
+			}
+			if isNilProtoMessage(res) {
+				return newField, d, unk, unk != nil, true
+			}
 			proto.Merge(msg, res)
-			return newField, d, unk, !d.HasError(), true
+			return newField, d, unk, true, true
 		}
 	}
 	from, _, innerDiag := ctypes.UnwrapDynamic(ctx, from)
