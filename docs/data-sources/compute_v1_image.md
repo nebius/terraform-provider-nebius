@@ -95,8 +95,9 @@ data ... {
 
    ID of the disk to create the image from
    
-   *Cannot be set alongside source_storage.*
-- `source_storage` (Attributes) *Cannot be set alongside source_disk_id.* (see [below for nested schema](#nestedatt--source_storage))
+   *Cannot be set alongside source_storage or source_disk_snapshot_id.*
+- `source_disk_snapshot_id` (String) *Cannot be set alongside source_disk_id or source_storage.*
+- `source_storage` (Attributes) *Cannot be set alongside source_disk_id or source_disk_snapshot_id.* (see [below for nested schema](#nestedatt--source_storage))
 - `status` (Attributes) (see [below for nested schema](#nestedatt--status))
 - `unsupported_platforms` (Map of String) list of platforms where this image is not supported with explanation
 - `updated_at` (String) :
