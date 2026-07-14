@@ -100,8 +100,7 @@ func ErrorToDiag(
 	if err == nil {
 		return diags
 	}
-	var serr *serviceerror.Error
-	if errors.As(err, &serr) {
+	if _, isServiceError := errors.AsType[*serviceerror.Error](err); isServiceError {
 		diags.AddError(
 			summary,
 			fmt.Sprintf(

@@ -15,8 +15,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/mk8s/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/mk8s/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/mk8s/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -72,7 +72,9 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapNodeGroup),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -552,7 +554,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 			"metadata": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{},
 				Validators: []validator.Object{
-					validators.ProtoFieldValidator(&v1.NodeGroup{}, "metadata", "metadata", fieldNameMapNodeGroup),
+					validators.ProtoFieldValidator(&v11.NodeGroup{}, "metadata", "metadata", fieldNameMapNodeGroup),
 				},
 				Computed:            true,
 				Optional:            true,
@@ -567,7 +569,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapNodeGroup),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -606,7 +610,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 			},
 			"version": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.NodeGroupSpec{}, "version", "version", fieldNameMapNodeGroup),
+					validators.ProtoFieldValidator(&v11.NodeGroupSpec{}, "version", "version", fieldNameMapNodeGroup),
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Version is desired Kubernetes version of the cluster. For now only acceptable format is\n   `<major>.<minor>` like \"1.31\". Option for patch version update will be added later.\n   By default the cluster control plane `<major>.<minor>` version will be used.\n",
@@ -618,7 +622,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						"fixed_node_count",
 						"autoscaling",
 					}, fieldNameMapNodeGroup),
-					validators.ProtoFieldValidator(&v1.NodeGroupSpec{}, "fixed_node_count", "fixed_node_count", fieldNameMapNodeGroup),
+					validators.ProtoFieldValidator(&v11.NodeGroupSpec{}, "fixed_node_count", "fixed_node_count", fieldNameMapNodeGroup),
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Number of nodes in the group. Can be changed manually at any time.\n   \n   *Cannot be set alongside autoscaling.*\n",
@@ -628,7 +632,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"min_node_count": schema1.Int64Attribute{
 						Validators: []validator.Int64{
-							validators.ProtoFieldValidator(&v1.NodeGroupAutoscalingSpec{}, "min_node_count", "min_node_count", fieldNameMapNodeGroup),
+							validators.ProtoFieldValidator(&v11.NodeGroupAutoscalingSpec{}, "min_node_count", "min_node_count", fieldNameMapNodeGroup),
 						},
 						Optional:            true,
 						MarkdownDescription: "",
@@ -636,7 +640,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 					},
 					"max_node_count": schema1.Int64Attribute{
 						Validators: []validator.Int64{
-							validators.ProtoFieldValidator(&v1.NodeGroupAutoscalingSpec{}, "max_node_count", "max_node_count", fieldNameMapNodeGroup),
+							validators.ProtoFieldValidator(&v11.NodeGroupAutoscalingSpec{}, "max_node_count", "max_node_count", fieldNameMapNodeGroup),
 						},
 						Optional:            true,
 						MarkdownDescription: "",
@@ -648,7 +652,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						"fixed_node_count",
 						"autoscaling",
 					}, fieldNameMapNodeGroup),
-					validators.ProtoFieldValidator(&v1.NodeGroupSpec{}, "autoscaling", "autoscaling", fieldNameMapNodeGroup),
+					validators.ProtoFieldValidator(&v11.NodeGroupSpec{}, "autoscaling", "autoscaling", fieldNameMapNodeGroup),
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Enables [Kubernetes Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)\n   for that NodeGroup, and defines autoscaling parameters.\n   \n   *Cannot be set alongside fixed_node_count.*\n",
@@ -661,7 +665,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							"labels": schema1.MapAttribute{
 								ElementType: types.StringType,
 								Validators: []validator.Map{
-									validators.ProtoFieldValidator(&v1.NodeMetadataTemplate{}, "labels", "labels", fieldNameMapNodeGroup),
+									validators.ProtoFieldValidator(&v11.NodeMetadataTemplate{}, "labels", "labels", fieldNameMapNodeGroup),
 								},
 								Optional:            true,
 								MarkdownDescription: ":\n\n   Kubernetes Node labels.\n   \n   Keys and values must follow Kubernetes label syntax:\n   https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/\n   \n   For now change will not be propagated to existing nodes, so will be applied only to Kubernetes Nodes created after the field change.\n   That behavior may change later.\n   So, for now you will need to manually set them to existing nodes, if that is needed.\n   \n   System labels containing \"kubernetes.io\" and \"k8s.io\" will be ignored.\n   Field change will NOT trigger NodeGroup roll out.\n",
@@ -690,7 +694,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 								},
 								"effect": schema1.StringAttribute{
 									Validators: []validator.String{
-										validators.EnumValidator(v1.NodeTaint_Effect_value),
+										validators.EnumValidator(v11.NodeTaint_Effect_value),
 									},
 									Required:            true,
 									MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `EFFECT_UNSPECIFIED`\n   - `NO_EXECUTE`\n   - `NO_SCHEDULE`\n   - `PREFER_NO_SCHEDULE`\n   \n",
@@ -699,7 +703,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							},
 						},
 						Validators: []validator.List{
-							validators.ProtoFieldValidator(&v1.NodeTemplate{}, "taints", "taints", fieldNameMapNodeGroup),
+							validators.ProtoFieldValidator(&v11.NodeTemplate{}, "taints", "taints", fieldNameMapNodeGroup),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   Kubernetes Node taints.\n   For now change will not be propagated to existing nodes, so will be applied only to Kubernetes Nodes created after the field change.\n   That behaviour may change later.\n   So, for now you will need to manually set them to existing nodes, if that is needed.\n   Field change will NOT trigger NodeGroup roll out.\n   \n   #### Inner value description\n   \n   See https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/\n",
@@ -735,7 +739,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 										"size_mebibytes",
 										"size_gibibytes",
 									}, fieldNameMapNodeGroup),
-									validators.ProtoFieldValidator(&v1.DiskSpec{}, "size_bytes", "size_bytes", fieldNameMapNodeGroup),
+									validators.ProtoFieldValidator(&v11.DiskSpec{}, "size_bytes", "size_bytes", fieldNameMapNodeGroup),
 								},
 								Computed:            true,
 								Optional:            true,
@@ -750,7 +754,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 										"size_mebibytes",
 										"size_gibibytes",
 									}, fieldNameMapNodeGroup),
-									validators.ProtoFieldValidator(&v1.DiskSpec{}, "size_kibibytes", "size_kibibytes", fieldNameMapNodeGroup),
+									validators.ProtoFieldValidator(&v11.DiskSpec{}, "size_kibibytes", "size_kibibytes", fieldNameMapNodeGroup),
 								},
 								Computed:            true,
 								Optional:            true,
@@ -765,7 +769,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 										"size_mebibytes",
 										"size_gibibytes",
 									}, fieldNameMapNodeGroup),
-									validators.ProtoFieldValidator(&v1.DiskSpec{}, "size_mebibytes", "size_mebibytes", fieldNameMapNodeGroup),
+									validators.ProtoFieldValidator(&v11.DiskSpec{}, "size_mebibytes", "size_mebibytes", fieldNameMapNodeGroup),
 								},
 								Computed:            true,
 								Optional:            true,
@@ -780,7 +784,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 										"size_mebibytes",
 										"size_gibibytes",
 									}, fieldNameMapNodeGroup),
-									validators.ProtoFieldValidator(&v1.DiskSpec{}, "size_gibibytes", "size_gibibytes", fieldNameMapNodeGroup),
+									validators.ProtoFieldValidator(&v11.DiskSpec{}, "size_gibibytes", "size_gibibytes", fieldNameMapNodeGroup),
 								},
 								Computed:            true,
 								Optional:            true,
@@ -796,7 +800,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							},
 							"type": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.EnumValidator(v1.DiskSpec_DiskType_value),
+									validators.EnumValidator(v11.DiskSpec_DiskType_value),
 								},
 								Computed:            true,
 								Optional:            true,
@@ -805,7 +809,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							},
 						},
 						Validators: []validator.Object{
-							validators.ProtoFieldValidator(&v1.NodeTemplate{}, "boot_disk", "boot_disk", fieldNameMapNodeGroup),
+							validators.ProtoFieldValidator(&v11.NodeTemplate{}, "boot_disk", "boot_disk", fieldNameMapNodeGroup),
 						},
 						Computed:            true,
 						Optional:            true,
@@ -885,7 +889,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							},
 						},
 						Validators: []validator.List{
-							validators.ProtoFieldValidator(&v1.NodeTemplate{}, "network_interfaces", "network_interfaces", fieldNameMapNodeGroup),
+							validators.ProtoFieldValidator(&v11.NodeTemplate{}, "network_interfaces", "network_interfaces", fieldNameMapNodeGroup),
 						},
 						Computed:            true,
 						Optional:            true,
@@ -897,7 +901,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							Attributes: map[string]schema1.Attribute{
 								"attach_mode": schema1.StringAttribute{
 									Validators: []validator.String{
-										validators.EnumValidator(v1.AttachedFilesystemSpec_AttachMode_value),
+										validators.EnumValidator(v11.AttachedFilesystemSpec_AttachMode_value),
 									},
 									Required:            true,
 									MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `READ_ONLY`\n   - `READ_WRITE`\n   \n",
@@ -962,7 +966,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							},
 						},
 						Validators: []validator.Object{
-							validators.ProtoFieldValidator(&v1.NodeTemplate{}, "nvlink", "nvlink", fieldNameMapNodeGroup),
+							validators.ProtoFieldValidator(&v11.NodeTemplate{}, "nvlink", "nvlink", fieldNameMapNodeGroup),
 						},
 						Optional:            true,
 						MarkdownDescription: "NVLinkSpec configures NVLink settings for the NodeGroup.",
@@ -972,7 +976,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						Attributes: map[string]schema1.Attribute{
 							"policy": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.EnumValidator(v1.ReservationPolicy_Policy_value),
+									validators.EnumValidator(v11.ReservationPolicy_Policy_value),
 								},
 								Optional:            true,
 								MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `AUTO`:\n      1) Will try to launch instance in any reservation_ids if provided.\n      2) Will try to launch instance in any of the available capacity block.\n      3) Will try to launch instance in PAYG if 1 & 2 are not satisfied.\n   \n   - `FORBID`:\n      The instance is launched only using on-demand (PAYG) capacity.\n      No attempt is made to find or use a Capacity Block.\n      It's an error to provide reservation_ids with policy = FORBID\n   \n   - `STRICT`:\n      1) Will try to launch the instance in Capacity Blocks from reservation_ids if provided.\n      2) If reservation_ids are not provided will try to launch instance in suitable & available Capacity Block.\n      3) Fail otherwise.\n   \n   \n",
@@ -1035,7 +1039,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 									},
 								},
 								Validators: []validator.Object{
-									validators.ProtoFieldValidator(&v1.LocalDisksSpec{}, "config", "config", fieldNameMapNodeGroup),
+									validators.ProtoFieldValidator(&v11.LocalDisksSpec{}, "config", "config", fieldNameMapNodeGroup),
 								},
 								Computed:            true,
 								Optional:            true,
@@ -1044,7 +1048,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							},
 						},
 						Validators: []validator.Object{
-							validators.ProtoFieldValidator(&v1.NodeTemplate{}, "local_disks", "local_disks", fieldNameMapNodeGroup),
+							validators.ProtoFieldValidator(&v11.NodeTemplate{}, "local_disks", "local_disks", fieldNameMapNodeGroup),
 						},
 						Computed:            true,
 						Optional:            true,
@@ -1053,7 +1057,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 					},
 					"max_pods": schema1.Int64Attribute{
 						Validators: []validator.Int64{
-							validators.ProtoFieldValidator(&v1.NodeTemplate{}, "max_pods", "max_pods", fieldNameMapNodeGroup),
+							validators.ProtoFieldValidator(&v11.NodeTemplate{}, "max_pods", "max_pods", fieldNameMapNodeGroup),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   The maximum number of Pods per node for your cluster. If omitted, MK8S assigns the default value of 110. When you\n   configure the maximum number of Pods per node for the cluster, MK8S uses this value to allocate a CIDR range for every node\n   in group. The node CIDR prefix is calculated as `32 - ceil(log2(2 * max_pods))`, i.e. the smallest IPv4 subnet whose total address\n   count is at least `2 * max_pods`. Not all IPs are usable for workload Pods because some of them are consumed by system Pods.\n",
@@ -1075,7 +1079,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 										"percent",
 										"count",
 									}, fieldNameMapNodeGroup),
-									validators.ProtoFieldValidator(&v1.PercentOrCount{}, "percent", "percent", fieldNameMapNodeGroup),
+									validators.ProtoFieldValidator(&v11.PercentOrCount{}, "percent", "percent", fieldNameMapNodeGroup),
 								},
 								Optional:            true,
 								MarkdownDescription: "*Cannot be set alongside count.*",
@@ -1087,7 +1091,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 										"percent",
 										"count",
 									}, fieldNameMapNodeGroup),
-									validators.ProtoFieldValidator(&v1.PercentOrCount{}, "count", "count", fieldNameMapNodeGroup),
+									validators.ProtoFieldValidator(&v11.PercentOrCount{}, "count", "count", fieldNameMapNodeGroup),
 								},
 								Optional:            true,
 								MarkdownDescription: "*Cannot be set alongside percent.*",
@@ -1095,7 +1099,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							},
 						},
 						Validators: []validator.Object{
-							validators.ProtoFieldValidator(&v1.NodeGroupDeploymentStrategy{}, "max_unavailable", "max_unavailable", fieldNameMapNodeGroup),
+							validators.ProtoFieldValidator(&v11.NodeGroupDeploymentStrategy{}, "max_unavailable", "max_unavailable", fieldNameMapNodeGroup),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   The maximum number of nodes that can be simultaneously unavailable during the update process.\n   \n   This value can be specified either as an absolute number (for example 3) or as a percentage of the desired\n   number of nodes (for example 5%).\n   \n   When specified as a percentage, the actual number is calculated by rounding down to the nearest whole number.\n   This value cannot be 0 if `max_surge` is also set to 0.\n   \n   On 2026-08-01, defaults to 0.\n   IMPORTANT: starting from Q3 2026 new default is 1;\n   for new clusters it will default to 1,\n   node groups in existing clusters will be gradually migrated during Q3 to the default of 1 as well.\n   To get the actual value for your node group, please see 'strategy' in its status.\n   \n   Example: If set to 20%, up to 20% of the nodes can be taken offline at once during the update,\n   ensuring that at least 80% of the desired nodes remain operational.\n",
@@ -1109,7 +1113,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 										"percent",
 										"count",
 									}, fieldNameMapNodeGroup),
-									validators.ProtoFieldValidator(&v1.PercentOrCount{}, "percent", "percent", fieldNameMapNodeGroup),
+									validators.ProtoFieldValidator(&v11.PercentOrCount{}, "percent", "percent", fieldNameMapNodeGroup),
 								},
 								Optional:            true,
 								MarkdownDescription: "*Cannot be set alongside count.*",
@@ -1121,7 +1125,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 										"percent",
 										"count",
 									}, fieldNameMapNodeGroup),
-									validators.ProtoFieldValidator(&v1.PercentOrCount{}, "count", "count", fieldNameMapNodeGroup),
+									validators.ProtoFieldValidator(&v11.PercentOrCount{}, "count", "count", fieldNameMapNodeGroup),
 								},
 								Optional:            true,
 								MarkdownDescription: "*Cannot be set alongside percent.*",
@@ -1129,7 +1133,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 							},
 						},
 						Validators: []validator.Object{
-							validators.ProtoFieldValidator(&v1.NodeGroupDeploymentStrategy{}, "max_surge", "max_surge", fieldNameMapNodeGroup),
+							validators.ProtoFieldValidator(&v11.NodeGroupDeploymentStrategy{}, "max_surge", "max_surge", fieldNameMapNodeGroup),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   The maximum number of additional nodes that can be provisioned above the desired number of nodes during the update process.\n   \n   This value can be specified either as an absolute number (for example 3) or as a percentage of the desired\n   number of nodes (for example 5%).\n   \n   When specified as a percentage, the actual number is calculated by rounding up to the nearest whole number.\n   This value cannot be 0 if `max_unavailable` is also set to 0.\n   \n   On 2026-08-01, defaults to 1.\n   IMPORTANT: starting from Q3 2026 new default is 0;\n   for new clusters it will default to 0,\n   node groups in existing clusters will be gradually migrated during Q3 to the default of 0 as well.\n   To get the actual value for your node group, please see 'strategy' in its status.\n   \n   Example: If set to 25%, the node group can scale up by an additional 25% during the update,\n   allowing new nodes to be added before old nodes are removed, which helps minimize workload disruption.\n   \n   NOTE:\n   \n   it is user responsibility to ensure that there are enough quota for provision nodes above the desired number.\n   Available quota effectively limits `max_surge`.\n   In case of not enough quota even for one extra node, update operation will hung because of quota exhausted error.\n   Such error will be visible in Operation.progress_data.\n",
@@ -1138,7 +1142,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 					"drain_timeout": schema1.StringAttribute{
 						CustomType: wellknown.WellKnownByName("google.protobuf.Duration").Type().(basetypes.StringTypable),
 						Validators: []validator.String{
-							validators.ProtoFieldValidator(&v1.NodeGroupDeploymentStrategy{}, "drain_timeout", "drain_timeout", fieldNameMapNodeGroup),
+							validators.ProtoFieldValidator(&v11.NodeGroupDeploymentStrategy{}, "drain_timeout", "drain_timeout", fieldNameMapNodeGroup),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   Maximum amount of time that the service will spend attempting to gracefully drain a node\n   (evicting its pods) before falling back to pod deletion.\n   A value of 0 means no timeout: the node can be drained for an unlimited time.\n   Important consequence of that is if PodDisruptionBudget doesn't allow evicting a pod,\n   then NodeGroup update with node re-creation will hang on that pod eviction.\n   Note that this is different from `kubectl drain --timeout`, which gives up and returns an error.\n   \n   On 2026-08-01, defaults to 0.\n   IMPORTANT: starting from Q3 2026 new default is 10m;\n   for new clusters it will default to 10m,\n   node groups in existing clusters will be gradually migrated during Q3 to the default of 10m as well.\n   To get the actual value for your node group, please see 'strategy' in its status.\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
@@ -1163,7 +1167,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 								},
 								"status": schema1.StringAttribute{
 									Validators: []validator.String{
-										validators.EnumValidator(v1.ConditionStatus_value),
+										validators.EnumValidator(v11.ConditionStatus_value),
 									},
 									Optional:            true,
 									MarkdownDescription: ":\n\n   Node condition status.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `CONDITION_STATUS_UNSPECIFIED`\n   - `TRUE`\n   - `FALSE`\n   - `UNKNOWN`\n   \n",
@@ -1353,7 +1357,7 @@ func (r *serviceNodeGroup) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceNodeGroup) StatusMessage() proto.Message {
-	return &v1.NodeGroupStatus{}
+	return &v11.NodeGroupStatus{}
 }
 
 var fieldNameMapNodeGroup = map[string]map[string]string{}
@@ -1363,16 +1367,16 @@ func (r *serviceNodeGroup) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceNodeGroup) SpecMessage() proto.Message {
-	return &v1.NodeGroupSpec{}
+	return &v11.NodeGroupSpec{}
 }
 
 func (r *serviceNodeGroup) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceNodeGroup) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceNodeGroup) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewNodeGroupService(r.provider.SDK())
-	req := &v1.GetNodeGroupRequest{
+	req := &v11.GetNodeGroupRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -1383,9 +1387,9 @@ func (r *serviceNodeGroup) Read(ctx context.Context, id string) (*v11.ResourceMe
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceNodeGroup) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceNodeGroup) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewNodeGroupService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -1397,14 +1401,14 @@ func (r *serviceNodeGroup) GetByName(ctx context.Context, name, parentID string)
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceNodeGroup) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceNodeGroup) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewNodeGroupService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.NodeGroupSpec)
+	specTyped, ok := spec.(*v11.NodeGroupSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.mk8s.v1.NodeGroupSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateNodeGroupRequest{
+	req := &v11.CreateNodeGroupRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -1423,14 +1427,14 @@ func (r *serviceNodeGroup) Create(ctx context.Context, metadata *v11.ResourceMet
 	return id, reqCtx, nil
 }
 
-func (r *serviceNodeGroup) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceNodeGroup) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewNodeGroupService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.NodeGroupSpec)
+	specTyped, ok := spec.(*v11.NodeGroupSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.mk8s.v1.NodeGroupSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateNodeGroupRequest{
+	req := &v11.UpdateNodeGroupRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -1447,7 +1451,7 @@ func (r *serviceNodeGroup) Update(ctx context.Context, metadata *v11.ResourceMet
 
 func (r *serviceNodeGroup) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteNodeGroupRequest{
+	req := &v11.DeleteNodeGroupRequest{
 		Id: id,
 	}
 	service := v12.NewNodeGroupService(r.provider.SDK())

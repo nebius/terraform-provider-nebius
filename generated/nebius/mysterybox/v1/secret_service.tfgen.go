@@ -18,8 +18,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/mysterybox/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/mysterybox/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/mysterybox/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -75,7 +75,9 @@ func (r *serviceSecret) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSecret),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -162,7 +164,9 @@ func (r *serviceSecret) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSecret),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -240,7 +244,7 @@ func (r *serviceSecret) ResourceSchema() schema1.Schema {
 											"string_value",
 											"binary_value",
 										}, fieldNameMapSecret),
-										validators.ProtoFieldValidator(&v1.Payload{}, "string_value", "string_value", fieldNameMapSecret),
+										validators.ProtoFieldValidator(&v11.Payload{}, "string_value", "string_value", fieldNameMapSecret),
 									},
 									Optional:            true,
 									Sensitive:           true,
@@ -256,7 +260,7 @@ func (r *serviceSecret) ResourceSchema() schema1.Schema {
 											"string_value",
 											"binary_value",
 										}, fieldNameMapSecret),
-										validators.ProtoFieldValidator(&v1.Payload{}, "binary_value", "binary_value", fieldNameMapSecret),
+										validators.ProtoFieldValidator(&v11.Payload{}, "binary_value", "binary_value", fieldNameMapSecret),
 									},
 									Optional:            true,
 									Sensitive:           true,
@@ -352,7 +356,7 @@ func (r *serviceSecret) ResourceSchema() schema1.Schema {
 												"string_value",
 												"binary_value",
 											}, fieldNameMapSecret),
-											validators.ProtoFieldValidator(&v1.Payload{}, "string_value", "string_value", fieldNameMapSecret),
+											validators.ProtoFieldValidator(&v11.Payload{}, "string_value", "string_value", fieldNameMapSecret),
 										},
 										WriteOnly:           true,
 										Optional:            true,
@@ -369,7 +373,7 @@ func (r *serviceSecret) ResourceSchema() schema1.Schema {
 												"string_value",
 												"binary_value",
 											}, fieldNameMapSecret),
-											validators.ProtoFieldValidator(&v1.Payload{}, "binary_value", "binary_value", fieldNameMapSecret),
+											validators.ProtoFieldValidator(&v11.Payload{}, "binary_value", "binary_value", fieldNameMapSecret),
 										},
 										WriteOnly:           true,
 										Optional:            true,
@@ -410,7 +414,7 @@ func (r *serviceSecret) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceSecret) StatusMessage() proto.Message {
-	return &v1.SecretStatus{}
+	return &v11.SecretStatus{}
 }
 
 var fieldNameMapSecret = map[string]map[string]string{}
@@ -420,16 +424,16 @@ func (r *serviceSecret) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceSecret) SpecMessage() proto.Message {
-	return &v1.SecretSpec{}
+	return &v11.SecretSpec{}
 }
 
 func (r *serviceSecret) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceSecret) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceSecret) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewSecretService(r.provider.SDK())
-	req := &v1.GetSecretRequest{
+	req := &v11.GetSecretRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -440,9 +444,9 @@ func (r *serviceSecret) Read(ctx context.Context, id string) (*v11.ResourceMetad
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSecret) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceSecret) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewSecretService(r.provider.SDK())
-	req := &v1.GetSecretByNameRequest{
+	req := &v11.GetSecretByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -454,14 +458,14 @@ func (r *serviceSecret) GetByName(ctx context.Context, name, parentID string) (*
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSecret) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceSecret) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewSecretService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.SecretSpec)
+	specTyped, ok := spec.(*v11.SecretSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.mysterybox.v1.SecretSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateSecretRequest{
+	req := &v11.CreateSecretRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -480,14 +484,14 @@ func (r *serviceSecret) Create(ctx context.Context, metadata *v11.ResourceMetada
 	return id, reqCtx, nil
 }
 
-func (r *serviceSecret) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceSecret) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewSecretService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.SecretSpec)
+	specTyped, ok := spec.(*v11.SecretSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.mysterybox.v1.SecretSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateSecretRequest{
+	req := &v11.UpdateSecretRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -504,7 +508,7 @@ func (r *serviceSecret) Update(ctx context.Context, metadata *v11.ResourceMetada
 
 func (r *serviceSecret) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteSecretRequest{
+	req := &v11.DeleteSecretRequest{
 		Id: id,
 	}
 	service := v12.NewSecretService(r.provider.SDK())

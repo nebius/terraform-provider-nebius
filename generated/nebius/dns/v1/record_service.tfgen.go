@@ -15,8 +15,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/dns/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/dns/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/dns/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -72,7 +72,9 @@ func (r *serviceRecord) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapRecord),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -165,7 +167,9 @@ func (r *serviceRecord) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapRecord),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -204,7 +208,7 @@ func (r *serviceRecord) ResourceSchema() schema1.Schema {
 			},
 			"relative_name": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.RecordSpec{}, "relative_name", "relative_name", fieldNameMapRecord),
+					validators.ProtoFieldValidator(&v11.RecordSpec{}, "relative_name", "relative_name", fieldNameMapRecord),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   Zone-relative name of this record (e.g., `www` for `www.<parent zone's domain name>`)\n   Use `@` for records in zone apex (that is, records that have the same domain name as the zone itself)\n   To see the resolved absolute domain name, see `Record.status.effective_fqdn`\n",
@@ -214,7 +218,7 @@ func (r *serviceRecord) ResourceSchema() schema1.Schema {
 			},
 			"type": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.RecordSpec_RecordType_value),
+					validators.EnumValidator(v11.RecordSpec_RecordType_value),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   Record type\n   \n   #### Supported values\n   \n   DNS Record type\n   Possible values:\n   \n   - `RECORD_TYPE_UNSPECIFIED` - Record type is not specified\n   - `A` - `A` record: IPv4 address\n   - `AAAA` - `AAAA` record: IPv6 address\n   - `PTR` - `PTR` record: mapping from IP address to a domain name\n   - `CNAME` - `CNAME` record: an alias for a *canonical domain name*\n   - `MX` - `MX` record: mail server information (domain name, priority)\n   - `TXT` - `TXT` record: text data, typically used to verify e-mail addresses, websites and TLS certificates\n   - `SRV` - `SRV` record: information about a network service (domain name, port, weight)\n   - `NS` - `NS` record: domain name of an authoritative nameserver for this DNS zone, or one of its subzones\n   - `SOA` - `SOA` record: administrative information about this DNS zone\n   - `CAA` - `CAA` record: certificate issuance settings for this DNS zone and its subzones\n   - `SVCB` - `SVCB` record: service binding. See [RFC 9460, section 2.3](https://www.rfc-editor.org/rfc/rfc9460.html#section-2.3)\n   - `HTTPS`:\n      `HTTPS` record: service binding with HTTPS protocol configuration.\n      See [RFC 9460, section 9.1](https://www.rfc-editor.org/rfc/rfc9460.html#section-9.1)\n   \n   \n",
@@ -273,7 +277,7 @@ func (r *serviceRecord) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceRecord) StatusMessage() proto.Message {
-	return &v1.RecordStatus{}
+	return &v11.RecordStatus{}
 }
 
 var fieldNameMapRecord = map[string]map[string]string{}
@@ -283,16 +287,16 @@ func (r *serviceRecord) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceRecord) SpecMessage() proto.Message {
-	return &v1.RecordSpec{}
+	return &v11.RecordSpec{}
 }
 
 func (r *serviceRecord) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceRecord) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceRecord) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewRecordService(r.provider.SDK())
-	req := &v1.GetRecordRequest{
+	req := &v11.GetRecordRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -303,9 +307,9 @@ func (r *serviceRecord) Read(ctx context.Context, id string) (*v11.ResourceMetad
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceRecord) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceRecord) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewRecordService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -317,14 +321,14 @@ func (r *serviceRecord) GetByName(ctx context.Context, name, parentID string) (*
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceRecord) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceRecord) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewRecordService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.RecordSpec)
+	specTyped, ok := spec.(*v11.RecordSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.dns.v1.RecordSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateRecordRequest{
+	req := &v11.CreateRecordRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -343,14 +347,14 @@ func (r *serviceRecord) Create(ctx context.Context, metadata *v11.ResourceMetada
 	return id, reqCtx, nil
 }
 
-func (r *serviceRecord) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceRecord) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewRecordService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.RecordSpec)
+	specTyped, ok := spec.(*v11.RecordSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.dns.v1.RecordSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateRecordRequest{
+	req := &v11.UpdateRecordRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -367,7 +371,7 @@ func (r *serviceRecord) Update(ctx context.Context, metadata *v11.ResourceMetada
 
 func (r *serviceRecord) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteRecordRequest{
+	req := &v11.DeleteRecordRequest{
 		Id: id,
 	}
 	service := v12.NewRecordService(r.provider.SDK())

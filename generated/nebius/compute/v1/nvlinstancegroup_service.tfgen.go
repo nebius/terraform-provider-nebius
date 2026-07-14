@@ -18,8 +18,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/compute/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/compute/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/compute/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -75,7 +75,9 @@ func (r *serviceNVLInstanceGroup) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapNVLInstanceGroup),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -162,7 +164,9 @@ func (r *serviceNVLInstanceGroup) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapNVLInstanceGroup),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers: []planmodifier.String{
@@ -211,7 +215,7 @@ func (r *serviceNVLInstanceGroup) ResourceSchema() schema1.Schema {
 			},
 			"type": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.NVLInstanceGroupSpec_NVLInstanceGroupType_value),
+					validators.EnumValidator(v11.NVLInstanceGroupSpec_NVLInstanceGroupType_value),
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Type of the NVLink InstanceGroup (corresponds to the Compute platform)\n   \n   #### Supported values\n   \n   Type of the NVLink InstanceGroup.\n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `GB200`\n   - `GB300`\n   \n",
@@ -221,7 +225,7 @@ func (r *serviceNVLInstanceGroup) ResourceSchema() schema1.Schema {
 			},
 			"size": schema1.Int64Attribute{
 				Validators: []validator.Int64{
-					validators.ProtoFieldValidator(&v1.NVLInstanceGroupSpec{}, "size", "size", fieldNameMapNVLInstanceGroup),
+					validators.ProtoFieldValidator(&v11.NVLInstanceGroupSpec{}, "size", "size", fieldNameMapNVLInstanceGroup),
 				},
 				Required:            true,
 				MarkdownDescription: "Maximum number of instances in the NVLink InstanceGroup",
@@ -266,7 +270,7 @@ func (r *serviceNVLInstanceGroup) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceNVLInstanceGroup) StatusMessage() proto.Message {
-	return &v1.NVLInstanceGroupStatus{}
+	return &v11.NVLInstanceGroupStatus{}
 }
 
 var fieldNameMapNVLInstanceGroup = map[string]map[string]string{}
@@ -276,16 +280,16 @@ func (r *serviceNVLInstanceGroup) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceNVLInstanceGroup) SpecMessage() proto.Message {
-	return &v1.NVLInstanceGroupSpec{}
+	return &v11.NVLInstanceGroupSpec{}
 }
 
 func (r *serviceNVLInstanceGroup) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceNVLInstanceGroup) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceNVLInstanceGroup) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewNVLInstanceGroupService(r.provider.SDK())
-	req := &v1.GetNVLInstanceGroupRequest{
+	req := &v11.GetNVLInstanceGroupRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -296,9 +300,9 @@ func (r *serviceNVLInstanceGroup) Read(ctx context.Context, id string) (*v11.Res
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceNVLInstanceGroup) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceNVLInstanceGroup) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewNVLInstanceGroupService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -310,14 +314,14 @@ func (r *serviceNVLInstanceGroup) GetByName(ctx context.Context, name, parentID 
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceNVLInstanceGroup) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceNVLInstanceGroup) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewNVLInstanceGroupService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.NVLInstanceGroupSpec)
+	specTyped, ok := spec.(*v11.NVLInstanceGroupSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.NVLInstanceGroupSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateNVLInstanceGroupRequest{
+	req := &v11.CreateNVLInstanceGroupRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -336,14 +340,14 @@ func (r *serviceNVLInstanceGroup) Create(ctx context.Context, metadata *v11.Reso
 	return id, reqCtx, nil
 }
 
-func (r *serviceNVLInstanceGroup) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceNVLInstanceGroup) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewNVLInstanceGroupService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.NVLInstanceGroupSpec)
+	specTyped, ok := spec.(*v11.NVLInstanceGroupSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.NVLInstanceGroupSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateNVLInstanceGroupRequest{
+	req := &v11.UpdateNVLInstanceGroupRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -360,7 +364,7 @@ func (r *serviceNVLInstanceGroup) Update(ctx context.Context, metadata *v11.Reso
 
 func (r *serviceNVLInstanceGroup) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteNVLInstanceGroupRequest{
+	req := &v11.DeleteNVLInstanceGroupRequest{
 		Id: id,
 	}
 	service := v12.NewNVLInstanceGroupService(r.provider.SDK())

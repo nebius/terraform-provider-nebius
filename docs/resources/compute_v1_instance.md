@@ -52,6 +52,7 @@ resource "nebius_compute_v1_instance" "vm" {
 
 ### Required
 
+- `boot_disk` (Attributes) Specified boot disk attached to the instance. (see [below for nested schema](#nestedatt--boot_disk))
 - `network_interfaces` (Attributes List) :
 
    List of network interfaces attached to the instance.
@@ -67,7 +68,6 @@ resource "nebius_compute_v1_instance" "vm" {
 
 ### Optional
 
-- `boot_disk` (Attributes) Specified boot disk attached to the instance. (see [below for nested schema](#nestedatt--boot_disk))
 - `cloud_init_user_data` (String, Sensitive) :
 
    Data in cloud-init format for customizing instance initialization.
@@ -146,91 +146,6 @@ resource "nebius_compute_v1_instance" "vm" {
    Timestamp indicating when the resource was last updated.
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
-
-<a id="nestedatt--network_interfaces"></a>
-### Nested Schema for `network_interfaces`
-
-Required:
-
-- `ip_address` (Attributes) :
-
-   Private IPv4 address associated with the interface.
-   
-   #### Inner value description
-   
-   Describes an IPv4 address. (see [below for nested schema](#nestedatt--network_interfaces--ip_address))
-- `name` (String) :
-
-   Interface name
-   Value of this field configures the name of the network interface inside VM's OS.
-   Longer values will persist in the specification but will be truncated to 15 symbols before being passed to VM configuration.
-- `subnet_id` (String) Subnet ID
-
-Optional:
-
-- `aliases` (Attributes List) Assign ranges of IP addresses as aliases (see [below for nested schema](#nestedatt--network_interfaces--aliases))
-- `public_ip_address` (Attributes) :
-
-   Public IPv4 address associated with the interface.
-   
-   #### Inner value description
-   
-   Describes a public IP address. (see [below for nested schema](#nestedatt--network_interfaces--public_ip_address))
-- `security_groups` (Attributes List) :
-
-   Security groups associated with the network interface.
-   If an empty list is provided, the default security group for the network will be used.
-   Effective security groups can be seen in the status. (see [below for nested schema](#nestedatt--network_interfaces--security_groups))
-
-<a id="nestedatt--network_interfaces--ip_address"></a>
-### Nested Schema for `network_interfaces.ip_address`
-
-Optional:
-
-- `allocation_id` (String) Allocation identifier if it was created before.
-
-
-<a id="nestedatt--network_interfaces--aliases"></a>
-### Nested Schema for `network_interfaces.aliases`
-
-Required:
-
-- `allocation_id` (String) ID of allocation
-
-
-<a id="nestedatt--network_interfaces--public_ip_address"></a>
-### Nested Schema for `network_interfaces.public_ip_address`
-
-Optional:
-
-- `allocation_id` (String) Allocation identifier if it was created before.
-- `static` (Boolean) :
-
-   If false - Allocation will be created/deleted during NetworkInterface.Allocate/NetworkInterface.Deallocate
-   If true  - Allocation will be created/deleted during NetworkInterface.Create/NetworkInterface.Delete
-   False by default
-
-
-<a id="nestedatt--network_interfaces--security_groups"></a>
-### Nested Schema for `network_interfaces.security_groups`
-
-Optional:
-
-- `id` (String) Security group identifier
-
-
-
-<a id="nestedatt--resources"></a>
-### Nested Schema for `resources`
-
-Required:
-
-- `platform` (String)
-
-Optional:
-
-- `preset` (String)
-
 
 <a id="nestedatt--boot_disk"></a>
 ### Nested Schema for `boot_disk`
@@ -366,8 +281,9 @@ Optional:
 - `size_gibibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*
 - `size_kibibytes` (Number) *Cannot be set alongside size_bytes, size_mebibytes or size_gibibytes.*
 - `size_mebibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_gibibytes.*
-- `source_image_family` (Attributes) *Cannot be set alongside source_image_id.* (see [below for nested schema](#nestedatt--boot_disk--managed_disk--spec--source_image_family))
-- `source_image_id` (String) *Cannot be set alongside source_image_family.*
+- `source_image_family` (Attributes) *Cannot be set alongside source_image_id or source_snapshot_id.* (see [below for nested schema](#nestedatt--boot_disk--managed_disk--spec--source_image_family))
+- `source_image_id` (String) *Cannot be set alongside source_image_family or source_snapshot_id.*
+- `source_snapshot_id` (String) *Cannot be set alongside source_image_id or source_image_family.*
 
 <a id="nestedatt--boot_disk--managed_disk--spec--disk_encryption"></a>
 ### Nested Schema for `boot_disk.managed_disk.spec.disk_encryption`
@@ -399,6 +315,91 @@ Optional:
 
 
 
+
+
+<a id="nestedatt--network_interfaces"></a>
+### Nested Schema for `network_interfaces`
+
+Required:
+
+- `ip_address` (Attributes) :
+
+   Private IPv4 address associated with the interface.
+   
+   #### Inner value description
+   
+   Describes an IPv4 address. (see [below for nested schema](#nestedatt--network_interfaces--ip_address))
+- `name` (String) :
+
+   Interface name
+   Value of this field configures the name of the network interface inside VM's OS.
+   Longer values will persist in the specification but will be truncated to 15 symbols before being passed to VM configuration.
+- `subnet_id` (String) Subnet ID
+
+Optional:
+
+- `aliases` (Attributes List) Assign ranges of IP addresses as aliases (see [below for nested schema](#nestedatt--network_interfaces--aliases))
+- `public_ip_address` (Attributes) :
+
+   Public IPv4 address associated with the interface.
+   
+   #### Inner value description
+   
+   Describes a public IP address. (see [below for nested schema](#nestedatt--network_interfaces--public_ip_address))
+- `security_groups` (Attributes List) :
+
+   Security groups associated with the network interface.
+   If an empty list is provided, the default security group for the network will be used.
+   Effective security groups can be seen in the status. (see [below for nested schema](#nestedatt--network_interfaces--security_groups))
+
+<a id="nestedatt--network_interfaces--ip_address"></a>
+### Nested Schema for `network_interfaces.ip_address`
+
+Optional:
+
+- `allocation_id` (String) Allocation identifier if it was created before.
+
+
+<a id="nestedatt--network_interfaces--aliases"></a>
+### Nested Schema for `network_interfaces.aliases`
+
+Required:
+
+- `allocation_id` (String) ID of allocation
+
+
+<a id="nestedatt--network_interfaces--public_ip_address"></a>
+### Nested Schema for `network_interfaces.public_ip_address`
+
+Optional:
+
+- `allocation_id` (String) Allocation identifier if it was created before.
+- `static` (Boolean) :
+
+   If false - Allocation will be created/deleted during NetworkInterface.Allocate/NetworkInterface.Deallocate
+   If true  - Allocation will be created/deleted during NetworkInterface.Create/NetworkInterface.Delete
+   False by default
+
+
+<a id="nestedatt--network_interfaces--security_groups"></a>
+### Nested Schema for `network_interfaces.security_groups`
+
+Optional:
+
+- `id` (String) Security group identifier
+
+
+
+<a id="nestedatt--resources"></a>
+### Nested Schema for `resources`
+
+Required:
+
+- `platform` (String)
+
+Optional:
+
+- `preset` (String)
 
 
 <a id="nestedatt--filesystems"></a>
@@ -657,8 +658,9 @@ Optional:
 - `size_gibibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*
 - `size_kibibytes` (Number) *Cannot be set alongside size_bytes, size_mebibytes or size_gibibytes.*
 - `size_mebibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_gibibytes.*
-- `source_image_family` (Attributes) *Cannot be set alongside source_image_id.* (see [below for nested schema](#nestedatt--secondary_disks--managed_disk--spec--source_image_family))
-- `source_image_id` (String) *Cannot be set alongside source_image_family.*
+- `source_image_family` (Attributes) *Cannot be set alongside source_image_id or source_snapshot_id.* (see [below for nested schema](#nestedatt--secondary_disks--managed_disk--spec--source_image_family))
+- `source_image_id` (String) *Cannot be set alongside source_image_family or source_snapshot_id.*
+- `source_snapshot_id` (String) *Cannot be set alongside source_image_id or source_image_family.*
 
 <a id="nestedatt--secondary_disks--managed_disk--spec--disk_encryption"></a>
 ### Nested Schema for `secondary_disks.managed_disk.spec.disk_encryption`

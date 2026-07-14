@@ -15,13 +15,14 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/vpc/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -71,7 +72,9 @@ func (r *serviceRouteTable) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapRouteTable),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -155,7 +158,9 @@ func (r *serviceRouteTable) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapRouteTable),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -241,7 +246,7 @@ func (r *serviceRouteTable) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceRouteTable) StatusMessage() proto.Message {
-	return &v1.RouteTableStatus{}
+	return &v11.RouteTableStatus{}
 }
 
 var fieldNameMapRouteTable = map[string]map[string]string{}
@@ -251,16 +256,16 @@ func (r *serviceRouteTable) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceRouteTable) SpecMessage() proto.Message {
-	return &v1.RouteTableSpec{}
+	return &v11.RouteTableSpec{}
 }
 
 func (r *serviceRouteTable) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceRouteTable) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceRouteTable) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewRouteTableService(r.provider.SDK())
-	req := &v1.GetRouteTableRequest{
+	req := &v11.GetRouteTableRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -271,9 +276,9 @@ func (r *serviceRouteTable) Read(ctx context.Context, id string) (*v11.ResourceM
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceRouteTable) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceRouteTable) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewRouteTableService(r.provider.SDK())
-	req := &v1.GetRouteTableByNameRequest{
+	req := &v11.GetRouteTableByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -285,14 +290,14 @@ func (r *serviceRouteTable) GetByName(ctx context.Context, name, parentID string
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceRouteTable) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceRouteTable) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewRouteTableService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.RouteTableSpec)
+	specTyped, ok := spec.(*v11.RouteTableSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.RouteTableSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateRouteTableRequest{
+	req := &v11.CreateRouteTableRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -311,14 +316,14 @@ func (r *serviceRouteTable) Create(ctx context.Context, metadata *v11.ResourceMe
 	return id, reqCtx, nil
 }
 
-func (r *serviceRouteTable) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceRouteTable) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewRouteTableService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.RouteTableSpec)
+	specTyped, ok := spec.(*v11.RouteTableSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.RouteTableSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateRouteTableRequest{
+	req := &v11.UpdateRouteTableRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -335,7 +340,7 @@ func (r *serviceRouteTable) Update(ctx context.Context, metadata *v11.ResourceMe
 
 func (r *serviceRouteTable) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteRouteTableRequest{
+	req := &v11.DeleteRouteTableRequest{
 		Id: id,
 	}
 	service := v12.NewRouteTableService(r.provider.SDK())

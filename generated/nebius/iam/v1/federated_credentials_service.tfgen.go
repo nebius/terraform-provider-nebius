@@ -15,13 +15,14 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/iam/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/iam/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/iam/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -71,7 +72,9 @@ func (r *serviceFederatedCredentials) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapFederatedCredentials),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -153,7 +156,9 @@ func (r *serviceFederatedCredentials) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapFederatedCredentials),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -239,7 +244,7 @@ func (r *serviceFederatedCredentials) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceFederatedCredentials) StatusMessage() proto.Message {
-	return &v1.FederatedCredentialsStatus{}
+	return &v11.FederatedCredentialsStatus{}
 }
 
 var fieldNameMapFederatedCredentials = map[string]map[string]string{}
@@ -249,16 +254,16 @@ func (r *serviceFederatedCredentials) FieldNameMap() map[string]map[string]strin
 }
 
 func (r *serviceFederatedCredentials) SpecMessage() proto.Message {
-	return &v1.FederatedCredentialsSpec{}
+	return &v11.FederatedCredentialsSpec{}
 }
 
 func (r *serviceFederatedCredentials) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceFederatedCredentials) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceFederatedCredentials) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewFederatedCredentialsService(r.provider.SDK())
-	req := &v1.GetFederatedCredentialsRequest{
+	req := &v11.GetFederatedCredentialsRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -269,9 +274,9 @@ func (r *serviceFederatedCredentials) Read(ctx context.Context, id string) (*v11
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceFederatedCredentials) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceFederatedCredentials) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewFederatedCredentialsService(r.provider.SDK())
-	req := &v1.GetByNameFederatedCredentialsRequest{
+	req := &v11.GetByNameFederatedCredentialsRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -283,14 +288,14 @@ func (r *serviceFederatedCredentials) GetByName(ctx context.Context, name, paren
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceFederatedCredentials) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceFederatedCredentials) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewFederatedCredentialsService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.FederatedCredentialsSpec)
+	specTyped, ok := spec.(*v11.FederatedCredentialsSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.FederatedCredentialsSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateFederatedCredentialsRequest{
+	req := &v11.CreateFederatedCredentialsRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -309,14 +314,14 @@ func (r *serviceFederatedCredentials) Create(ctx context.Context, metadata *v11.
 	return id, reqCtx, nil
 }
 
-func (r *serviceFederatedCredentials) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceFederatedCredentials) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewFederatedCredentialsService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.FederatedCredentialsSpec)
+	specTyped, ok := spec.(*v11.FederatedCredentialsSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.FederatedCredentialsSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateFederatedCredentialsRequest{
+	req := &v11.UpdateFederatedCredentialsRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -333,7 +338,7 @@ func (r *serviceFederatedCredentials) Update(ctx context.Context, metadata *v11.
 
 func (r *serviceFederatedCredentials) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteFederatedCredentialsRequest{
+	req := &v11.DeleteFederatedCredentialsRequest{
 		Id: id,
 	}
 	service := v12.NewFederatedCredentialsService(r.provider.SDK())

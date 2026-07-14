@@ -139,9 +139,8 @@ func (v *protoFieldValidator) validate(
 		if parentPathStr != "" {
 			parentPathStr = parentPathStr + "."
 		}
-		var valError *protovalidate.ValidationError
-		if errors.As(err, &valError) {
-			violations := valError.ToProto()
+		if e, isValidationError := errors.AsType[*protovalidate.ValidationError](err); isValidationError {
+			violations := e.ToProto()
 
 		violationChecker:
 			for _, violation := range violations.GetViolations() {

@@ -18,13 +18,14 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/iam/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/iam/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/iam/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -205,7 +206,9 @@ func (r *serviceGroupMembership) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapGroupMembership),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers: []planmodifier.String{
@@ -362,7 +365,7 @@ func (r *serviceGroupMembership) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceGroupMembership) StatusMessage() proto.Message {
-	return &v1.GroupMembershipStatus{}
+	return &v11.GroupMembershipStatus{}
 }
 
 var fieldNameMapGroupMembership = map[string]map[string]string{}
@@ -372,16 +375,16 @@ func (r *serviceGroupMembership) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceGroupMembership) SpecMessage() proto.Message {
-	return &v1.GroupMembershipSpec{}
+	return &v11.GroupMembershipSpec{}
 }
 
 func (r *serviceGroupMembership) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceGroupMembership) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceGroupMembership) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewGroupMembershipService(r.provider.SDK())
-	req := &v1.GetGroupMembershipRequest{
+	req := &v11.GetGroupMembershipRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -392,14 +395,14 @@ func (r *serviceGroupMembership) Read(ctx context.Context, id string) (*v11.Reso
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceGroupMembership) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceGroupMembership) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewGroupMembershipService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.GroupMembershipSpec)
+	specTyped, ok := spec.(*v11.GroupMembershipSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.GroupMembershipSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateGroupMembershipRequest{
+	req := &v11.CreateGroupMembershipRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -418,14 +421,14 @@ func (r *serviceGroupMembership) Create(ctx context.Context, metadata *v11.Resou
 	return id, reqCtx, nil
 }
 
-func (r *serviceGroupMembership) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceGroupMembership) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	var reqCtx *requestcontext.Context
 	return reqCtx, fmt.Errorf("Update is unimplemented for nebius.iam.v1.GroupMembershipService")
 }
 
 func (r *serviceGroupMembership) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteGroupMembershipRequest{
+	req := &v11.DeleteGroupMembershipRequest{
 		Id: id,
 	}
 	service := v12.NewGroupMembershipService(r.provider.SDK())

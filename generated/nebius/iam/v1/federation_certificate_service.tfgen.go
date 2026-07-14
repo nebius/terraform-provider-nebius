@@ -15,13 +15,14 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/iam/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/iam/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/iam/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -161,7 +162,9 @@ func (r *serviceFederationCertificate) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapFederationCertificate),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -262,7 +265,7 @@ func (r *serviceFederationCertificate) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceFederationCertificate) StatusMessage() proto.Message {
-	return &v1.FederationCertificateStatus{}
+	return &v11.FederationCertificateStatus{}
 }
 
 var fieldNameMapFederationCertificate = map[string]map[string]string{}
@@ -272,16 +275,16 @@ func (r *serviceFederationCertificate) FieldNameMap() map[string]map[string]stri
 }
 
 func (r *serviceFederationCertificate) SpecMessage() proto.Message {
-	return &v1.FederationCertificateSpec{}
+	return &v11.FederationCertificateSpec{}
 }
 
 func (r *serviceFederationCertificate) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceFederationCertificate) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceFederationCertificate) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewFederationCertificateService(r.provider.SDK())
-	req := &v1.GetFederationCertificateRequest{
+	req := &v11.GetFederationCertificateRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -292,14 +295,14 @@ func (r *serviceFederationCertificate) Read(ctx context.Context, id string) (*v1
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceFederationCertificate) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceFederationCertificate) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewFederationCertificateService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.FederationCertificateSpec)
+	specTyped, ok := spec.(*v11.FederationCertificateSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.FederationCertificateSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateFederationCertificateRequest{
+	req := &v11.CreateFederationCertificateRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -318,14 +321,14 @@ func (r *serviceFederationCertificate) Create(ctx context.Context, metadata *v11
 	return id, reqCtx, nil
 }
 
-func (r *serviceFederationCertificate) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceFederationCertificate) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewFederationCertificateService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.FederationCertificateSpec)
+	specTyped, ok := spec.(*v11.FederationCertificateSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.FederationCertificateSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateFederationCertificateRequest{
+	req := &v11.UpdateFederationCertificateRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -342,7 +345,7 @@ func (r *serviceFederationCertificate) Update(ctx context.Context, metadata *v11
 
 func (r *serviceFederationCertificate) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteFederationCertificateRequest{
+	req := &v11.DeleteFederationCertificateRequest{
 		Id: id,
 	}
 	service := v12.NewFederationCertificateService(r.provider.SDK())

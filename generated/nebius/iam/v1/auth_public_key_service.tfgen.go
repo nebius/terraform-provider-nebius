@@ -16,8 +16,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/iam/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/iam/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/iam/v1"
 	types1 "github.com/nebius/terraform-provider-nebius/conversion/types"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
@@ -191,7 +191,9 @@ func (r *serviceAuthPublicKey) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapAuthPublicKey),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -363,7 +365,7 @@ func (r *serviceAuthPublicKey) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceAuthPublicKey) StatusMessage() proto.Message {
-	return &v1.AuthPublicKeyStatus{}
+	return &v11.AuthPublicKeyStatus{}
 }
 
 var fieldNameMapAuthPublicKey = map[string]map[string]string{}
@@ -373,16 +375,16 @@ func (r *serviceAuthPublicKey) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceAuthPublicKey) SpecMessage() proto.Message {
-	return &v1.AuthPublicKeySpec{}
+	return &v11.AuthPublicKeySpec{}
 }
 
 func (r *serviceAuthPublicKey) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceAuthPublicKey) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceAuthPublicKey) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewAuthPublicKeyService(r.provider.SDK())
-	req := &v1.GetAuthPublicKeyRequest{
+	req := &v11.GetAuthPublicKeyRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -393,14 +395,14 @@ func (r *serviceAuthPublicKey) Read(ctx context.Context, id string) (*v11.Resour
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceAuthPublicKey) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceAuthPublicKey) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewAuthPublicKeyService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.AuthPublicKeySpec)
+	specTyped, ok := spec.(*v11.AuthPublicKeySpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.AuthPublicKeySpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateAuthPublicKeyRequest{
+	req := &v11.CreateAuthPublicKeyRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -419,14 +421,14 @@ func (r *serviceAuthPublicKey) Create(ctx context.Context, metadata *v11.Resourc
 	return id, reqCtx, nil
 }
 
-func (r *serviceAuthPublicKey) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceAuthPublicKey) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewAuthPublicKeyService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.AuthPublicKeySpec)
+	specTyped, ok := spec.(*v11.AuthPublicKeySpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.AuthPublicKeySpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateAuthPublicKeyRequest{
+	req := &v11.UpdateAuthPublicKeyRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -443,7 +445,7 @@ func (r *serviceAuthPublicKey) Update(ctx context.Context, metadata *v11.Resourc
 
 func (r *serviceAuthPublicKey) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteAuthPublicKeyRequest{
+	req := &v11.DeleteAuthPublicKeyRequest{
 		Id: id,
 	}
 	service := v12.NewAuthPublicKeyService(r.provider.SDK())

@@ -15,8 +15,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/dns/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/dns/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/dns/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -72,7 +72,9 @@ func (r *serviceZone) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapZone),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -165,7 +167,9 @@ func (r *serviceZone) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapZone),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -204,7 +208,7 @@ func (r *serviceZone) ResourceSchema() schema1.Schema {
 			},
 			"domain_name": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.ZoneSpec{}, "domain_name", "domain_name", fieldNameMapZone),
+					validators.ProtoFieldValidator(&v11.ZoneSpec{}, "domain_name", "domain_name", fieldNameMapZone),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   Fully qualified domain name of this zone, including `.` at the end\n   Cannot be changed after creating the zone\n",
@@ -270,7 +274,7 @@ func (r *serviceZone) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceZone) StatusMessage() proto.Message {
-	return &v1.ZoneStatus{}
+	return &v11.ZoneStatus{}
 }
 
 var fieldNameMapZone = map[string]map[string]string{}
@@ -280,16 +284,16 @@ func (r *serviceZone) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceZone) SpecMessage() proto.Message {
-	return &v1.ZoneSpec{}
+	return &v11.ZoneSpec{}
 }
 
 func (r *serviceZone) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceZone) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceZone) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewZoneService(r.provider.SDK())
-	req := &v1.GetZoneRequest{
+	req := &v11.GetZoneRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -300,9 +304,9 @@ func (r *serviceZone) Read(ctx context.Context, id string) (*v11.ResourceMetadat
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceZone) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceZone) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewZoneService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -314,14 +318,14 @@ func (r *serviceZone) GetByName(ctx context.Context, name, parentID string) (*v1
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceZone) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceZone) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewZoneService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.ZoneSpec)
+	specTyped, ok := spec.(*v11.ZoneSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.dns.v1.ZoneSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateZoneRequest{
+	req := &v11.CreateZoneRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -340,14 +344,14 @@ func (r *serviceZone) Create(ctx context.Context, metadata *v11.ResourceMetadata
 	return id, reqCtx, nil
 }
 
-func (r *serviceZone) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceZone) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewZoneService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.ZoneSpec)
+	specTyped, ok := spec.(*v11.ZoneSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.dns.v1.ZoneSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateZoneRequest{
+	req := &v11.UpdateZoneRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -364,7 +368,7 @@ func (r *serviceZone) Update(ctx context.Context, metadata *v11.ResourceMetadata
 
 func (r *serviceZone) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteZoneRequest{
+	req := &v11.DeleteZoneRequest{
 		Id: id,
 	}
 	service := v12.NewZoneService(r.provider.SDK())

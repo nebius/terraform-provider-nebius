@@ -18,8 +18,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/vpc/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -75,7 +75,9 @@ func (r *serviceSecurityRule) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSecurityRule),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -244,7 +246,9 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSecurityRule),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -283,7 +287,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 			},
 			"access": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.RuleAccessAction_value),
+					validators.EnumValidator(v11.RuleAccessAction_value),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   Access action for the rule.\n   Required. Determines whether matching traffic is allowed or denied.\n   \n   #### Supported values\n   \n   Access specifies action on matching traffic: ALLOW or DENY.\n   Possible values:\n   \n   - `ACCESS_UNSPECIFIED`\n   - `ALLOW`\n   - `DENY`\n   \n",
@@ -294,7 +298,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 			"priority": schema1.Int64Attribute{
 				Validators: []validator.Int64{
 					validators.Int32Validator(),
-					validators.ProtoFieldValidator(&v1.SecurityRuleSpec{}, "priority", "priority", fieldNameMapSecurityRule),
+					validators.ProtoFieldValidator(&v11.SecurityRuleSpec{}, "priority", "priority", fieldNameMapSecurityRule),
 				},
 				Computed:            true,
 				Optional:            true,
@@ -305,7 +309,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 			},
 			"protocol": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.RuleProtocol_value),
+					validators.EnumValidator(v11.RuleProtocol_value),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   Protocol used in the rule.\n   Supported values: ANY, TCP, UDP, ICMP.\n   \n   #### Supported values\n   \n   Protocol specifies traffic protocol.\n   Possible values:\n   \n   - `PROTOCOL_UNSPECIFIED`\n   - `ANY`\n   - `TCP`\n   - `UDP`\n   - `ICMP`\n   \n",
@@ -326,7 +330,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 					"source_cidrs": schema1.ListAttribute{
 						ElementType: types.StringType,
 						Validators: []validator.List{
-							validators.ProtoFieldValidator(&v1.RuleIngress{}, "source_cidrs", "source_cidrs", fieldNameMapSecurityRule),
+							validators.ProtoFieldValidator(&v11.RuleIngress{}, "source_cidrs", "source_cidrs", fieldNameMapSecurityRule),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   CIDR blocks as the source.\n   Optional. Empty list means any address.\n   Must be a valid IPv4\n   Maximum of 8 CIDRs can be specified.\n",
@@ -338,7 +342,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 						ElementType: types.Int64Type,
 						Validators: []validator.List{
 							validators.ListInt32Validator(),
-							validators.ProtoFieldValidator(&v1.RuleIngress{}, "destination_ports", "destination_ports", fieldNameMapSecurityRule),
+							validators.ProtoFieldValidator(&v11.RuleIngress{}, "destination_ports", "destination_ports", fieldNameMapSecurityRule),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   List of destination ports to which the rule applies.\n   Optional. Empty list means any port.\n   Valid range: 1–65535.\n   Maximum of 8 ports can be specified.\n",
@@ -372,7 +376,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 					"destination_cidrs": schema1.ListAttribute{
 						ElementType: types.StringType,
 						Validators: []validator.List{
-							validators.ProtoFieldValidator(&v1.RuleEgress{}, "destination_cidrs", "destination_cidrs", fieldNameMapSecurityRule),
+							validators.ProtoFieldValidator(&v11.RuleEgress{}, "destination_cidrs", "destination_cidrs", fieldNameMapSecurityRule),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   CIDR blocks as the destination.\n   Optional. Empty list means any address.\n   Must be a valid IPv4.\n   Maximum of 8 CIDRs can be specified.\n",
@@ -384,7 +388,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 						ElementType: types.Int64Type,
 						Validators: []validator.List{
 							validators.ListInt32Validator(),
-							validators.ProtoFieldValidator(&v1.RuleEgress{}, "destination_ports", "destination_ports", fieldNameMapSecurityRule),
+							validators.ProtoFieldValidator(&v11.RuleEgress{}, "destination_ports", "destination_ports", fieldNameMapSecurityRule),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   List of ports to which the rule applies.\n   Optional. Empty list means any port.\n   Valid range: 1–65535.\n   Maximum of 8 ports can be specified.\n",
@@ -407,7 +411,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 			},
 			"type": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.RuleType_value),
+					validators.EnumValidator(v11.RuleType_value),
 				},
 				Computed:            true,
 				Optional:            true,
@@ -497,7 +501,7 @@ func (r *serviceSecurityRule) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceSecurityRule) StatusMessage() proto.Message {
-	return &v1.SecurityRuleStatus{}
+	return &v11.SecurityRuleStatus{}
 }
 
 var fieldNameMapSecurityRule = map[string]map[string]string{}
@@ -507,16 +511,16 @@ func (r *serviceSecurityRule) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceSecurityRule) SpecMessage() proto.Message {
-	return &v1.SecurityRuleSpec{}
+	return &v11.SecurityRuleSpec{}
 }
 
 func (r *serviceSecurityRule) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceSecurityRule) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceSecurityRule) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewSecurityRuleService(r.provider.SDK())
-	req := &v1.GetSecurityRuleRequest{
+	req := &v11.GetSecurityRuleRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -527,9 +531,9 @@ func (r *serviceSecurityRule) Read(ctx context.Context, id string) (*v11.Resourc
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSecurityRule) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceSecurityRule) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewSecurityRuleService(r.provider.SDK())
-	req := &v1.GetSecurityRuleByNameRequest{
+	req := &v11.GetSecurityRuleByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -541,14 +545,14 @@ func (r *serviceSecurityRule) GetByName(ctx context.Context, name, parentID stri
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSecurityRule) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceSecurityRule) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewSecurityRuleService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.SecurityRuleSpec)
+	specTyped, ok := spec.(*v11.SecurityRuleSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.SecurityRuleSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateSecurityRuleRequest{
+	req := &v11.CreateSecurityRuleRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -567,14 +571,14 @@ func (r *serviceSecurityRule) Create(ctx context.Context, metadata *v11.Resource
 	return id, reqCtx, nil
 }
 
-func (r *serviceSecurityRule) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceSecurityRule) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewSecurityRuleService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.SecurityRuleSpec)
+	specTyped, ok := spec.(*v11.SecurityRuleSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.SecurityRuleSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateSecurityRuleRequest{
+	req := &v11.UpdateSecurityRuleRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -591,7 +595,7 @@ func (r *serviceSecurityRule) Update(ctx context.Context, metadata *v11.Resource
 
 func (r *serviceSecurityRule) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteSecurityRuleRequest{
+	req := &v11.DeleteSecurityRuleRequest{
 		Id: id,
 	}
 	service := v12.NewSecurityRuleService(r.provider.SDK())

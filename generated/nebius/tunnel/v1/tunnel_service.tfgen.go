@@ -15,8 +15,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/tunnel/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/tunnel/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/tunnel/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -140,7 +140,9 @@ func (r *serviceTunnel) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapTunnel),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -179,7 +181,7 @@ func (r *serviceTunnel) ResourceSchema() schema1.Schema {
 			},
 			"title": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.TunnelSpec{}, "title", "title", fieldNameMapTunnel),
+					validators.ProtoFieldValidator(&v11.TunnelSpec{}, "title", "title", fieldNameMapTunnel),
 				},
 				Optional:            true,
 				MarkdownDescription: "Human-readable display name for the tunnel.",
@@ -187,7 +189,7 @@ func (r *serviceTunnel) ResourceSchema() schema1.Schema {
 			},
 			"description": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.TunnelSpec{}, "description", "description", fieldNameMapTunnel),
+					validators.ProtoFieldValidator(&v11.TunnelSpec{}, "description", "description", fieldNameMapTunnel),
 				},
 				Optional:            true,
 				MarkdownDescription: "Arbitrary description of the tunnel provided by the user.",
@@ -216,7 +218,7 @@ func (r *serviceTunnel) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceTunnel) StatusMessage() proto.Message {
-	return &v1.TunnelStatus{}
+	return &v11.TunnelStatus{}
 }
 
 var fieldNameMapTunnel = map[string]map[string]string{}
@@ -226,16 +228,16 @@ func (r *serviceTunnel) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceTunnel) SpecMessage() proto.Message {
-	return &v1.TunnelSpec{}
+	return &v11.TunnelSpec{}
 }
 
 func (r *serviceTunnel) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceTunnel) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceTunnel) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewTunnelService(r.provider.SDK())
-	req := &v1.GetTunnelRequest{
+	req := &v11.GetTunnelRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -246,14 +248,14 @@ func (r *serviceTunnel) Read(ctx context.Context, id string) (*v11.ResourceMetad
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceTunnel) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceTunnel) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewTunnelService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.TunnelSpec)
+	specTyped, ok := spec.(*v11.TunnelSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.tunnel.v1.TunnelSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateTunnelRequest{
+	req := &v11.CreateTunnelRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -272,14 +274,14 @@ func (r *serviceTunnel) Create(ctx context.Context, metadata *v11.ResourceMetada
 	return id, reqCtx, nil
 }
 
-func (r *serviceTunnel) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceTunnel) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewTunnelService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.TunnelSpec)
+	specTyped, ok := spec.(*v11.TunnelSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.tunnel.v1.TunnelSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateTunnelRequest{
+	req := &v11.UpdateTunnelRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -296,7 +298,7 @@ func (r *serviceTunnel) Update(ctx context.Context, metadata *v11.ResourceMetada
 
 func (r *serviceTunnel) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteTunnelRequest{
+	req := &v11.DeleteTunnelRequest{
 		Id: id,
 	}
 	service := v12.NewTunnelService(r.provider.SDK())

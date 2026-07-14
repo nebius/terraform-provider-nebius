@@ -18,8 +18,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/kms/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/kms/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/kms/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -75,7 +75,9 @@ func (r *serviceSymmetricKey) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSymmetricKey),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -165,7 +167,9 @@ func (r *serviceSymmetricKey) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSymmetricKey),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers: []planmodifier.String{
@@ -214,7 +218,7 @@ func (r *serviceSymmetricKey) ResourceSchema() schema1.Schema {
 			},
 			"description": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.SymmetricKeySpec{}, "description", "description", fieldNameMapSymmetricKey),
+					validators.ProtoFieldValidator(&v11.SymmetricKeySpec{}, "description", "description", fieldNameMapSymmetricKey),
 				},
 				Optional:            true,
 				MarkdownDescription: "Description of the key.",
@@ -224,8 +228,8 @@ func (r *serviceSymmetricKey) ResourceSchema() schema1.Schema {
 			},
 			"algorithm": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.SymmetricAlgorithm_value),
-					validators.ProtoFieldValidator(&v1.SymmetricKeySpec{}, "algorithm", "algorithm", fieldNameMapSymmetricKey),
+					validators.EnumValidator(v11.SymmetricAlgorithm_value),
+					validators.ProtoFieldValidator(&v11.SymmetricKeySpec{}, "algorithm", "algorithm", fieldNameMapSymmetricKey),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   Encryption algorithm that should be used when using the key to encrypt plaintext.\n   Must be specified only during create operations. Cannot be updated.\n   \n   #### Supported values\n   \n   Supported symmetric encryption algorithms.\n   Possible values:\n   \n   - `SYMMETRIC_ALGORITHM_UNSPECIFIED`\n   - `AES_128`:\n      Deprecated. It is impossible to create new keys with this algorithm.\n      AES algorithm with 128-bit keys.\n   \n   - `AES_256` - AES algorithm with 256-bit keys.\n   \n",
@@ -236,7 +240,7 @@ func (r *serviceSymmetricKey) ResourceSchema() schema1.Schema {
 			"rotation_period": schema1.StringAttribute{
 				CustomType: wellknown.WellKnownByName("google.protobuf.Duration").Type().(basetypes.StringTypable),
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.SymmetricKeySpec{}, "rotation_period", "rotation_period", fieldNameMapSymmetricKey),
+					validators.ProtoFieldValidator(&v11.SymmetricKeySpec{}, "rotation_period", "rotation_period", fieldNameMapSymmetricKey),
 				},
 				Computed:            true,
 				Optional:            true,
@@ -280,7 +284,7 @@ func (r *serviceSymmetricKey) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceSymmetricKey) StatusMessage() proto.Message {
-	return &v1.SymmetricKeyStatus{}
+	return &v11.SymmetricKeyStatus{}
 }
 
 var fieldNameMapSymmetricKey = map[string]map[string]string{}
@@ -290,16 +294,16 @@ func (r *serviceSymmetricKey) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceSymmetricKey) SpecMessage() proto.Message {
-	return &v1.SymmetricKeySpec{}
+	return &v11.SymmetricKeySpec{}
 }
 
 func (r *serviceSymmetricKey) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceSymmetricKey) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceSymmetricKey) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewSymmetricKeyService(r.provider.SDK())
-	req := &v1.GetSymmetricKeyRequest{
+	req := &v11.GetSymmetricKeyRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -310,9 +314,9 @@ func (r *serviceSymmetricKey) Read(ctx context.Context, id string) (*v11.Resourc
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSymmetricKey) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceSymmetricKey) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewSymmetricKeyService(r.provider.SDK())
-	req := &v1.GetSymmetricKeyByNameRequest{
+	req := &v11.GetSymmetricKeyByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -324,14 +328,14 @@ func (r *serviceSymmetricKey) GetByName(ctx context.Context, name, parentID stri
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSymmetricKey) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceSymmetricKey) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewSymmetricKeyService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.SymmetricKeySpec)
+	specTyped, ok := spec.(*v11.SymmetricKeySpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.kms.v1.SymmetricKeySpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateSymmetricKeyRequest{
+	req := &v11.CreateSymmetricKeyRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -350,14 +354,14 @@ func (r *serviceSymmetricKey) Create(ctx context.Context, metadata *v11.Resource
 	return id, reqCtx, nil
 }
 
-func (r *serviceSymmetricKey) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceSymmetricKey) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewSymmetricKeyService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.SymmetricKeySpec)
+	specTyped, ok := spec.(*v11.SymmetricKeySpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.kms.v1.SymmetricKeySpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateSymmetricKeyRequest{
+	req := &v11.UpdateSymmetricKeyRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -374,7 +378,7 @@ func (r *serviceSymmetricKey) Update(ctx context.Context, metadata *v11.Resource
 
 func (r *serviceSymmetricKey) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteSymmetricKeyRequest{
+	req := &v11.DeleteSymmetricKeyRequest{
 		Id: id,
 	}
 	service := v12.NewSymmetricKeyService(r.provider.SDK())

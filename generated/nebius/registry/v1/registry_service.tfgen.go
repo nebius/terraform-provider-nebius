@@ -15,13 +15,14 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/registry/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/registry/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/registry/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -147,7 +148,9 @@ func (r *serviceRegistry) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapRegistry),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -228,7 +231,7 @@ func (r *serviceRegistry) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceRegistry) StatusMessage() proto.Message {
-	return &v1.RegistryStatus{}
+	return &v11.RegistryStatus{}
 }
 
 var fieldNameMapRegistry = map[string]map[string]string{}
@@ -238,16 +241,16 @@ func (r *serviceRegistry) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceRegistry) SpecMessage() proto.Message {
-	return &v1.RegistrySpec{}
+	return &v11.RegistrySpec{}
 }
 
 func (r *serviceRegistry) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceRegistry) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceRegistry) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewRegistryService(r.provider.SDK())
-	req := &v1.GetRegistryRequest{
+	req := &v11.GetRegistryRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -258,14 +261,14 @@ func (r *serviceRegistry) Read(ctx context.Context, id string) (*v11.ResourceMet
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceRegistry) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceRegistry) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewRegistryService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.RegistrySpec)
+	specTyped, ok := spec.(*v11.RegistrySpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.registry.v1.RegistrySpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateRegistryRequest{
+	req := &v11.CreateRegistryRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -284,14 +287,14 @@ func (r *serviceRegistry) Create(ctx context.Context, metadata *v11.ResourceMeta
 	return id, reqCtx, nil
 }
 
-func (r *serviceRegistry) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceRegistry) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewRegistryService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.RegistrySpec)
+	specTyped, ok := spec.(*v11.RegistrySpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.registry.v1.RegistrySpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateRegistryRequest{
+	req := &v11.UpdateRegistryRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -308,7 +311,7 @@ func (r *serviceRegistry) Update(ctx context.Context, metadata *v11.ResourceMeta
 
 func (r *serviceRegistry) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteRegistryRequest{
+	req := &v11.DeleteRegistryRequest{
 		Id: id,
 	}
 	service := v12.NewRegistryService(r.provider.SDK())

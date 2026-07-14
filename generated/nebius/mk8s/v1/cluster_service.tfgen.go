@@ -16,8 +16,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/mk8s/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/mk8s/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/mk8s/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -73,7 +73,9 @@ func (r *serviceCluster) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapCluster),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -263,7 +265,7 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 			"metadata": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{},
 				Validators: []validator.Object{
-					validators.ProtoFieldValidator(&v1.Cluster{}, "metadata", "metadata", fieldNameMapCluster),
+					validators.ProtoFieldValidator(&v11.Cluster{}, "metadata", "metadata", fieldNameMapCluster),
 				},
 				Computed:            true,
 				Optional:            true,
@@ -278,7 +280,9 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapCluster),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -319,7 +323,7 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"version": schema1.StringAttribute{
 						Validators: []validator.String{
-							validators.ProtoFieldValidator(&v1.ControlPlaneSpec{}, "version", "version", fieldNameMapCluster),
+							validators.ProtoFieldValidator(&v11.ControlPlaneSpec{}, "version", "version", fieldNameMapCluster),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   Desired Kubernetes version of the cluster. For now only acceptable format is\n   `<major>.<minor>` like \"1.31\". Option for patch version update will be added later.\n",
@@ -340,7 +344,7 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 									"allowed_cidrs": schema1.ListAttribute{
 										ElementType: types.StringType,
 										Validators: []validator.List{
-											validators.ProtoFieldValidator(&v1.PublicEndpointSpec{}, "allowed_cidrs", "allowed_cidrs", fieldNameMapCluster),
+											validators.ProtoFieldValidator(&v11.PublicEndpointSpec{}, "allowed_cidrs", "allowed_cidrs", fieldNameMapCluster),
 										},
 										Optional:            true,
 										MarkdownDescription: ":\n\n   List of CIDR blocks from which access to public endpoint is allowed.\n   If field is not set, or list is empty, it means that access is not restricted at all.\n",
@@ -360,7 +364,7 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 					},
 					"etcd_cluster_size": schema1.Int64Attribute{
 						Validators: []validator.Int64{
-							validators.ProtoFieldValidator(&v1.ControlPlaneSpec{}, "etcd_cluster_size", "etcd_cluster_size", fieldNameMapCluster),
+							validators.ProtoFieldValidator(&v11.ControlPlaneSpec{}, "etcd_cluster_size", "etcd_cluster_size", fieldNameMapCluster),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   Number of instances in etcd cluster.\n   3 by default.\n   Control plane with `etcd_cluster_size: 3` called \"Highly Available\" (\"HA\"), because it's Kubernetes API\n   will be available despite a failure of one control plane instance.\n",
@@ -391,7 +395,7 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 					"service_cidrs": schema1.ListAttribute{
 						ElementType: types.StringType,
 						Validators: []validator.List{
-							validators.ProtoFieldValidator(&v1.KubeNetworkSpec{}, "service_cidrs", "service_cidrs", fieldNameMapCluster),
+							validators.ProtoFieldValidator(&v11.KubeNetworkSpec{}, "service_cidrs", "service_cidrs", fieldNameMapCluster),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   CIDR blocks for Service ClusterIP allocation.\n   For now, only one value is supported.\n   Must be a valid CIDR block or prefix length.\n   In case of prefix length, certain CIDR is auto allocated.\n   Specified CIDR blocks will be reserved in Cluster.spec.control_plane.subnet_id to prevent address duplication.\n   Allowed prefix length is from \"/12\" to \"/28\".\n   Empty value treated as [\"/16\"].\n",
@@ -527,7 +531,7 @@ func (r *serviceCluster) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceCluster) StatusMessage() proto.Message {
-	return &v1.ClusterStatus{}
+	return &v11.ClusterStatus{}
 }
 
 var fieldNameMapCluster = map[string]map[string]string{}
@@ -537,16 +541,16 @@ func (r *serviceCluster) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceCluster) SpecMessage() proto.Message {
-	return &v1.ClusterSpec{}
+	return &v11.ClusterSpec{}
 }
 
 func (r *serviceCluster) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceCluster) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceCluster) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewClusterService(r.provider.SDK())
-	req := &v1.GetClusterRequest{
+	req := &v11.GetClusterRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -557,9 +561,9 @@ func (r *serviceCluster) Read(ctx context.Context, id string) (*v11.ResourceMeta
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceCluster) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceCluster) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewClusterService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -571,14 +575,14 @@ func (r *serviceCluster) GetByName(ctx context.Context, name, parentID string) (
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceCluster) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceCluster) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewClusterService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.ClusterSpec)
+	specTyped, ok := spec.(*v11.ClusterSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.mk8s.v1.ClusterSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateClusterRequest{
+	req := &v11.CreateClusterRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -597,14 +601,14 @@ func (r *serviceCluster) Create(ctx context.Context, metadata *v11.ResourceMetad
 	return id, reqCtx, nil
 }
 
-func (r *serviceCluster) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceCluster) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewClusterService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.ClusterSpec)
+	specTyped, ok := spec.(*v11.ClusterSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.mk8s.v1.ClusterSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateClusterRequest{
+	req := &v11.UpdateClusterRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -621,7 +625,7 @@ func (r *serviceCluster) Update(ctx context.Context, metadata *v11.ResourceMetad
 
 func (r *serviceCluster) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteClusterRequest{
+	req := &v11.DeleteClusterRequest{
 		Id: id,
 	}
 	service := v12.NewClusterService(r.provider.SDK())

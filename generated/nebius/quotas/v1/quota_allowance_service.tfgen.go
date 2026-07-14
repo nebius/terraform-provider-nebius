@@ -15,8 +15,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/quotas/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/quotas/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/quotas/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -192,7 +192,9 @@ func (r *serviceQuotaAllowance) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapQuotaAllowance),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -303,7 +305,7 @@ func (r *serviceQuotaAllowance) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceQuotaAllowance) StatusMessage() proto.Message {
-	return &v1.QuotaAllowanceStatus{}
+	return &v11.QuotaAllowanceStatus{}
 }
 
 var fieldNameMapQuotaAllowance = map[string]map[string]string{}
@@ -313,7 +315,7 @@ func (r *serviceQuotaAllowance) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceQuotaAllowance) SpecMessage() proto.Message {
-	return &v1.QuotaAllowanceSpec{}
+	return &v11.QuotaAllowanceSpec{}
 }
 
 func (r *serviceQuotaAllowance) GetAdditionalGetters() map[string]service.AdditionalGetter {
@@ -327,13 +329,13 @@ func (r *serviceQuotaAllowance) GetAdditionalGetters() map[string]service.Additi
 }
 
 func (r *serviceQuotaAllowance) AdditionalGetterInputMessageGetByName() proto.Message {
-	return &v1.GetByNameRequest{}
+	return &v11.GetByNameRequest{}
 }
 
-func (r *serviceQuotaAllowance) AdditionalGetterFuncGetByName(ctx context.Context, input proto.Message) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceQuotaAllowance) AdditionalGetterFuncGetByName(ctx context.Context, input proto.Message) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewQuotaAllowanceService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	req, ok := input.(*v1.GetByNameRequest)
+	req, ok := input.(*v11.GetByNameRequest)
 	if !ok {
 		return nil, nil, nil, reqCtx, fmt.Errorf("wrong input message type %q, expecting nebius.quotas.v1.GetByNameRequest", input.ProtoReflect().Descriptor().FullName())
 	}
@@ -344,9 +346,9 @@ func (r *serviceQuotaAllowance) AdditionalGetterFuncGetByName(ctx context.Contex
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceQuotaAllowance) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceQuotaAllowance) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewQuotaAllowanceService(r.provider.SDK())
-	req := &v1.GetQuotaAllowanceRequest{
+	req := &v11.GetQuotaAllowanceRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -357,14 +359,14 @@ func (r *serviceQuotaAllowance) Read(ctx context.Context, id string) (*v11.Resou
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceQuotaAllowance) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceQuotaAllowance) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewQuotaAllowanceService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.QuotaAllowanceSpec)
+	specTyped, ok := spec.(*v11.QuotaAllowanceSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.quotas.v1.QuotaAllowanceSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateQuotaAllowanceRequest{
+	req := &v11.CreateQuotaAllowanceRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -383,14 +385,14 @@ func (r *serviceQuotaAllowance) Create(ctx context.Context, metadata *v11.Resour
 	return id, reqCtx, nil
 }
 
-func (r *serviceQuotaAllowance) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceQuotaAllowance) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewQuotaAllowanceService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.QuotaAllowanceSpec)
+	specTyped, ok := spec.(*v11.QuotaAllowanceSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.quotas.v1.QuotaAllowanceSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateQuotaAllowanceRequest{
+	req := &v11.UpdateQuotaAllowanceRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -407,7 +409,7 @@ func (r *serviceQuotaAllowance) Update(ctx context.Context, metadata *v11.Resour
 
 func (r *serviceQuotaAllowance) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteQuotaAllowanceRequest{
+	req := &v11.DeleteQuotaAllowanceRequest{
 		Id: id,
 	}
 	service := v12.NewQuotaAllowanceService(r.provider.SDK())

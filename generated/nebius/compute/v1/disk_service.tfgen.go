@@ -17,8 +17,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/compute/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/compute/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/compute/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -74,7 +74,9 @@ func (r *serviceDisk) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapDisk),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -130,7 +132,7 @@ func (r *serviceDisk) DataSourceSchema() schema.Schema {
 			},
 			"source_image_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "*Cannot be set alongside source_image_family.*",
+				MarkdownDescription: "*Cannot be set alongside source_image_family or source_snapshot_id.*",
 			},
 			"source_image_family": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
@@ -144,7 +146,11 @@ func (r *serviceDisk) DataSourceSchema() schema.Schema {
 					},
 				},
 				Computed:            true,
-				MarkdownDescription: "*Cannot be set alongside source_image_id.*",
+				MarkdownDescription: "*Cannot be set alongside source_image_id or source_snapshot_id.*",
+			},
+			"source_snapshot_id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "*Cannot be set alongside source_image_id or source_image_family.*",
 			},
 			"disk_encryption": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
@@ -248,7 +254,9 @@ func (r *serviceDisk) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapDisk),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -347,7 +355,7 @@ func (r *serviceDisk) ResourceSchema() schema1.Schema {
 			},
 			"type": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.DiskSpec_DiskType_value),
+					validators.EnumValidator(v11.DiskSpec_DiskType_value),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   The type of disk defines the performance and reliability characteristics of the block device.\n   For details, see https://docs.nebius.com/compute/storage/types#disks-types\n   \n   #### Supported values\n   \n   the list of available types will be clarified later, it is not final version\n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `NETWORK_SSD`\n   - `NETWORK_HDD`\n   - `NETWORK_SSD_NON_REPLICATED`\n   - `NETWORK_SSD_IO_M3`\n   \n",
@@ -360,10 +368,11 @@ func (r *serviceDisk) ResourceSchema() schema1.Schema {
 					validators.OneofValidator([]string{
 						"source_image_id",
 						"source_image_family",
+						"source_snapshot_id",
 					}, fieldNameMapDisk),
 				},
 				Optional:            true,
-				MarkdownDescription: "*Cannot be set alongside source_image_family.*",
+				MarkdownDescription: "*Cannot be set alongside source_image_family or source_snapshot_id.*",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -391,19 +400,34 @@ func (r *serviceDisk) ResourceSchema() schema1.Schema {
 					validators.OneofValidator([]string{
 						"source_image_id",
 						"source_image_family",
+						"source_snapshot_id",
 					}, fieldNameMapDisk),
 				},
 				Optional:            true,
-				MarkdownDescription: "*Cannot be set alongside source_image_id.*",
+				MarkdownDescription: "*Cannot be set alongside source_image_id or source_snapshot_id.*",
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.RequiresReplace(),
+				},
+			},
+			"source_snapshot_id": schema1.StringAttribute{
+				Validators: []validator.String{
+					validators.OneofValidator([]string{
+						"source_image_id",
+						"source_image_family",
+						"source_snapshot_id",
+					}, fieldNameMapDisk),
+				},
+				Optional:            true,
+				MarkdownDescription: "*Cannot be set alongside source_image_id or source_image_family.*",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"disk_encryption": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{
 					"type": schema1.StringAttribute{
 						Validators: []validator.String{
-							validators.EnumValidator(v1.DiskEncryption_DiskEncryptionType_value),
+							validators.EnumValidator(v11.DiskEncryption_DiskEncryptionType_value),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `DISK_ENCRYPTION_UNSPECIFIED` - No encryption is applied unless explicitly specified.\n   - `DISK_ENCRYPTION_MANAGED`:\n      Enables encryption using the platform's default root key from KMS.\n      Available for disks with NETWORK_SSD_NON_REPLICATED and NETWORK_SSD_IO_M3 types only.\n   \n   \n",
@@ -513,7 +537,7 @@ func (r *serviceDisk) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceDisk) StatusMessage() proto.Message {
-	return &v1.DiskStatus{}
+	return &v11.DiskStatus{}
 }
 
 var fieldNameMapDisk = map[string]map[string]string{}
@@ -523,16 +547,16 @@ func (r *serviceDisk) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceDisk) SpecMessage() proto.Message {
-	return &v1.DiskSpec{}
+	return &v11.DiskSpec{}
 }
 
 func (r *serviceDisk) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceDisk) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceDisk) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewDiskService(r.provider.SDK())
-	req := &v1.GetDiskRequest{
+	req := &v11.GetDiskRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -543,9 +567,9 @@ func (r *serviceDisk) Read(ctx context.Context, id string) (*v11.ResourceMetadat
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceDisk) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceDisk) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewDiskService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -557,14 +581,14 @@ func (r *serviceDisk) GetByName(ctx context.Context, name, parentID string) (*v1
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceDisk) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceDisk) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewDiskService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.DiskSpec)
+	specTyped, ok := spec.(*v11.DiskSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.DiskSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateDiskRequest{
+	req := &v11.CreateDiskRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -583,14 +607,14 @@ func (r *serviceDisk) Create(ctx context.Context, metadata *v11.ResourceMetadata
 	return id, reqCtx, nil
 }
 
-func (r *serviceDisk) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceDisk) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewDiskService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.DiskSpec)
+	specTyped, ok := spec.(*v11.DiskSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.DiskSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateDiskRequest{
+	req := &v11.UpdateDiskRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -607,7 +631,7 @@ func (r *serviceDisk) Update(ctx context.Context, metadata *v11.ResourceMetadata
 
 func (r *serviceDisk) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteDiskRequest{
+	req := &v11.DeleteDiskRequest{
 		Id: id,
 	}
 	service := v12.NewDiskService(r.provider.SDK())
