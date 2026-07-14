@@ -15,8 +15,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/vpc/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -72,7 +72,9 @@ func (r *serviceAllocation) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapAllocation),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -233,7 +235,9 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapAllocation),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -274,7 +278,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"cidr": schema1.StringAttribute{
 						Validators: []validator.String{
-							validators.ProtoFieldValidator(&v1.IPv4PrivateAllocationSpec{}, "cidr", "cidr", fieldNameMapAllocation),
+							validators.ProtoFieldValidator(&v11.IPv4PrivateAllocationSpec{}, "cidr", "cidr", fieldNameMapAllocation),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   A single IP address (e.g 10.1.2.1), a CIDR block (e.g., \"10.1.2.0/24\") or\n   a prefix length (e.g., \"/32\").\n   If prefix length is specified, the CIDR block will be auto-allocated from\n   the available space in the pool or subnet.\n   If not specified, defaults to \"/32\".\n",
@@ -314,7 +318,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 						"ipv4_private",
 						"ipv4_public",
 					}, fieldNameMapAllocation),
-					validators.ProtoFieldValidator(&v1.AllocationSpec{}, "ipv4_private", "ipv4_private", fieldNameMapAllocation),
+					validators.ProtoFieldValidator(&v11.AllocationSpec{}, "ipv4_private", "ipv4_private", fieldNameMapAllocation),
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Private IPv4 address configuration for the allocation.\n   \n   *Cannot be set alongside ipv4_public.*\n",
@@ -324,7 +328,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"cidr": schema1.StringAttribute{
 						Validators: []validator.String{
-							validators.ProtoFieldValidator(&v1.IPv4PublicAllocationSpec{}, "cidr", "cidr", fieldNameMapAllocation),
+							validators.ProtoFieldValidator(&v11.IPv4PublicAllocationSpec{}, "cidr", "cidr", fieldNameMapAllocation),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   A single IP address (e.g. 1.2.3.4), a CIDR block (e.g., \"1.2.3.4/24\")\n   or a prefix length (e.g., \"/32\").\n   If prefix length is specified, the CIDR block will be auto-allocated from\n   the available space in the pool or subnet.\n   If not specified, defaults to \"/32\".\n",
@@ -364,7 +368,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 						"ipv4_private",
 						"ipv4_public",
 					}, fieldNameMapAllocation),
-					validators.ProtoFieldValidator(&v1.AllocationSpec{}, "ipv4_public", "ipv4_public", fieldNameMapAllocation),
+					validators.ProtoFieldValidator(&v11.AllocationSpec{}, "ipv4_public", "ipv4_public", fieldNameMapAllocation),
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Public IPv4 address configuration for the allocation.\n   \n   *Cannot be set alongside ipv4_private.*\n",
@@ -466,7 +470,7 @@ func (r *serviceAllocation) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceAllocation) StatusMessage() proto.Message {
-	return &v1.AllocationStatus{}
+	return &v11.AllocationStatus{}
 }
 
 var fieldNameMapAllocation = map[string]map[string]string{}
@@ -476,16 +480,16 @@ func (r *serviceAllocation) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceAllocation) SpecMessage() proto.Message {
-	return &v1.AllocationSpec{}
+	return &v11.AllocationSpec{}
 }
 
 func (r *serviceAllocation) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceAllocation) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceAllocation) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewAllocationService(r.provider.SDK())
-	req := &v1.GetAllocationRequest{
+	req := &v11.GetAllocationRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -496,9 +500,9 @@ func (r *serviceAllocation) Read(ctx context.Context, id string) (*v11.ResourceM
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceAllocation) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceAllocation) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewAllocationService(r.provider.SDK())
-	req := &v1.GetAllocationByNameRequest{
+	req := &v11.GetAllocationByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -510,14 +514,14 @@ func (r *serviceAllocation) GetByName(ctx context.Context, name, parentID string
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceAllocation) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceAllocation) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewAllocationService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.AllocationSpec)
+	specTyped, ok := spec.(*v11.AllocationSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.AllocationSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateAllocationRequest{
+	req := &v11.CreateAllocationRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -536,14 +540,14 @@ func (r *serviceAllocation) Create(ctx context.Context, metadata *v11.ResourceMe
 	return id, reqCtx, nil
 }
 
-func (r *serviceAllocation) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceAllocation) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewAllocationService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.AllocationSpec)
+	specTyped, ok := spec.(*v11.AllocationSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.AllocationSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateAllocationRequest{
+	req := &v11.UpdateAllocationRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -560,7 +564,7 @@ func (r *serviceAllocation) Update(ctx context.Context, metadata *v11.ResourceMe
 
 func (r *serviceAllocation) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteAllocationRequest{
+	req := &v11.DeleteAllocationRequest{
 		Id: id,
 	}
 	service := v12.NewAllocationService(r.provider.SDK())

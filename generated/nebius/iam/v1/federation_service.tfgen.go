@@ -15,13 +15,14 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/iam/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/iam/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/iam/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -71,7 +72,9 @@ func (r *serviceFederation) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapFederation),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -171,7 +174,9 @@ func (r *serviceFederation) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapFederation),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -280,7 +285,7 @@ func (r *serviceFederation) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceFederation) StatusMessage() proto.Message {
-	return &v1.FederationStatus{}
+	return &v11.FederationStatus{}
 }
 
 var fieldNameMapFederation = map[string]map[string]string{}
@@ -290,16 +295,16 @@ func (r *serviceFederation) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceFederation) SpecMessage() proto.Message {
-	return &v1.FederationSpec{}
+	return &v11.FederationSpec{}
 }
 
 func (r *serviceFederation) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceFederation) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceFederation) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewFederationService(r.provider.SDK())
-	req := &v1.GetFederationRequest{
+	req := &v11.GetFederationRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -310,9 +315,9 @@ func (r *serviceFederation) Read(ctx context.Context, id string) (*v11.ResourceM
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceFederation) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceFederation) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewFederationService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -324,14 +329,14 @@ func (r *serviceFederation) GetByName(ctx context.Context, name, parentID string
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceFederation) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceFederation) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewFederationService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.FederationSpec)
+	specTyped, ok := spec.(*v11.FederationSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.FederationSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateFederationRequest{
+	req := &v11.CreateFederationRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -350,14 +355,14 @@ func (r *serviceFederation) Create(ctx context.Context, metadata *v11.ResourceMe
 	return id, reqCtx, nil
 }
 
-func (r *serviceFederation) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceFederation) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewFederationService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.FederationSpec)
+	specTyped, ok := spec.(*v11.FederationSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.FederationSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateFederationRequest{
+	req := &v11.UpdateFederationRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -374,7 +379,7 @@ func (r *serviceFederation) Update(ctx context.Context, metadata *v11.ResourceMe
 
 func (r *serviceFederation) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteFederationRequest{
+	req := &v11.DeleteFederationRequest{
 		Id: id,
 	}
 	service := v12.NewFederationService(r.provider.SDK())

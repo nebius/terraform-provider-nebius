@@ -18,8 +18,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/kms/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/kms/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/kms/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -75,7 +75,9 @@ func (r *serviceAsymmetricKey) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapAsymmetricKey),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -160,7 +162,9 @@ func (r *serviceAsymmetricKey) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapAsymmetricKey),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers: []planmodifier.String{
@@ -209,7 +213,7 @@ func (r *serviceAsymmetricKey) ResourceSchema() schema1.Schema {
 			},
 			"description": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.AsymmetricKeySpec{}, "description", "description", fieldNameMapAsymmetricKey),
+					validators.ProtoFieldValidator(&v11.AsymmetricKeySpec{}, "description", "description", fieldNameMapAsymmetricKey),
 				},
 				Optional:            true,
 				MarkdownDescription: "Description of the key.",
@@ -219,8 +223,8 @@ func (r *serviceAsymmetricKey) ResourceSchema() schema1.Schema {
 			},
 			"algorithm": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.AsymmetricAlgorithm_value),
-					validators.ProtoFieldValidator(&v1.AsymmetricKeySpec{}, "algorithm", "algorithm", fieldNameMapAsymmetricKey),
+					validators.EnumValidator(v11.AsymmetricAlgorithm_value),
+					validators.ProtoFieldValidator(&v11.AsymmetricKeySpec{}, "algorithm", "algorithm", fieldNameMapAsymmetricKey),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   Cryptographic algorithm that should be used with the key.\n   Must be specified only during create operations. Cannot be updated.\n   \n   #### Supported values\n   \n   Supported asymmetric algorithms.\n   Possible values:\n   \n   - `ASYMMETRIC_ALGORITHM_UNSPECIFIED`\n   - `ECDSA_NIST_P256_SHA_256` - ECDSA signature with NIST P-256 curve and SHA-256\n   - `ECDSA_NIST_P384_SHA_384` - ECDSA signature with NIST P-384 curve and SHA-384\n   - `RSA_4096_ENC_OAEP_SHA_256` - RSA encryption with RSA-4096 key, OAEP padding and SHA-256.\n   \n",
@@ -263,7 +267,7 @@ func (r *serviceAsymmetricKey) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceAsymmetricKey) StatusMessage() proto.Message {
-	return &v1.AsymmetricKeyStatus{}
+	return &v11.AsymmetricKeyStatus{}
 }
 
 var fieldNameMapAsymmetricKey = map[string]map[string]string{}
@@ -273,16 +277,16 @@ func (r *serviceAsymmetricKey) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceAsymmetricKey) SpecMessage() proto.Message {
-	return &v1.AsymmetricKeySpec{}
+	return &v11.AsymmetricKeySpec{}
 }
 
 func (r *serviceAsymmetricKey) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceAsymmetricKey) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceAsymmetricKey) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewAsymmetricKeyService(r.provider.SDK())
-	req := &v1.GetAsymmetricKeyRequest{
+	req := &v11.GetAsymmetricKeyRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -293,9 +297,9 @@ func (r *serviceAsymmetricKey) Read(ctx context.Context, id string) (*v11.Resour
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceAsymmetricKey) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceAsymmetricKey) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewAsymmetricKeyService(r.provider.SDK())
-	req := &v1.GetAsymmetricKeyByNameRequest{
+	req := &v11.GetAsymmetricKeyByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -307,14 +311,14 @@ func (r *serviceAsymmetricKey) GetByName(ctx context.Context, name, parentID str
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceAsymmetricKey) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceAsymmetricKey) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewAsymmetricKeyService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.AsymmetricKeySpec)
+	specTyped, ok := spec.(*v11.AsymmetricKeySpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.kms.v1.AsymmetricKeySpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateAsymmetricKeyRequest{
+	req := &v11.CreateAsymmetricKeyRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -333,14 +337,14 @@ func (r *serviceAsymmetricKey) Create(ctx context.Context, metadata *v11.Resourc
 	return id, reqCtx, nil
 }
 
-func (r *serviceAsymmetricKey) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceAsymmetricKey) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewAsymmetricKeyService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.AsymmetricKeySpec)
+	specTyped, ok := spec.(*v11.AsymmetricKeySpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.kms.v1.AsymmetricKeySpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateAsymmetricKeyRequest{
+	req := &v11.UpdateAsymmetricKeyRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -357,7 +361,7 @@ func (r *serviceAsymmetricKey) Update(ctx context.Context, metadata *v11.Resourc
 
 func (r *serviceAsymmetricKey) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteAsymmetricKeyRequest{
+	req := &v11.DeleteAsymmetricKeyRequest{
 		Id: id,
 	}
 	service := v12.NewAsymmetricKeyService(r.provider.SDK())

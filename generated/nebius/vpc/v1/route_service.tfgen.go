@@ -17,8 +17,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/vpc/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -74,7 +74,9 @@ func (r *serviceRoute) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapRoute),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -202,7 +204,9 @@ func (r *serviceRoute) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapRoute),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -249,7 +253,7 @@ func (r *serviceRoute) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"cidr": schema1.StringAttribute{
 						Validators: []validator.String{
-							validators.ProtoFieldValidator(&v1.DestinationMatch{}, "cidr", "cidr", fieldNameMapRoute),
+							validators.ProtoFieldValidator(&v11.DestinationMatch{}, "cidr", "cidr", fieldNameMapRoute),
 						},
 						Required:            true,
 						MarkdownDescription: ":\n\n   Destination CIDR block in IPv4 format (e.g., \"0.0.0.0/0\" for default route, \"192.168.100.0/24\" for specific subnet).\n   The CIDR notation specifies the range of IP addresses that this route will match.\n   Must be unique within a route table.\n",
@@ -369,7 +373,7 @@ func (r *serviceRoute) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceRoute) StatusMessage() proto.Message {
-	return &v1.RouteStatus{}
+	return &v11.RouteStatus{}
 }
 
 var fieldNameMapRoute = map[string]map[string]string{}
@@ -379,16 +383,16 @@ func (r *serviceRoute) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceRoute) SpecMessage() proto.Message {
-	return &v1.RouteSpec{}
+	return &v11.RouteSpec{}
 }
 
 func (r *serviceRoute) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceRoute) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceRoute) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewRouteService(r.provider.SDK())
-	req := &v1.GetRouteRequest{
+	req := &v11.GetRouteRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -399,9 +403,9 @@ func (r *serviceRoute) Read(ctx context.Context, id string) (*v11.ResourceMetada
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceRoute) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceRoute) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewRouteService(r.provider.SDK())
-	req := &v1.GetRouteByNameRequest{
+	req := &v11.GetRouteByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -413,14 +417,14 @@ func (r *serviceRoute) GetByName(ctx context.Context, name, parentID string) (*v
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceRoute) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceRoute) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewRouteService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.RouteSpec)
+	specTyped, ok := spec.(*v11.RouteSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.RouteSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateRouteRequest{
+	req := &v11.CreateRouteRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -439,14 +443,14 @@ func (r *serviceRoute) Create(ctx context.Context, metadata *v11.ResourceMetadat
 	return id, reqCtx, nil
 }
 
-func (r *serviceRoute) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceRoute) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewRouteService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.RouteSpec)
+	specTyped, ok := spec.(*v11.RouteSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.RouteSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateRouteRequest{
+	req := &v11.UpdateRouteRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -463,7 +467,7 @@ func (r *serviceRoute) Update(ctx context.Context, metadata *v11.ResourceMetadat
 
 func (r *serviceRoute) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteRouteRequest{
+	req := &v11.DeleteRouteRequest{
 		Id: id,
 	}
 	service := v12.NewRouteService(r.provider.SDK())

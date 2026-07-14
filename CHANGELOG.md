@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.27 (July 14, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.38`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_compute_v1_disk](./docs/resources/compute_v1_disk.md):
+    * Added: `source_snapshot_id`
+* Changed attributes for data source [nebius_compute_v1_disk](./docs/data-sources/compute_v1_disk.md):
+    * Added: `source_snapshot_id`
+* Changed attributes for data source [nebius_compute_v1_instance](./docs/data-sources/compute_v1_instance.md):
+    * Added: `boot_disk.managed_disk.spec.source_snapshot_id`, `secondary_disks.managed_disk.spec.source_snapshot_id`
+
+BREAKING CHANGES:
+
+* Changed attributes for resource [nebius_compute_v1_instance](./docs/resources/compute_v1_instance.md):
+    * Added: `boot_disk.managed_disk.spec.source_snapshot_id`, `secondary_disks.managed_disk.spec.source_snapshot_id`
+    * Became required: `boot_disk`
+
 ## 0.6.26 (July 8, 2026)
 
 NOTES:

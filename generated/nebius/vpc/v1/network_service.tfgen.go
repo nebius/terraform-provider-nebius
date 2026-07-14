@@ -15,13 +15,14 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/vpc/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -71,7 +72,9 @@ func (r *serviceNetwork) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapNetwork),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -176,7 +179,9 @@ func (r *serviceNetwork) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapNetwork),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -295,7 +300,7 @@ func (r *serviceNetwork) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceNetwork) StatusMessage() proto.Message {
-	return &v1.NetworkStatus{}
+	return &v11.NetworkStatus{}
 }
 
 var fieldNameMapNetwork = map[string]map[string]string{}
@@ -305,16 +310,16 @@ func (r *serviceNetwork) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceNetwork) SpecMessage() proto.Message {
-	return &v1.NetworkSpec{}
+	return &v11.NetworkSpec{}
 }
 
 func (r *serviceNetwork) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceNetwork) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceNetwork) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewNetworkService(r.provider.SDK())
-	req := &v1.GetNetworkRequest{
+	req := &v11.GetNetworkRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -325,9 +330,9 @@ func (r *serviceNetwork) Read(ctx context.Context, id string) (*v11.ResourceMeta
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceNetwork) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceNetwork) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewNetworkService(r.provider.SDK())
-	req := &v1.GetNetworkByNameRequest{
+	req := &v11.GetNetworkByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -339,14 +344,14 @@ func (r *serviceNetwork) GetByName(ctx context.Context, name, parentID string) (
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceNetwork) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceNetwork) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewNetworkService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.NetworkSpec)
+	specTyped, ok := spec.(*v11.NetworkSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.NetworkSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateNetworkRequest{
+	req := &v11.CreateNetworkRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -365,14 +370,14 @@ func (r *serviceNetwork) Create(ctx context.Context, metadata *v11.ResourceMetad
 	return id, reqCtx, nil
 }
 
-func (r *serviceNetwork) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceNetwork) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewNetworkService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.NetworkSpec)
+	specTyped, ok := spec.(*v11.NetworkSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.NetworkSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateNetworkRequest{
+	req := &v11.UpdateNetworkRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -389,7 +394,7 @@ func (r *serviceNetwork) Update(ctx context.Context, metadata *v11.ResourceMetad
 
 func (r *serviceNetwork) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteNetworkRequest{
+	req := &v11.DeleteNetworkRequest{
 		Id: id,
 	}
 	service := v12.NewNetworkService(r.provider.SDK())

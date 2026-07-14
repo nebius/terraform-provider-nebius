@@ -18,13 +18,14 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/iam/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/iam/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/iam/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -139,7 +140,9 @@ func (r *serviceAccessPermit) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapAccessPermit),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers: []planmodifier.String{
@@ -219,7 +222,7 @@ func (r *serviceAccessPermit) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceAccessPermit) StatusMessage() proto.Message {
-	return &v1.AccessPermitStatus{}
+	return &v11.AccessPermitStatus{}
 }
 
 var fieldNameMapAccessPermit = map[string]map[string]string{}
@@ -229,16 +232,16 @@ func (r *serviceAccessPermit) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceAccessPermit) SpecMessage() proto.Message {
-	return &v1.AccessPermitSpec{}
+	return &v11.AccessPermitSpec{}
 }
 
 func (r *serviceAccessPermit) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceAccessPermit) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceAccessPermit) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewAccessPermitService(r.provider.SDK())
-	req := &v1.GetAccessPermitRequest{
+	req := &v11.GetAccessPermitRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -249,14 +252,14 @@ func (r *serviceAccessPermit) Read(ctx context.Context, id string) (*v11.Resourc
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceAccessPermit) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceAccessPermit) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewAccessPermitService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.AccessPermitSpec)
+	specTyped, ok := spec.(*v11.AccessPermitSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.AccessPermitSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateAccessPermitRequest{
+	req := &v11.CreateAccessPermitRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -275,14 +278,14 @@ func (r *serviceAccessPermit) Create(ctx context.Context, metadata *v11.Resource
 	return id, reqCtx, nil
 }
 
-func (r *serviceAccessPermit) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceAccessPermit) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	var reqCtx *requestcontext.Context
 	return reqCtx, fmt.Errorf("Update is unimplemented for nebius.iam.v1.AccessPermitService")
 }
 
 func (r *serviceAccessPermit) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteAccessPermitRequest{
+	req := &v11.DeleteAccessPermitRequest{
 		Id: id,
 	}
 	service := v12.NewAccessPermitService(r.provider.SDK())

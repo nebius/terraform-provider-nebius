@@ -15,13 +15,14 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/vpc/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -71,7 +72,9 @@ func (r *serviceSecurityGroup) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSecurityGroup),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -144,7 +147,9 @@ func (r *serviceSecurityGroup) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSecurityGroup),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -217,7 +222,7 @@ func (r *serviceSecurityGroup) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceSecurityGroup) StatusMessage() proto.Message {
-	return &v1.SecurityGroupStatus{}
+	return &v11.SecurityGroupStatus{}
 }
 
 var fieldNameMapSecurityGroup = map[string]map[string]string{}
@@ -227,16 +232,16 @@ func (r *serviceSecurityGroup) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceSecurityGroup) SpecMessage() proto.Message {
-	return &v1.SecurityGroupSpec{}
+	return &v11.SecurityGroupSpec{}
 }
 
 func (r *serviceSecurityGroup) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceSecurityGroup) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceSecurityGroup) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewSecurityGroupService(r.provider.SDK())
-	req := &v1.GetSecurityGroupRequest{
+	req := &v11.GetSecurityGroupRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -247,9 +252,9 @@ func (r *serviceSecurityGroup) Read(ctx context.Context, id string) (*v11.Resour
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSecurityGroup) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceSecurityGroup) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewSecurityGroupService(r.provider.SDK())
-	req := &v1.GetSecurityGroupByNameRequest{
+	req := &v11.GetSecurityGroupByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -261,14 +266,14 @@ func (r *serviceSecurityGroup) GetByName(ctx context.Context, name, parentID str
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSecurityGroup) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceSecurityGroup) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewSecurityGroupService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.SecurityGroupSpec)
+	specTyped, ok := spec.(*v11.SecurityGroupSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.SecurityGroupSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateSecurityGroupRequest{
+	req := &v11.CreateSecurityGroupRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -287,14 +292,14 @@ func (r *serviceSecurityGroup) Create(ctx context.Context, metadata *v11.Resourc
 	return id, reqCtx, nil
 }
 
-func (r *serviceSecurityGroup) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceSecurityGroup) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewSecurityGroupService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.SecurityGroupSpec)
+	specTyped, ok := spec.(*v11.SecurityGroupSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.SecurityGroupSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateSecurityGroupRequest{
+	req := &v11.UpdateSecurityGroupRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -311,7 +316,7 @@ func (r *serviceSecurityGroup) Update(ctx context.Context, metadata *v11.Resourc
 
 func (r *serviceSecurityGroup) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteSecurityGroupRequest{
+	req := &v11.DeleteSecurityGroupRequest{
 		Id: id,
 	}
 	service := v12.NewSecurityGroupService(r.provider.SDK())

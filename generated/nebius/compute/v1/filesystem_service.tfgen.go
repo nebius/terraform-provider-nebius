@@ -16,8 +16,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/compute/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/compute/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/compute/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -73,7 +73,9 @@ func (r *serviceFilesystem) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapFilesystem),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -192,7 +194,9 @@ func (r *serviceFilesystem) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapFilesystem),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -291,7 +295,7 @@ func (r *serviceFilesystem) ResourceSchema() schema1.Schema {
 			},
 			"type": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.FilesystemSpec_FilesystemType_value),
+					validators.EnumValidator(v11.FilesystemSpec_FilesystemType_value),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   The Shared Filesystem type determines its limits and performance characteristics.\n   For details, see https://docs.nebius.com/compute/storage/types#filesystems-types\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `NETWORK_SSD` - the list of available types will be clarified later, it is not final version\n   - `NETWORK_HDD`\n   - `WEKA`\n   - `VAST`\n   \n",
@@ -360,7 +364,7 @@ func (r *serviceFilesystem) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceFilesystem) StatusMessage() proto.Message {
-	return &v1.FilesystemStatus{}
+	return &v11.FilesystemStatus{}
 }
 
 var fieldNameMapFilesystem = map[string]map[string]string{}
@@ -370,16 +374,16 @@ func (r *serviceFilesystem) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceFilesystem) SpecMessage() proto.Message {
-	return &v1.FilesystemSpec{}
+	return &v11.FilesystemSpec{}
 }
 
 func (r *serviceFilesystem) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceFilesystem) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceFilesystem) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewFilesystemService(r.provider.SDK())
-	req := &v1.GetFilesystemRequest{
+	req := &v11.GetFilesystemRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -390,9 +394,9 @@ func (r *serviceFilesystem) Read(ctx context.Context, id string) (*v11.ResourceM
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceFilesystem) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceFilesystem) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewFilesystemService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -404,14 +408,14 @@ func (r *serviceFilesystem) GetByName(ctx context.Context, name, parentID string
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceFilesystem) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceFilesystem) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewFilesystemService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.FilesystemSpec)
+	specTyped, ok := spec.(*v11.FilesystemSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.FilesystemSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateFilesystemRequest{
+	req := &v11.CreateFilesystemRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -430,14 +434,14 @@ func (r *serviceFilesystem) Create(ctx context.Context, metadata *v11.ResourceMe
 	return id, reqCtx, nil
 }
 
-func (r *serviceFilesystem) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceFilesystem) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewFilesystemService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.FilesystemSpec)
+	specTyped, ok := spec.(*v11.FilesystemSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.FilesystemSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateFilesystemRequest{
+	req := &v11.UpdateFilesystemRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -454,7 +458,7 @@ func (r *serviceFilesystem) Update(ctx context.Context, metadata *v11.ResourceMe
 
 func (r *serviceFilesystem) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteFilesystemRequest{
+	req := &v11.DeleteFilesystemRequest{
 		Id: id,
 	}
 	service := v12.NewFilesystemService(r.provider.SDK())

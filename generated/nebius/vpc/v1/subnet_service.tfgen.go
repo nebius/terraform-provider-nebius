@@ -15,8 +15,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/vpc/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -72,7 +72,9 @@ func (r *serviceSubnet) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSubnet),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -281,7 +283,9 @@ func (r *serviceSubnet) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSubnet),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -334,7 +338,7 @@ func (r *serviceSubnet) ResourceSchema() schema1.Schema {
 										Attributes: map[string]schema1.Attribute{
 											"cidr": schema1.StringAttribute{
 												Validators: []validator.String{
-													validators.ProtoFieldValidator(&v1.SubnetCidr{}, "cidr", "cidr", fieldNameMapSubnet),
+													validators.ProtoFieldValidator(&v11.SubnetCidr{}, "cidr", "cidr", fieldNameMapSubnet),
 												},
 												Computed:            true,
 												Optional:            true,
@@ -343,7 +347,7 @@ func (r *serviceSubnet) ResourceSchema() schema1.Schema {
 											},
 											"state": schema1.StringAttribute{
 												Validators: []validator.String{
-													validators.EnumValidator(v1.AddressBlockState_value),
+													validators.EnumValidator(v11.AddressBlockState_value),
 												},
 												Computed:            true,
 												Optional:            true,
@@ -352,7 +356,7 @@ func (r *serviceSubnet) ResourceSchema() schema1.Schema {
 											},
 											"max_mask_length": schema1.Int64Attribute{
 												Validators: []validator.Int64{
-													validators.ProtoFieldValidator(&v1.SubnetCidr{}, "max_mask_length", "max_mask_length", fieldNameMapSubnet),
+													validators.ProtoFieldValidator(&v11.SubnetCidr{}, "max_mask_length", "max_mask_length", fieldNameMapSubnet),
 												},
 												Computed:            true,
 												Optional:            true,
@@ -399,7 +403,7 @@ func (r *serviceSubnet) ResourceSchema() schema1.Schema {
 										Attributes: map[string]schema1.Attribute{
 											"cidr": schema1.StringAttribute{
 												Validators: []validator.String{
-													validators.ProtoFieldValidator(&v1.SubnetCidr{}, "cidr", "cidr", fieldNameMapSubnet),
+													validators.ProtoFieldValidator(&v11.SubnetCidr{}, "cidr", "cidr", fieldNameMapSubnet),
 												},
 												Computed:            true,
 												Optional:            true,
@@ -408,7 +412,7 @@ func (r *serviceSubnet) ResourceSchema() schema1.Schema {
 											},
 											"state": schema1.StringAttribute{
 												Validators: []validator.String{
-													validators.EnumValidator(v1.AddressBlockState_value),
+													validators.EnumValidator(v11.AddressBlockState_value),
 												},
 												Computed:            true,
 												Optional:            true,
@@ -417,7 +421,7 @@ func (r *serviceSubnet) ResourceSchema() schema1.Schema {
 											},
 											"max_mask_length": schema1.Int64Attribute{
 												Validators: []validator.Int64{
-													validators.ProtoFieldValidator(&v1.SubnetCidr{}, "max_mask_length", "max_mask_length", fieldNameMapSubnet),
+													validators.ProtoFieldValidator(&v11.SubnetCidr{}, "max_mask_length", "max_mask_length", fieldNameMapSubnet),
 												},
 												Computed:            true,
 												Optional:            true,
@@ -554,7 +558,7 @@ func (r *serviceSubnet) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceSubnet) StatusMessage() proto.Message {
-	return &v1.SubnetStatus{}
+	return &v11.SubnetStatus{}
 }
 
 var fieldNameMapSubnet = map[string]map[string]string{}
@@ -564,16 +568,16 @@ func (r *serviceSubnet) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceSubnet) SpecMessage() proto.Message {
-	return &v1.SubnetSpec{}
+	return &v11.SubnetSpec{}
 }
 
 func (r *serviceSubnet) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceSubnet) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceSubnet) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewSubnetService(r.provider.SDK())
-	req := &v1.GetSubnetRequest{
+	req := &v11.GetSubnetRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -584,9 +588,9 @@ func (r *serviceSubnet) Read(ctx context.Context, id string) (*v11.ResourceMetad
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSubnet) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceSubnet) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewSubnetService(r.provider.SDK())
-	req := &v1.GetSubnetByNameRequest{
+	req := &v11.GetSubnetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -598,14 +602,14 @@ func (r *serviceSubnet) GetByName(ctx context.Context, name, parentID string) (*
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSubnet) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceSubnet) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewSubnetService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.SubnetSpec)
+	specTyped, ok := spec.(*v11.SubnetSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.SubnetSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateSubnetRequest{
+	req := &v11.CreateSubnetRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -624,14 +628,14 @@ func (r *serviceSubnet) Create(ctx context.Context, metadata *v11.ResourceMetada
 	return id, reqCtx, nil
 }
 
-func (r *serviceSubnet) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceSubnet) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewSubnetService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.SubnetSpec)
+	specTyped, ok := spec.(*v11.SubnetSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.SubnetSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateSubnetRequest{
+	req := &v11.UpdateSubnetRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -648,7 +652,7 @@ func (r *serviceSubnet) Update(ctx context.Context, metadata *v11.ResourceMetada
 
 func (r *serviceSubnet) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteSubnetRequest{
+	req := &v11.DeleteSubnetRequest{
 		Id: id,
 	}
 	service := v12.NewSubnetService(r.provider.SDK())

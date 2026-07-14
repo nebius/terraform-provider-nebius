@@ -15,13 +15,14 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/compute/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/compute/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/compute/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -71,7 +72,9 @@ func (r *serviceGpuCluster) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapGpuCluster),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -168,7 +171,9 @@ func (r *serviceGpuCluster) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapGpuCluster),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -269,7 +274,7 @@ func (r *serviceGpuCluster) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceGpuCluster) StatusMessage() proto.Message {
-	return &v1.GpuClusterStatus{}
+	return &v11.GpuClusterStatus{}
 }
 
 var fieldNameMapGpuCluster = map[string]map[string]string{}
@@ -279,16 +284,16 @@ func (r *serviceGpuCluster) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceGpuCluster) SpecMessage() proto.Message {
-	return &v1.GpuClusterSpec{}
+	return &v11.GpuClusterSpec{}
 }
 
 func (r *serviceGpuCluster) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceGpuCluster) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceGpuCluster) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewGpuClusterService(r.provider.SDK())
-	req := &v1.GetGpuClusterRequest{
+	req := &v11.GetGpuClusterRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -299,9 +304,9 @@ func (r *serviceGpuCluster) Read(ctx context.Context, id string) (*v11.ResourceM
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceGpuCluster) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceGpuCluster) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewGpuClusterService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -313,14 +318,14 @@ func (r *serviceGpuCluster) GetByName(ctx context.Context, name, parentID string
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceGpuCluster) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceGpuCluster) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewGpuClusterService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.GpuClusterSpec)
+	specTyped, ok := spec.(*v11.GpuClusterSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.GpuClusterSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateGpuClusterRequest{
+	req := &v11.CreateGpuClusterRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -339,14 +344,14 @@ func (r *serviceGpuCluster) Create(ctx context.Context, metadata *v11.ResourceMe
 	return id, reqCtx, nil
 }
 
-func (r *serviceGpuCluster) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceGpuCluster) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewGpuClusterService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.GpuClusterSpec)
+	specTyped, ok := spec.(*v11.GpuClusterSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.GpuClusterSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateGpuClusterRequest{
+	req := &v11.UpdateGpuClusterRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -363,7 +368,7 @@ func (r *serviceGpuCluster) Update(ctx context.Context, metadata *v11.ResourceMe
 
 func (r *serviceGpuCluster) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteGpuClusterRequest{
+	req := &v11.DeleteGpuClusterRequest{
 		Id: id,
 	}
 	service := v12.NewGpuClusterService(r.provider.SDK())

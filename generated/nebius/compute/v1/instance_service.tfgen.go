@@ -17,8 +17,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/compute/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/compute/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/compute/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -74,7 +74,9 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapInstance),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -251,7 +253,7 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 									},
 									"source_image_id": schema.StringAttribute{
 										Computed:            true,
-										MarkdownDescription: "*Cannot be set alongside source_image_family.*",
+										MarkdownDescription: "*Cannot be set alongside source_image_family or source_snapshot_id.*",
 									},
 									"source_image_family": schema.SingleNestedAttribute{
 										Attributes: map[string]schema.Attribute{
@@ -265,7 +267,11 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 											},
 										},
 										Computed:            true,
-										MarkdownDescription: "*Cannot be set alongside source_image_id.*",
+										MarkdownDescription: "*Cannot be set alongside source_image_id or source_snapshot_id.*",
+									},
+									"source_snapshot_id": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: "*Cannot be set alongside source_image_id or source_image_family.*",
 									},
 									"disk_encryption": schema.SingleNestedAttribute{
 										Attributes: map[string]schema.Attribute{
@@ -353,7 +359,7 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 										},
 										"source_image_id": schema.StringAttribute{
 											Computed:            true,
-											MarkdownDescription: "*Cannot be set alongside source_image_family.*",
+											MarkdownDescription: "*Cannot be set alongside source_image_family or source_snapshot_id.*",
 										},
 										"source_image_family": schema.SingleNestedAttribute{
 											Attributes: map[string]schema.Attribute{
@@ -367,7 +373,11 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 												},
 											},
 											Computed:            true,
-											MarkdownDescription: "*Cannot be set alongside source_image_id.*",
+											MarkdownDescription: "*Cannot be set alongside source_image_id or source_snapshot_id.*",
+										},
+										"source_snapshot_id": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "*Cannot be set alongside source_image_id or source_image_family.*",
 										},
 										"disk_encryption": schema.SingleNestedAttribute{
 											Attributes: map[string]schema.Attribute{
@@ -638,7 +648,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapInstance),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -736,7 +748,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 						},
 						"name": schema1.StringAttribute{
 							Validators: []validator.String{
-								validators.ProtoFieldValidator(&v1.NetworkInterfaceSpec{}, "name", "name", fieldNameMapInstance),
+								validators.ProtoFieldValidator(&v11.NetworkInterfaceSpec{}, "name", "name", fieldNameMapInstance),
 							},
 							Required:            true,
 							MarkdownDescription: ":\n\n   Interface name\n   Value of this field configures the name of the network interface inside VM's OS.\n   Longer values will persist in the specification but will be truncated to 15 symbols before being passed to VM configuration.\n",
@@ -817,7 +829,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 					},
 				},
 				Validators: []validator.List{
-					validators.ProtoFieldValidator(&v1.InstanceSpec{}, "network_interfaces", "network_interfaces", fieldNameMapInstance),
+					validators.ProtoFieldValidator(&v11.InstanceSpec{}, "network_interfaces", "network_interfaces", fieldNameMapInstance),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   List of network interfaces attached to the instance.\n   \n   #### Inner value description\n   \n   Describes the specification of a network interface.\n",
@@ -827,7 +839,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"attach_mode": schema1.StringAttribute{
 						Validators: []validator.String{
-							validators.EnumValidator(v1.AttachedDiskSpec_AttachMode_value),
+							validators.EnumValidator(v11.AttachedDiskSpec_AttachMode_value),
 						},
 						Required:            true,
 						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `READ_ONLY`\n   - `READ_WRITE`\n   \n",
@@ -931,7 +943,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 									},
 									"type": schema1.StringAttribute{
 										Validators: []validator.String{
-											validators.EnumValidator(v1.DiskSpec_DiskType_value),
+											validators.EnumValidator(v11.DiskSpec_DiskType_value),
 										},
 										Required:            true,
 										MarkdownDescription: ":\n\n   The type of disk defines the performance and reliability characteristics of the block device.\n   For details, see https://docs.nebius.com/compute/storage/types#disks-types\n   \n   #### Supported values\n   \n   the list of available types will be clarified later, it is not final version\n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `NETWORK_SSD`\n   - `NETWORK_HDD`\n   - `NETWORK_SSD_NON_REPLICATED`\n   - `NETWORK_SSD_IO_M3`\n   \n",
@@ -944,10 +956,11 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 											validators.OneofValidator([]string{
 												"source_image_id",
 												"source_image_family",
+												"source_snapshot_id",
 											}, fieldNameMapInstance),
 										},
 										Optional:            true,
-										MarkdownDescription: "*Cannot be set alongside source_image_family.*",
+										MarkdownDescription: "*Cannot be set alongside source_image_family or source_snapshot_id.*",
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -975,19 +988,34 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 											validators.OneofValidator([]string{
 												"source_image_id",
 												"source_image_family",
+												"source_snapshot_id",
 											}, fieldNameMapInstance),
 										},
 										Optional:            true,
-										MarkdownDescription: "*Cannot be set alongside source_image_id.*",
+										MarkdownDescription: "*Cannot be set alongside source_image_id or source_snapshot_id.*",
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.RequiresReplace(),
+										},
+									},
+									"source_snapshot_id": schema1.StringAttribute{
+										Validators: []validator.String{
+											validators.OneofValidator([]string{
+												"source_image_id",
+												"source_image_family",
+												"source_snapshot_id",
+											}, fieldNameMapInstance),
+										},
+										Optional:            true,
+										MarkdownDescription: "*Cannot be set alongside source_image_id or source_image_family.*",
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.RequiresReplace(),
 										},
 									},
 									"disk_encryption": schema1.SingleNestedAttribute{
 										Attributes: map[string]schema1.Attribute{
 											"type": schema1.StringAttribute{
 												Validators: []validator.String{
-													validators.EnumValidator(v1.DiskEncryption_DiskEncryptionType_value),
+													validators.EnumValidator(v11.DiskEncryption_DiskEncryptionType_value),
 												},
 												Optional:            true,
 												MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `DISK_ENCRYPTION_UNSPECIFIED` - No encryption is applied unless explicitly specified.\n   - `DISK_ENCRYPTION_MANAGED`:\n      Enables encryption using the platform's default root key from KMS.\n      Available for disks with NETWORK_SSD_NON_REPLICATED and NETWORK_SSD_IO_M3 types only.\n   \n   \n",
@@ -1028,17 +1056,15 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 					},
 					"device_id": schema1.StringAttribute{
 						Validators: []validator.String{
-							validators.ProtoFieldValidator(&v1.AttachedDiskSpec{}, "device_id", "device_id", fieldNameMapInstance),
+							validators.ProtoFieldValidator(&v11.AttachedDiskSpec{}, "device_id", "device_id", fieldNameMapInstance),
 						},
 						Optional:            true,
 						MarkdownDescription: "Specifies the user-defined identifier, allowing to use '/dev/disk/by-id/virtio-{device_id}' as a device path in mount command.",
 						PlanModifiers:       []planmodifier.String{},
 					},
 				},
-				Validators: []validator.Object{
-					validators.ProtoFieldValidator(&v1.InstanceSpec{}, "boot_disk", "boot_disk", fieldNameMapInstance),
-				},
-				Optional:            true,
+				Validators:          []validator.Object{},
+				Required:            true,
 				MarkdownDescription: "Specified boot disk attached to the instance.",
 				PlanModifiers:       []planmodifier.Object{},
 			},
@@ -1047,7 +1073,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 					Attributes: map[string]schema1.Attribute{
 						"attach_mode": schema1.StringAttribute{
 							Validators: []validator.String{
-								validators.EnumValidator(v1.AttachedDiskSpec_AttachMode_value),
+								validators.EnumValidator(v11.AttachedDiskSpec_AttachMode_value),
 							},
 							Required:            true,
 							MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `READ_ONLY`\n   - `READ_WRITE`\n   \n",
@@ -1151,7 +1177,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 										},
 										"type": schema1.StringAttribute{
 											Validators: []validator.String{
-												validators.EnumValidator(v1.DiskSpec_DiskType_value),
+												validators.EnumValidator(v11.DiskSpec_DiskType_value),
 											},
 											Required:            true,
 											MarkdownDescription: ":\n\n   The type of disk defines the performance and reliability characteristics of the block device.\n   For details, see https://docs.nebius.com/compute/storage/types#disks-types\n   \n   #### Supported values\n   \n   the list of available types will be clarified later, it is not final version\n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `NETWORK_SSD`\n   - `NETWORK_HDD`\n   - `NETWORK_SSD_NON_REPLICATED`\n   - `NETWORK_SSD_IO_M3`\n   \n",
@@ -1164,10 +1190,11 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 												validators.OneofValidator([]string{
 													"source_image_id",
 													"source_image_family",
+													"source_snapshot_id",
 												}, fieldNameMapInstance),
 											},
 											Optional:            true,
-											MarkdownDescription: "*Cannot be set alongside source_image_family.*",
+											MarkdownDescription: "*Cannot be set alongside source_image_family or source_snapshot_id.*",
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.RequiresReplace(),
 											},
@@ -1195,19 +1222,34 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 												validators.OneofValidator([]string{
 													"source_image_id",
 													"source_image_family",
+													"source_snapshot_id",
 												}, fieldNameMapInstance),
 											},
 											Optional:            true,
-											MarkdownDescription: "*Cannot be set alongside source_image_id.*",
+											MarkdownDescription: "*Cannot be set alongside source_image_id or source_snapshot_id.*",
 											PlanModifiers: []planmodifier.Object{
 												objectplanmodifier.RequiresReplace(),
+											},
+										},
+										"source_snapshot_id": schema1.StringAttribute{
+											Validators: []validator.String{
+												validators.OneofValidator([]string{
+													"source_image_id",
+													"source_image_family",
+													"source_snapshot_id",
+												}, fieldNameMapInstance),
+											},
+											Optional:            true,
+											MarkdownDescription: "*Cannot be set alongside source_image_id or source_image_family.*",
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.RequiresReplace(),
 											},
 										},
 										"disk_encryption": schema1.SingleNestedAttribute{
 											Attributes: map[string]schema1.Attribute{
 												"type": schema1.StringAttribute{
 													Validators: []validator.String{
-														validators.EnumValidator(v1.DiskEncryption_DiskEncryptionType_value),
+														validators.EnumValidator(v11.DiskEncryption_DiskEncryptionType_value),
 													},
 													Optional:            true,
 													MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `DISK_ENCRYPTION_UNSPECIFIED` - No encryption is applied unless explicitly specified.\n   - `DISK_ENCRYPTION_MANAGED`:\n      Enables encryption using the platform's default root key from KMS.\n      Available for disks with NETWORK_SSD_NON_REPLICATED and NETWORK_SSD_IO_M3 types only.\n   \n   \n",
@@ -1248,7 +1290,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 						},
 						"device_id": schema1.StringAttribute{
 							Validators: []validator.String{
-								validators.ProtoFieldValidator(&v1.AttachedDiskSpec{}, "device_id", "device_id", fieldNameMapInstance),
+								validators.ProtoFieldValidator(&v11.AttachedDiskSpec{}, "device_id", "device_id", fieldNameMapInstance),
 							},
 							Optional:            true,
 							MarkdownDescription: "Specifies the user-defined identifier, allowing to use '/dev/disk/by-id/virtio-{device_id}' as a device path in mount command.",
@@ -1266,7 +1308,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 					Attributes: map[string]schema1.Attribute{
 						"attach_mode": schema1.StringAttribute{
 							Validators: []validator.String{
-								validators.EnumValidator(v1.AttachedFilesystemSpec_AttachMode_value),
+								validators.EnumValidator(v11.AttachedFilesystemSpec_AttachMode_value),
 							},
 							Required:            true,
 							MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `READ_ONLY`\n   - `READ_WRITE`\n   \n",
@@ -1274,7 +1316,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 						},
 						"mount_tag": schema1.StringAttribute{
 							Validators: []validator.String{
-								validators.ProtoFieldValidator(&v1.AttachedFilesystemSpec{}, "mount_tag", "mount_tag", fieldNameMapInstance),
+								validators.ProtoFieldValidator(&v11.AttachedFilesystemSpec{}, "mount_tag", "mount_tag", fieldNameMapInstance),
 							},
 							Required:            true,
 							MarkdownDescription: "Specifies the user-defined identifier, allowing to use it as a device in mount command.",
@@ -1303,7 +1345,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 			},
 			"cloud_init_user_data": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.InstanceSpec{}, "cloud_init_user_data", "cloud_init_user_data", fieldNameMapInstance),
+					validators.ProtoFieldValidator(&v11.InstanceSpec{}, "cloud_init_user_data", "cloud_init_user_data", fieldNameMapInstance),
 				},
 				Optional:            true,
 				Sensitive:           true,
@@ -1318,7 +1360,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 			},
 			"recovery_policy": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.InstanceRecoveryPolicy_value),
+					validators.EnumValidator(v11.InstanceRecoveryPolicy_value),
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Recovery policy defines how the instance will be treated in case of a failure.\n   Common source of failure is a host failure, but it can be any other failure.\n   Instance undergoing a guest shutdown (poweroff, etc.) will be subject to recovery policy, meaning that it could\n   be restarted and billed accordingly. Stop instance via API or UI to stop it to avoid recovering.\n   - If set to RECOVER, instance will be restarted, if possible. It could be restarted on the same host or on another host.\n   - If set to FAIL, instance will be stopped and not restarted.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `RECOVER`\n   - `FAIL`\n   \n",
@@ -1330,7 +1372,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"on_preemption": schema1.StringAttribute{
 						Validators: []validator.String{
-							validators.EnumValidator(v1.PreemptibleSpec_PreemptionPolicy_value),
+							validators.EnumValidator(v11.PreemptibleSpec_PreemptionPolicy_value),
 						},
 						Required:            true,
 						MarkdownDescription: ":\n\n   Specifies what happens when the VM is preempted. The only supported value is STOP:\n   Compute stops the VM without deleting or restarting it.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `STOP`\n   \n",
@@ -1359,7 +1401,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 			},
 			"hostname": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.InstanceSpec{}, "hostname", "hostname", fieldNameMapInstance),
+					validators.ProtoFieldValidator(&v11.InstanceSpec{}, "hostname", "hostname", fieldNameMapInstance),
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Instance's hostname. Used to generate default DNS record in format `<hostname>.<network_id>.compute.internal.`\n   or `<instance_id>.<network_id>.compute.internal.` if hostname is not specified.\n",
@@ -1375,7 +1417,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"policy": schema1.StringAttribute{
 						Validators: []validator.String{
-							validators.EnumValidator(v1.ReservationPolicy_Policy_value),
+							validators.EnumValidator(v11.ReservationPolicy_Policy_value),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `AUTO`:\n      1) Will try to launch instance in any reservation_ids if provided.\n      2) Will try to launch instance in any of the available capacity block.\n      3) Will try to launch instance in PAYG if 1 & 2 are not satisfied.\n   \n   - `FORBID`:\n      The instance is launched only using on-demand (PAYG) capacity.\n      No attempt is made to find or use a Capacity Block.\n      It's an error to provide reservation_ids with policy = FORBID\n   \n   - `STRICT`:\n      1) Will try to launch the instance in Capacity Blocks from reservation_ids if provided.\n      2) If reservation_ids are not provided will try to launch instance in suitable & available Capacity Block.\n      3) Fail otherwise.\n   \n   \n",
@@ -1412,7 +1454,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 					},
 				},
 				Validators: []validator.Object{
-					validators.ProtoFieldValidator(&v1.InstanceSpec{}, "local_disks", "local_disks", fieldNameMapInstance),
+					validators.ProtoFieldValidator(&v11.InstanceSpec{}, "local_disks", "local_disks", fieldNameMapInstance),
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Local disks are meaningfully different from regular (remote) disks:\n   they are provided by the underlying host and are tied to a particular VM run.\n   Local disk data is not preserved across Stop-Start initiated via Compute API.\n   Local disks are not provided by default. To get them, explicitly request them via this field.\n   Availability depends on the selected platform, preset and region.\n   Changing this field will result in disks change and content loss, but only after stop and start the instance.\n",
@@ -1574,7 +1616,7 @@ func (r *serviceInstance) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceInstance) StatusMessage() proto.Message {
-	return &v1.InstanceStatus{}
+	return &v11.InstanceStatus{}
 }
 
 var fieldNameMapInstance = map[string]map[string]string{}
@@ -1584,16 +1626,16 @@ func (r *serviceInstance) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceInstance) SpecMessage() proto.Message {
-	return &v1.InstanceSpec{}
+	return &v11.InstanceSpec{}
 }
 
 func (r *serviceInstance) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceInstance) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceInstance) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewInstanceService(r.provider.SDK())
-	req := &v1.GetInstanceRequest{
+	req := &v11.GetInstanceRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -1604,9 +1646,9 @@ func (r *serviceInstance) Read(ctx context.Context, id string) (*v11.ResourceMet
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceInstance) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceInstance) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewInstanceService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -1618,14 +1660,14 @@ func (r *serviceInstance) GetByName(ctx context.Context, name, parentID string) 
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceInstance) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceInstance) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewInstanceService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.InstanceSpec)
+	specTyped, ok := spec.(*v11.InstanceSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.InstanceSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateInstanceRequest{
+	req := &v11.CreateInstanceRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -1644,14 +1686,14 @@ func (r *serviceInstance) Create(ctx context.Context, metadata *v11.ResourceMeta
 	return id, reqCtx, nil
 }
 
-func (r *serviceInstance) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceInstance) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewInstanceService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.InstanceSpec)
+	specTyped, ok := spec.(*v11.InstanceSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.InstanceSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateInstanceRequest{
+	req := &v11.UpdateInstanceRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -1668,7 +1710,7 @@ func (r *serviceInstance) Update(ctx context.Context, metadata *v11.ResourceMeta
 
 func (r *serviceInstance) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteInstanceRequest{
+	req := &v11.DeleteInstanceRequest{
 		Id: id,
 	}
 	service := v12.NewInstanceService(r.provider.SDK())

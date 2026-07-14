@@ -15,8 +15,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/vpc/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/vpc/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -72,7 +72,9 @@ func (r *servicePool) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapPool),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -194,7 +196,9 @@ func (r *servicePool) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapPool),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -241,7 +245,7 @@ func (r *servicePool) ResourceSchema() schema1.Schema {
 			},
 			"version": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.IpVersion_value),
+					validators.EnumValidator(v11.IpVersion_value),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   IP version of the pool.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `IP_VERSION_UNSPECIFIED` - Default, unspecified IP version.\n   - `IPV4` - IPv4 address.\n   - `IPV6` - IPv6 address.\n   \n",
@@ -251,7 +255,7 @@ func (r *servicePool) ResourceSchema() schema1.Schema {
 			},
 			"visibility": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.IpVisibility_value),
+					validators.EnumValidator(v11.IpVisibility_value),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   Configures whether the pool is private or public.\n   Only public pools IP addresses are routable in the Internet.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `IP_VISIBILITY_UNSPECIFIED` - Default, unspecified IP visibility.\n   - `PRIVATE` - Private address.\n   - `PUBLIC` - Public address.\n   \n",
@@ -264,7 +268,7 @@ func (r *servicePool) ResourceSchema() schema1.Schema {
 					Attributes: map[string]schema1.Attribute{
 						"cidr": schema1.StringAttribute{
 							Validators: []validator.String{
-								validators.ProtoFieldValidator(&v1.PoolCidr{}, "cidr", "cidr", fieldNameMapPool),
+								validators.ProtoFieldValidator(&v11.PoolCidr{}, "cidr", "cidr", fieldNameMapPool),
 							},
 							Required:            true,
 							MarkdownDescription: ":\n\n   A CIDR block (e.g., \"10.1.2.0/24\") or a prefix length (e.g., \"/24\").\n   If prefix length is specified, the CIDR block will be auto-allocated from\n   the available space in the parent pool.\n",
@@ -272,7 +276,7 @@ func (r *servicePool) ResourceSchema() schema1.Schema {
 						},
 						"state": schema1.StringAttribute{
 							Validators: []validator.String{
-								validators.EnumValidator(v1.AddressBlockState_value),
+								validators.EnumValidator(v11.AddressBlockState_value),
 							},
 							Computed:            true,
 							Optional:            true,
@@ -281,7 +285,7 @@ func (r *servicePool) ResourceSchema() schema1.Schema {
 						},
 						"max_mask_length": schema1.Int64Attribute{
 							Validators: []validator.Int64{
-								validators.ProtoFieldValidator(&v1.PoolCidr{}, "max_mask_length", "max_mask_length", fieldNameMapPool),
+								validators.ProtoFieldValidator(&v11.PoolCidr{}, "max_mask_length", "max_mask_length", fieldNameMapPool),
 							},
 							Computed:            true,
 							Optional:            true,
@@ -349,7 +353,7 @@ func (r *servicePool) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *servicePool) StatusMessage() proto.Message {
-	return &v1.PoolStatus{}
+	return &v11.PoolStatus{}
 }
 
 var fieldNameMapPool = map[string]map[string]string{}
@@ -359,16 +363,16 @@ func (r *servicePool) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *servicePool) SpecMessage() proto.Message {
-	return &v1.PoolSpec{}
+	return &v11.PoolSpec{}
 }
 
 func (r *servicePool) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *servicePool) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *servicePool) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewPoolService(r.provider.SDK())
-	req := &v1.GetPoolRequest{
+	req := &v11.GetPoolRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -379,9 +383,9 @@ func (r *servicePool) Read(ctx context.Context, id string) (*v11.ResourceMetadat
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *servicePool) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *servicePool) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewPoolService(r.provider.SDK())
-	req := &v1.GetPoolByNameRequest{
+	req := &v11.GetPoolByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -393,14 +397,14 @@ func (r *servicePool) GetByName(ctx context.Context, name, parentID string) (*v1
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *servicePool) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *servicePool) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewPoolService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.PoolSpec)
+	specTyped, ok := spec.(*v11.PoolSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.PoolSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreatePoolRequest{
+	req := &v11.CreatePoolRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -419,14 +423,14 @@ func (r *servicePool) Create(ctx context.Context, metadata *v11.ResourceMetadata
 	return id, reqCtx, nil
 }
 
-func (r *servicePool) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *servicePool) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewPoolService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.PoolSpec)
+	specTyped, ok := spec.(*v11.PoolSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.vpc.v1.PoolSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdatePoolRequest{
+	req := &v11.UpdatePoolRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -443,7 +447,7 @@ func (r *servicePool) Update(ctx context.Context, metadata *v11.ResourceMetadata
 
 func (r *servicePool) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeletePoolRequest{
+	req := &v11.DeletePoolRequest{
 		Id: id,
 	}
 	service := v12.NewPoolService(r.provider.SDK())

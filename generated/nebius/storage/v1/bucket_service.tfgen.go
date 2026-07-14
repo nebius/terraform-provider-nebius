@@ -15,8 +15,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/storage/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/storage/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/storage/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -72,7 +72,9 @@ func (r *serviceBucket) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapBucket),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -495,7 +497,9 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapBucket),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers: []planmodifier.String{
@@ -536,7 +540,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 			},
 			"versioning_policy": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.VersioningPolicy_value),
+					validators.EnumValidator(v11.VersioningPolicy_value),
 				},
 				Computed:            true,
 				Optional:            true,
@@ -563,7 +567,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 								},
 								"status": schema1.StringAttribute{
 									Validators: []validator.String{
-										validators.EnumValidator(v1.LifecycleRule_Status_value),
+										validators.EnumValidator(v11.LifecycleRule_Status_value),
 									},
 									Required:            true,
 									MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STATUS_UNSPECIFIED`\n   - `ENABLED`\n   - `DISABLED`\n   \n",
@@ -645,7 +649,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 													"date",
 													"days",
 												}, fieldNameMapBucket),
-												validators.ProtoFieldValidator(&v1.LifecycleExpiration{}, "days", "days", fieldNameMapBucket),
+												validators.ProtoFieldValidator(&v11.LifecycleExpiration{}, "days", "days", fieldNameMapBucket),
 											},
 											Optional:            true,
 											MarkdownDescription: ":\n\n   Indicates the lifetime, in days, of the objects that are subject to the rule.\n   The value must be a non-zero positive integer.\n   \n   *Cannot be set alongside date.*\n",
@@ -676,7 +680,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 										"noncurrent_days": schema1.Int64Attribute{
 											Validators: []validator.Int64{
 												validators.Int32Validator(),
-												validators.ProtoFieldValidator(&v1.LifecycleNoncurrentVersionExpiration{}, "noncurrent_days", "noncurrent_days", fieldNameMapBucket),
+												validators.ProtoFieldValidator(&v11.LifecycleNoncurrentVersionExpiration{}, "noncurrent_days", "noncurrent_days", fieldNameMapBucket),
 											},
 											Optional:            true,
 											MarkdownDescription: "Specifies the number of days an object is noncurrent before the system will expire it.",
@@ -693,7 +697,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 										"days_after_initiation": schema1.Int64Attribute{
 											Validators: []validator.Int64{
 												validators.Int32Validator(),
-												validators.ProtoFieldValidator(&v1.LifecycleAbortIncompleteMultipartUpload{}, "days_after_initiation", "days_after_initiation", fieldNameMapBucket),
+												validators.ProtoFieldValidator(&v11.LifecycleAbortIncompleteMultipartUpload{}, "days_after_initiation", "days_after_initiation", fieldNameMapBucket),
 											},
 											Optional:            true,
 											MarkdownDescription: ":\n\n   Specifies the days since the initiation of an incomplete multipart upload that\n   the system will wait before permanently removing all parts of the upload.\n",
@@ -728,7 +732,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 													"days",
 													"days_since_last_access",
 												}, fieldNameMapBucket),
-												validators.ProtoFieldValidator(&v1.LifecycleTransition{}, "days", "days", fieldNameMapBucket),
+												validators.ProtoFieldValidator(&v11.LifecycleTransition{}, "days", "days", fieldNameMapBucket),
 											},
 											Optional:            true,
 											MarkdownDescription: ":\n\n   Amount of days since object was uploaded before it's transited to a new storage class.\n   The value must be a non-zero positive integer.\n   \n   *Cannot be set alongside date or days_since_last_access.*\n",
@@ -742,7 +746,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 													"days",
 													"days_since_last_access",
 												}, fieldNameMapBucket),
-												validators.ProtoFieldValidator(&v1.LifecycleTransition{}, "days_since_last_access", "days_since_last_access", fieldNameMapBucket),
+												validators.ProtoFieldValidator(&v11.LifecycleTransition{}, "days_since_last_access", "days_since_last_access", fieldNameMapBucket),
 											},
 											Optional:            true,
 											MarkdownDescription: ":\n\n   The number of days since the object was last accessed before it is transitioned.\n   \n   *Cannot be set alongside date or days.*\n",
@@ -750,7 +754,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 										},
 										"storage_class": schema1.StringAttribute{
 											Validators: []validator.String{
-												validators.EnumValidator(v1.StorageClass_value),
+												validators.EnumValidator(v11.StorageClass_value),
 											},
 											Optional:            true,
 											MarkdownDescription: ":\n\n   Target storage class to transit to.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   - `FILESYSTEM` - Special storage class only for filesystem buckets.\n   \n",
@@ -775,7 +779,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 										"noncurrent_days": schema1.Int64Attribute{
 											Validators: []validator.Int64{
 												validators.Int32Validator(),
-												validators.ProtoFieldValidator(&v1.LifecycleNoncurrentVersionTransition{}, "noncurrent_days", "noncurrent_days", fieldNameMapBucket),
+												validators.ProtoFieldValidator(&v11.LifecycleNoncurrentVersionTransition{}, "noncurrent_days", "noncurrent_days", fieldNameMapBucket),
 											},
 											Optional:            true,
 											MarkdownDescription: "Specifies the number of days an object is noncurrent before the system will transit it.",
@@ -783,7 +787,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 										},
 										"storage_class": schema1.StringAttribute{
 											Validators: []validator.String{
-												validators.EnumValidator(v1.StorageClass_value),
+												validators.EnumValidator(v11.StorageClass_value),
 											},
 											Optional:            true,
 											MarkdownDescription: ":\n\n   Target storage class to transit to.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   - `FILESYSTEM` - Special storage class only for filesystem buckets.\n   \n",
@@ -798,7 +802,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 							},
 						},
 						Validators: []validator.List{
-							validators.ProtoFieldValidator(&v1.LifecycleConfiguration{}, "rules", "rules", fieldNameMapBucket),
+							validators.ProtoFieldValidator(&v11.LifecycleConfiguration{}, "rules", "rules", fieldNameMapBucket),
 						},
 						Computed:            true,
 						Optional:            true,
@@ -812,7 +816,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 									Attributes: map[string]schema1.Attribute{
 										"type": schema1.StringAttribute{
 											Validators: []validator.String{
-												validators.EnumValidator(v1.LifecycleAccessFilter_Condition_Type_value),
+												validators.EnumValidator(v11.LifecycleAccessFilter_Condition_Type_value),
 											},
 											Required:            true,
 											MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `TYPE_UNSPECIFIED`\n   - `INCLUDE`:\n      If an include type condition is the first condition that the request match, the request will be included in\n      `days_since_last_access` calculation.\n   \n   - `EXCLUDE`:\n      If an exclude type condition is the first condition that the request match, the request will be ignored in `days_since_last_access`\n      calculation.\n   \n   \n",
@@ -821,8 +825,8 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 										"methods": schema1.ListAttribute{
 											ElementType: types.StringType,
 											Validators: []validator.List{
-												validators.ListEnumValidator(v1.LifecycleAccessFilter_Condition_Method_value),
-												validators.ProtoFieldValidator(&v1.LifecycleAccessFilter_Condition{}, "methods", "methods", fieldNameMapBucket),
+												validators.ListEnumValidator(v11.LifecycleAccessFilter_Condition_Method_value),
+												validators.ProtoFieldValidator(&v11.LifecycleAccessFilter_Condition{}, "methods", "methods", fieldNameMapBucket),
 											},
 											Optional:            true,
 											MarkdownDescription: ":\n\n   The s3 methods to match.\n   An empty list matches all methods\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `METHOD_UNSPECIFIED`\n   - `GET_OBJECT`\n   - `HEAD_OBJECT`\n   - `GET_OBJECT_TAGGING`\n   - `COPY_OBJECT`:\n      Copy object method reads the source object.\n      We account for those operations as source object accesses when calculating `days_since_last_access` for source object.\n   \n   - `UPLOAD_PART_COPY`:\n      Upload part copy method reads the source object.\n      We account for those operations as source object accesses when calculating `days_since_last_access` for source object.\n   \n   \n",
@@ -831,7 +835,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 										"user_agents": schema1.ListAttribute{
 											ElementType: types.StringType,
 											Validators: []validator.List{
-												validators.ProtoFieldValidator(&v1.LifecycleAccessFilter_Condition{}, "user_agents", "user_agents", fieldNameMapBucket),
+												validators.ProtoFieldValidator(&v11.LifecycleAccessFilter_Condition{}, "user_agents", "user_agents", fieldNameMapBucket),
 											},
 											Optional:            true,
 											MarkdownDescription: ":\n\n   User agents to match. Condition is satisfied if the request's user agent contains any of these substrings.\n   An empty list matches all user agents.\n",
@@ -840,7 +844,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 									},
 								},
 								Validators: []validator.List{
-									validators.ProtoFieldValidator(&v1.LifecycleAccessFilter{}, "conditions", "conditions", fieldNameMapBucket),
+									validators.ProtoFieldValidator(&v11.LifecycleAccessFilter{}, "conditions", "conditions", fieldNameMapBucket),
 								},
 								Optional:            true,
 								MarkdownDescription: ":\n\n   A request is included in `days_since_last_access` calculations if:\n   - The first condition matching the request has `INCLUDE` type.\n   OR\n   - The request doesn't match any conditions\n",
@@ -909,7 +913,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 							},
 						},
 						Validators: []validator.List{
-							validators.ProtoFieldValidator(&v1.CORSConfiguration{}, "rules", "rules", fieldNameMapBucket),
+							validators.ProtoFieldValidator(&v11.CORSConfiguration{}, "rules", "rules", fieldNameMapBucket),
 						},
 						Optional:            true,
 						MarkdownDescription: "CORS rules.",
@@ -923,7 +927,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 			},
 			"default_storage_class": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.StorageClass_value),
+					validators.EnumValidator(v11.StorageClass_value),
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Storage class to use by default for uploads to the bucket. It may be overridden by `x-amz-storage-class` header.\n   If not set - STANDARD is used as a default storage class.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `STORAGE_CLASS_UNSPECIFIED`\n   - `STANDARD`\n   - `ENHANCED_THROUGHPUT`\n   - `INTELLIGENT`\n   - `FILESYSTEM` - Special storage class only for filesystem buckets.\n   \n",
@@ -937,7 +941,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 			},
 			"object_audit_logging": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.BucketSpec_ObjectAuditLogging_value),
+					validators.EnumValidator(v11.BucketSpec_ObjectAuditLogging_value),
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Object audit logging specifies which requests must be logged - none, all or mutational only.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `OBJECT_AUDIT_LOGGING_UNSPECIFIED`\n   - `NONE` - Logging is disabled.\n   - `MUTATE_ONLY` - Logging enabled only for mutating requests.\n   - `ALL` - Logging enabled for all requests.\n   \n",
@@ -951,7 +955,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 								"paths": schema1.ListAttribute{
 									ElementType: types.StringType,
 									Validators: []validator.List{
-										validators.ProtoFieldValidator(&v1.BucketPolicy_Rule{}, "paths", "paths", fieldNameMapBucket),
+										validators.ProtoFieldValidator(&v11.BucketPolicy_Rule{}, "paths", "paths", fieldNameMapBucket),
 									},
 									Optional:            true,
 									MarkdownDescription: ":\n\n   A list of paths each of which is either a full object key or a prefix ending with a\n   single \"*\" wildcard character. A rule is only applied to objects matching any of paths.\n   If there is a path equal to \"*\", a rule applies to a whole bucket.\n",
@@ -990,7 +994,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 							},
 						},
 						Validators: []validator.List{
-							validators.ProtoFieldValidator(&v1.BucketPolicy{}, "rules", "rules", fieldNameMapBucket),
+							validators.ProtoFieldValidator(&v11.BucketPolicy{}, "rules", "rules", fieldNameMapBucket),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   Rule specifies which role must be given to a subject to access a set of objects with given\n   prefixes or a whole bucket.\n",
@@ -1140,7 +1144,7 @@ func (r *serviceBucket) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceBucket) StatusMessage() proto.Message {
-	return &v1.BucketStatus{}
+	return &v11.BucketStatus{}
 }
 
 var fieldNameMapBucket = map[string]map[string]string{}
@@ -1150,16 +1154,16 @@ func (r *serviceBucket) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceBucket) SpecMessage() proto.Message {
-	return &v1.BucketSpec{}
+	return &v11.BucketSpec{}
 }
 
 func (r *serviceBucket) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceBucket) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceBucket) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewBucketService(r.provider.SDK())
-	req := &v1.GetBucketRequest{
+	req := &v11.GetBucketRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -1170,9 +1174,9 @@ func (r *serviceBucket) Read(ctx context.Context, id string) (*v11.ResourceMetad
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceBucket) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceBucket) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewBucketService(r.provider.SDK())
-	req := &v1.GetBucketByNameRequest{
+	req := &v11.GetBucketByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -1184,14 +1188,14 @@ func (r *serviceBucket) GetByName(ctx context.Context, name, parentID string) (*
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceBucket) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceBucket) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewBucketService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.BucketSpec)
+	specTyped, ok := spec.(*v11.BucketSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.storage.v1.BucketSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateBucketRequest{
+	req := &v11.CreateBucketRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -1210,14 +1214,14 @@ func (r *serviceBucket) Create(ctx context.Context, metadata *v11.ResourceMetada
 	return id, reqCtx, nil
 }
 
-func (r *serviceBucket) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceBucket) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewBucketService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.BucketSpec)
+	specTyped, ok := spec.(*v11.BucketSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.storage.v1.BucketSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateBucketRequest{
+	req := &v11.UpdateBucketRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -1234,7 +1238,7 @@ func (r *serviceBucket) Update(ctx context.Context, metadata *v11.ResourceMetada
 
 func (r *serviceBucket) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteBucketRequest{
+	req := &v11.DeleteBucketRequest{
 		Id: id,
 	}
 	service := v12.NewBucketService(r.provider.SDK())

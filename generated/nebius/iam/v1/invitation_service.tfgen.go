@@ -15,13 +15,14 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/iam/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/iam/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/iam/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -149,7 +150,9 @@ func (r *serviceInvitation) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapInvitation),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -233,7 +236,7 @@ func (r *serviceInvitation) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceInvitation) StatusMessage() proto.Message {
-	return &v1.InvitationStatus{}
+	return &v11.InvitationStatus{}
 }
 
 var fieldNameMapInvitation = map[string]map[string]string{}
@@ -243,16 +246,16 @@ func (r *serviceInvitation) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceInvitation) SpecMessage() proto.Message {
-	return &v1.InvitationSpec{}
+	return &v11.InvitationSpec{}
 }
 
 func (r *serviceInvitation) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceInvitation) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceInvitation) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewInvitationService(r.provider.SDK())
-	req := &v1.GetInvitationRequest{
+	req := &v11.GetInvitationRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -263,14 +266,14 @@ func (r *serviceInvitation) Read(ctx context.Context, id string) (*v11.ResourceM
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceInvitation) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceInvitation) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewInvitationService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.InvitationSpec)
+	specTyped, ok := spec.(*v11.InvitationSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.InvitationSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateInvitationRequest{
+	req := &v11.CreateInvitationRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -289,14 +292,14 @@ func (r *serviceInvitation) Create(ctx context.Context, metadata *v11.ResourceMe
 	return id, reqCtx, nil
 }
 
-func (r *serviceInvitation) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceInvitation) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewInvitationService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.InvitationSpec)
+	specTyped, ok := spec.(*v11.InvitationSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.iam.v1.InvitationSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateInvitationRequest{
+	req := &v11.UpdateInvitationRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -313,7 +316,7 @@ func (r *serviceInvitation) Update(ctx context.Context, metadata *v11.ResourceMe
 
 func (r *serviceInvitation) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteInvitationRequest{
+	req := &v11.DeleteInvitationRequest{
 		Id: id,
 	}
 	service := v12.NewInvitationService(r.provider.SDK())

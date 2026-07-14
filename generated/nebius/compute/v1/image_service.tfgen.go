@@ -10,13 +10,14 @@ import (
 	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/compute/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/compute/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/compute/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
 	requestcontext "github.com/nebius/terraform-provider-nebius/service/requestcontext"
+	validators "github.com/nebius/terraform-provider-nebius/validators"
 	proto "google.golang.org/protobuf/proto"
 )
 
@@ -59,7 +60,9 @@ func (r *serviceImage) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapImage),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -189,7 +192,7 @@ func (r *serviceImage) DataSourceSchema() schema.Schema {
 }
 
 func (r *serviceImage) StatusMessage() proto.Message {
-	return &v1.ImageStatus{}
+	return &v11.ImageStatus{}
 }
 
 var fieldNameMapImage = map[string]map[string]string{}
@@ -199,16 +202,16 @@ func (r *serviceImage) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceImage) SpecMessage() proto.Message {
-	return &v1.ImageSpec{}
+	return &v11.ImageSpec{}
 }
 
 func (r *serviceImage) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceImage) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceImage) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewImageService(r.provider.SDK())
-	req := &v1.GetImageRequest{
+	req := &v11.GetImageRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -219,9 +222,9 @@ func (r *serviceImage) Read(ctx context.Context, id string) (*v11.ResourceMetada
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceImage) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceImage) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewImageService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -233,14 +236,14 @@ func (r *serviceImage) GetByName(ctx context.Context, name, parentID string) (*v
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceImage) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceImage) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewImageService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.ImageSpec)
+	specTyped, ok := spec.(*v11.ImageSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.ImageSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateImageRequest{
+	req := &v11.CreateImageRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -259,14 +262,14 @@ func (r *serviceImage) Create(ctx context.Context, metadata *v11.ResourceMetadat
 	return id, reqCtx, nil
 }
 
-func (r *serviceImage) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceImage) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewImageService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.ImageSpec)
+	specTyped, ok := spec.(*v11.ImageSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.ImageSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateImageRequest{
+	req := &v11.UpdateImageRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -283,7 +286,7 @@ func (r *serviceImage) Update(ctx context.Context, metadata *v11.ResourceMetadat
 
 func (r *serviceImage) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteImageRequest{
+	req := &v11.DeleteImageRequest{
 		Id: id,
 	}
 	service := v12.NewImageService(r.provider.SDK())

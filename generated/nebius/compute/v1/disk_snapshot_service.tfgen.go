@@ -15,8 +15,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/compute/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/compute/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/compute/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -72,7 +72,9 @@ func (r *serviceDiskSnapshot) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapDiskSnapshot),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -168,7 +170,9 @@ func (r *serviceDiskSnapshot) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapDiskSnapshot),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -215,7 +219,7 @@ func (r *serviceDiskSnapshot) ResourceSchema() schema1.Schema {
 			},
 			"description": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.DiskSnapshotSpec{}, "description", "description", fieldNameMapDiskSnapshot),
+					validators.ProtoFieldValidator(&v11.DiskSnapshotSpec{}, "description", "description", fieldNameMapDiskSnapshot),
 				},
 				Optional:            true,
 				MarkdownDescription: "Arbitrary information about this snapshot provided by user.",
@@ -272,7 +276,7 @@ func (r *serviceDiskSnapshot) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceDiskSnapshot) StatusMessage() proto.Message {
-	return &v1.DiskSnapshotStatus{}
+	return &v11.DiskSnapshotStatus{}
 }
 
 var fieldNameMapDiskSnapshot = map[string]map[string]string{}
@@ -282,16 +286,16 @@ func (r *serviceDiskSnapshot) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceDiskSnapshot) SpecMessage() proto.Message {
-	return &v1.DiskSnapshotSpec{}
+	return &v11.DiskSnapshotSpec{}
 }
 
 func (r *serviceDiskSnapshot) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceDiskSnapshot) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceDiskSnapshot) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewDiskSnapshotService(r.provider.SDK())
-	req := &v1.GetDiskSnapshotRequest{
+	req := &v11.GetDiskSnapshotRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -302,9 +306,9 @@ func (r *serviceDiskSnapshot) Read(ctx context.Context, id string) (*v11.Resourc
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceDiskSnapshot) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceDiskSnapshot) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewDiskSnapshotService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -316,14 +320,14 @@ func (r *serviceDiskSnapshot) GetByName(ctx context.Context, name, parentID stri
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceDiskSnapshot) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceDiskSnapshot) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewDiskSnapshotService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.DiskSnapshotSpec)
+	specTyped, ok := spec.(*v11.DiskSnapshotSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.DiskSnapshotSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateDiskSnapshotRequest{
+	req := &v11.CreateDiskSnapshotRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -342,14 +346,14 @@ func (r *serviceDiskSnapshot) Create(ctx context.Context, metadata *v11.Resource
 	return id, reqCtx, nil
 }
 
-func (r *serviceDiskSnapshot) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceDiskSnapshot) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewDiskSnapshotService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.DiskSnapshotSpec)
+	specTyped, ok := spec.(*v11.DiskSnapshotSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.compute.v1.DiskSnapshotSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateDiskSnapshotRequest{
+	req := &v11.UpdateDiskSnapshotRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -366,7 +370,7 @@ func (r *serviceDiskSnapshot) Update(ctx context.Context, metadata *v11.Resource
 
 func (r *serviceDiskSnapshot) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteDiskSnapshotRequest{
+	req := &v11.DeleteDiskSnapshotRequest{
 		Id: id,
 	}
 	service := v12.NewDiskSnapshotService(r.provider.SDK())

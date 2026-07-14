@@ -16,8 +16,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/storage/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/storage/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/storage/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -73,7 +73,9 @@ func (r *serviceTransfer) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapTransfer),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
@@ -437,7 +439,9 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapTransfer),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
@@ -480,7 +484,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 						Attributes: map[string]schema1.Attribute{
 							"region": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferSource_NebiusProvider{}, "region", "region", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferSource_NebiusProvider{}, "region", "region", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: "Nebius region where the source bucket is located.",
@@ -490,7 +494,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 							},
 							"bucket_name": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferSource_NebiusProvider{}, "bucket_name", "bucket_name", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferSource_NebiusProvider{}, "bucket_name", "bucket_name", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: "Name of the source bucket.",
@@ -514,7 +518,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 								Attributes: map[string]schema1.Attribute{
 									"access_key_id": schema1.StringAttribute{
 										Validators: []validator.String{
-											validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "access_key_id", "access_key_id", fieldNameMapTransfer),
+											validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "access_key_id", "access_key_id", fieldNameMapTransfer),
 										},
 										Required:            true,
 										MarkdownDescription: "Access key ID.",
@@ -522,7 +526,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 									},
 									"secret_access_key": schema1.StringAttribute{
 										Validators: []validator.String{
-											validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
+											validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
 											validators.WriteOnlyDuplicateValidator(),
 										},
 										Optional:            true,
@@ -548,7 +552,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 								"s3_compatible",
 								"azure_blob_storage",
 							}, fieldNameMapTransfer),
-							validators.ProtoFieldValidator(&v1.TransferSource{}, "nebius", "nebius", fieldNameMapTransfer),
+							validators.ProtoFieldValidator(&v11.TransferSource{}, "nebius", "nebius", fieldNameMapTransfer),
 						},
 						Optional:            true,
 						MarkdownDescription: "*Cannot be set alongside s3_compatible or azure_blob_storage.*",
@@ -558,7 +562,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 						Attributes: map[string]schema1.Attribute{
 							"endpoint": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferSource_S3CompatibleProvider{}, "endpoint", "endpoint", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferSource_S3CompatibleProvider{}, "endpoint", "endpoint", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: ":\n\n   The endpoint must be in the form of a URL, starting with the protocol (https),\n   followed by the endpoint address without a trailing slash.\n   Example: \"https://storage.some-cloud\".\n",
@@ -568,7 +572,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 							},
 							"region": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferSource_S3CompatibleProvider{}, "region", "region", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferSource_S3CompatibleProvider{}, "region", "region", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: "S3-compatible provider region where source bucket is located.",
@@ -578,7 +582,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 							},
 							"bucket_name": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferSource_S3CompatibleProvider{}, "bucket_name", "bucket_name", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferSource_S3CompatibleProvider{}, "bucket_name", "bucket_name", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: "Name of the source bucket.",
@@ -602,7 +606,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 								Attributes: map[string]schema1.Attribute{
 									"access_key_id": schema1.StringAttribute{
 										Validators: []validator.String{
-											validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "access_key_id", "access_key_id", fieldNameMapTransfer),
+											validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "access_key_id", "access_key_id", fieldNameMapTransfer),
 										},
 										Required:            true,
 										MarkdownDescription: "Access key ID.",
@@ -610,7 +614,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 									},
 									"secret_access_key": schema1.StringAttribute{
 										Validators: []validator.String{
-											validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
+											validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
 											validators.WriteOnlyDuplicateValidator(),
 										},
 										Optional:            true,
@@ -636,7 +640,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 								"s3_compatible",
 								"azure_blob_storage",
 							}, fieldNameMapTransfer),
-							validators.ProtoFieldValidator(&v1.TransferSource{}, "s3_compatible", "s3_compatible", fieldNameMapTransfer),
+							validators.ProtoFieldValidator(&v11.TransferSource{}, "s3_compatible", "s3_compatible", fieldNameMapTransfer),
 						},
 						Optional:            true,
 						MarkdownDescription: "*Cannot be set alongside nebius or azure_blob_storage.*",
@@ -646,7 +650,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 						Attributes: map[string]schema1.Attribute{
 							"endpoint": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferSource_AzureBlobStorageProvider{}, "endpoint", "endpoint", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferSource_AzureBlobStorageProvider{}, "endpoint", "endpoint", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: ":\n\n   The endpoint must be in the form of a URL, starting with the protocol (https),\n   followed by the endpoint address without a trailing slash.\n   Example: \"https://storageaccountname.blob.core.windows.net\".\n",
@@ -656,7 +660,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 							},
 							"container_name": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferSource_AzureBlobStorageProvider{}, "container_name", "container_name", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferSource_AzureBlobStorageProvider{}, "container_name", "container_name", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: "Name of the source Azure Blob Storage container.",
@@ -680,7 +684,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 								Attributes: map[string]schema1.Attribute{
 									"account_name": schema1.StringAttribute{
 										Validators: []validator.String{
-											validators.ProtoFieldValidator(&v1.TransferCredentialsAzureStorageAccount{}, "account_name", "account_name", fieldNameMapTransfer),
+											validators.ProtoFieldValidator(&v11.TransferCredentialsAzureStorageAccount{}, "account_name", "account_name", fieldNameMapTransfer),
 										},
 										Required:            true,
 										MarkdownDescription: "Storage account name.",
@@ -688,7 +692,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 									},
 									"access_key": schema1.StringAttribute{
 										Validators: []validator.String{
-											validators.ProtoFieldValidator(&v1.TransferCredentialsAzureStorageAccount{}, "access_key", "access_key", fieldNameMapTransfer),
+											validators.ProtoFieldValidator(&v11.TransferCredentialsAzureStorageAccount{}, "access_key", "access_key", fieldNameMapTransfer),
 											validators.WriteOnlyDuplicateValidator(),
 										},
 										Optional:            true,
@@ -714,7 +718,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 								"s3_compatible",
 								"azure_blob_storage",
 							}, fieldNameMapTransfer),
-							validators.ProtoFieldValidator(&v1.TransferSource{}, "azure_blob_storage", "azure_blob_storage", fieldNameMapTransfer),
+							validators.ProtoFieldValidator(&v11.TransferSource{}, "azure_blob_storage", "azure_blob_storage", fieldNameMapTransfer),
 						},
 						Optional:            true,
 						MarkdownDescription: "*Cannot be set alongside nebius or s3_compatible.*",
@@ -722,7 +726,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 					},
 					"prefix": schema1.StringAttribute{
 						Validators: []validator.String{
-							validators.ProtoFieldValidator(&v1.TransferSource{}, "prefix", "prefix", fieldNameMapTransfer),
+							validators.ProtoFieldValidator(&v11.TransferSource{}, "prefix", "prefix", fieldNameMapTransfer),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   Prefix to filter objects in the source. Only objects whose keys start with this prefix will be transferred.\n   During transfer, the resulting object key in the destination is computed\n   by removing source.prefix from the original key and then prepending destination.prefix (if provided).\n   Important: This transformation may result in an empty object key or one that exceeds allowed length limits.\n   Use prefixes that guarantee valid resulting object keys for your objects after transformation.\n",
@@ -742,7 +746,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 						Attributes: map[string]schema1.Attribute{
 							"region": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferDestination_NebiusProvider{}, "region", "region", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferDestination_NebiusProvider{}, "region", "region", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: "Nebius region where the destination bucket is located.",
@@ -752,7 +756,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 							},
 							"bucket_name": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferDestination_NebiusProvider{}, "bucket_name", "bucket_name", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferDestination_NebiusProvider{}, "bucket_name", "bucket_name", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: "Name of the destination bucket.",
@@ -764,7 +768,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 								Attributes: map[string]schema1.Attribute{
 									"access_key_id": schema1.StringAttribute{
 										Validators: []validator.String{
-											validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "access_key_id", "access_key_id", fieldNameMapTransfer),
+											validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "access_key_id", "access_key_id", fieldNameMapTransfer),
 										},
 										Required:            true,
 										MarkdownDescription: "Access key ID.",
@@ -772,7 +776,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 									},
 									"secret_access_key": schema1.StringAttribute{
 										Validators: []validator.String{
-											validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
+											validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
 											validators.WriteOnlyDuplicateValidator(),
 										},
 										Optional:            true,
@@ -792,7 +796,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 								"nebius",
 								"s3_compatible",
 							}, fieldNameMapTransfer),
-							validators.ProtoFieldValidator(&v1.TransferDestination{}, "nebius", "nebius", fieldNameMapTransfer),
+							validators.ProtoFieldValidator(&v11.TransferDestination{}, "nebius", "nebius", fieldNameMapTransfer),
 						},
 						Optional:            true,
 						MarkdownDescription: "*Cannot be set alongside s3_compatible.*",
@@ -802,7 +806,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 						Attributes: map[string]schema1.Attribute{
 							"endpoint": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferDestination_S3CompatibleProvider{}, "endpoint", "endpoint", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferDestination_S3CompatibleProvider{}, "endpoint", "endpoint", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: ":\n\n   The endpoint must be in the form of a URL, starting with the protocol (https),\n   followed by the endpoint address without a trailing slash.\n   Example: \"https://storage.some-cloud\".\n",
@@ -812,7 +816,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 							},
 							"region": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferDestination_S3CompatibleProvider{}, "region", "region", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferDestination_S3CompatibleProvider{}, "region", "region", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: "S3-compatible provider region where destination bucket is located.",
@@ -822,7 +826,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 							},
 							"bucket_name": schema1.StringAttribute{
 								Validators: []validator.String{
-									validators.ProtoFieldValidator(&v1.TransferDestination_S3CompatibleProvider{}, "bucket_name", "bucket_name", fieldNameMapTransfer),
+									validators.ProtoFieldValidator(&v11.TransferDestination_S3CompatibleProvider{}, "bucket_name", "bucket_name", fieldNameMapTransfer),
 								},
 								Required:            true,
 								MarkdownDescription: "Name of the destination bucket.",
@@ -846,7 +850,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 								Attributes: map[string]schema1.Attribute{
 									"access_key_id": schema1.StringAttribute{
 										Validators: []validator.String{
-											validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "access_key_id", "access_key_id", fieldNameMapTransfer),
+											validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "access_key_id", "access_key_id", fieldNameMapTransfer),
 										},
 										Required:            true,
 										MarkdownDescription: "Access key ID.",
@@ -854,7 +858,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 									},
 									"secret_access_key": schema1.StringAttribute{
 										Validators: []validator.String{
-											validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
+											validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
 											validators.WriteOnlyDuplicateValidator(),
 										},
 										Optional:            true,
@@ -879,7 +883,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 								"nebius",
 								"s3_compatible",
 							}, fieldNameMapTransfer),
-							validators.ProtoFieldValidator(&v1.TransferDestination{}, "s3_compatible", "s3_compatible", fieldNameMapTransfer),
+							validators.ProtoFieldValidator(&v11.TransferDestination{}, "s3_compatible", "s3_compatible", fieldNameMapTransfer),
 						},
 						Optional:            true,
 						MarkdownDescription: "*Cannot be set alongside nebius.*",
@@ -887,7 +891,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 					},
 					"prefix": schema1.StringAttribute{
 						Validators: []validator.String{
-							validators.ProtoFieldValidator(&v1.TransferDestination{}, "prefix", "prefix", fieldNameMapTransfer),
+							validators.ProtoFieldValidator(&v11.TransferDestination{}, "prefix", "prefix", fieldNameMapTransfer),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   Prefix to add to the beginning of each transferred object key in the destination.\n   During transfer, the resulting object key in the destination is computed\n   by removing source.prefix (if provided) from the original key and then prepending destination.prefix.\n   Important: This transformation may result in an empty object key or one that exceeds allowed length limits.\n   Use prefixes that guarantee valid resulting object keys for your objects after transformation.\n",
@@ -976,7 +980,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 			"inter_iteration_interval": schema1.StringAttribute{
 				CustomType: wellknown.WellKnownByName("google.protobuf.Duration").Type().(basetypes.StringTypable),
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.TransferSpec{}, "inter_iteration_interval", "inter_iteration_interval", fieldNameMapTransfer),
+					validators.ProtoFieldValidator(&v11.TransferSpec{}, "inter_iteration_interval", "inter_iteration_interval", fieldNameMapTransfer),
 				},
 				Computed:            true,
 				Optional:            true,
@@ -985,7 +989,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 			},
 			"overwrite_strategy": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v1.TransferSpec_OverwriteStrategy_value),
+					validators.EnumValidator(v11.TransferSpec_OverwriteStrategy_value),
 				},
 				Required:            true,
 				MarkdownDescription: ":\n\n   Overwrite strategy set logic of overwrite already existed objects in destination bucket.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `OVERWRITE_STRATEGY_UNSPECIFIED`\n   - `NEVER`:\n      Never overwrite objects that exist in the destination.\n      If object exists in destination bucket, skip it.\n      Safest option to prevent any data loss.\n   \n   - `IF_NEWER`:\n      Overwrite only if source object is newer than destination.\n      Comparison based on Last-Modified timestamp.\n      Recommended for incremental sync scenarios.\n      If touch_unmanaged flag isn't set, we do not overwrite objects that haven't been created by Data Transfer service.\n   \n   \n",
@@ -1137,7 +1141,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 									Attributes: map[string]schema1.Attribute{
 										"secret_access_key": schema1.StringAttribute{
 											Validators: []validator.String{
-												validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
+												validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
 											},
 											WriteOnly:           true,
 											Optional:            true,
@@ -1163,7 +1167,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 									Attributes: map[string]schema1.Attribute{
 										"secret_access_key": schema1.StringAttribute{
 											Validators: []validator.String{
-												validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
+												validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
 											},
 											WriteOnly:           true,
 											Optional:            true,
@@ -1189,7 +1193,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 									Attributes: map[string]schema1.Attribute{
 										"access_key": schema1.StringAttribute{
 											Validators: []validator.String{
-												validators.ProtoFieldValidator(&v1.TransferCredentialsAzureStorageAccount{}, "access_key", "access_key", fieldNameMapTransfer),
+												validators.ProtoFieldValidator(&v11.TransferCredentialsAzureStorageAccount{}, "access_key", "access_key", fieldNameMapTransfer),
 											},
 											WriteOnly:           true,
 											Optional:            true,
@@ -1223,7 +1227,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 									Attributes: map[string]schema1.Attribute{
 										"secret_access_key": schema1.StringAttribute{
 											Validators: []validator.String{
-												validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
+												validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
 											},
 											WriteOnly:           true,
 											Optional:            true,
@@ -1249,7 +1253,7 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 									Attributes: map[string]schema1.Attribute{
 										"secret_access_key": schema1.StringAttribute{
 											Validators: []validator.String{
-												validators.ProtoFieldValidator(&v1.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
+												validators.ProtoFieldValidator(&v11.TransferCredentialsAccessKey{}, "secret_access_key", "secret_access_key", fieldNameMapTransfer),
 											},
 											WriteOnly:           true,
 											Optional:            true,
@@ -1289,7 +1293,7 @@ func (r *serviceTransfer) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceTransfer) StatusMessage() proto.Message {
-	return &v1.TransferStatus{}
+	return &v11.TransferStatus{}
 }
 
 var fieldNameMapTransfer = map[string]map[string]string{}
@@ -1299,16 +1303,16 @@ func (r *serviceTransfer) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceTransfer) SpecMessage() proto.Message {
-	return &v1.TransferSpec{}
+	return &v11.TransferSpec{}
 }
 
 func (r *serviceTransfer) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceTransfer) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceTransfer) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewTransferService(r.provider.SDK())
-	req := &v1.GetTransferRequest{
+	req := &v11.GetTransferRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -1319,9 +1323,9 @@ func (r *serviceTransfer) Read(ctx context.Context, id string) (*v11.ResourceMet
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceTransfer) GetByName(ctx context.Context, name, parentID string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceTransfer) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewTransferService(r.provider.SDK())
-	req := &v11.GetByNameRequest{
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -1333,14 +1337,14 @@ func (r *serviceTransfer) GetByName(ctx context.Context, name, parentID string) 
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceTransfer) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceTransfer) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewTransferService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.TransferSpec)
+	specTyped, ok := spec.(*v11.TransferSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.storage.v1.TransferSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateTransferRequest{
+	req := &v11.CreateTransferRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -1359,14 +1363,14 @@ func (r *serviceTransfer) Create(ctx context.Context, metadata *v11.ResourceMeta
 	return id, reqCtx, nil
 }
 
-func (r *serviceTransfer) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceTransfer) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	service := v12.NewTransferService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.TransferSpec)
+	specTyped, ok := spec.(*v11.TransferSpec)
 	if !ok {
 		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.storage.v1.TransferSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.UpdateTransferRequest{
+	req := &v11.UpdateTransferRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -1383,7 +1387,7 @@ func (r *serviceTransfer) Update(ctx context.Context, metadata *v11.ResourceMeta
 
 func (r *serviceTransfer) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteTransferRequest{
+	req := &v11.DeleteTransferRequest{
 		Id: id,
 	}
 	service := v12.NewTransferService(r.provider.SDK())

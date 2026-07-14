@@ -255,8 +255,9 @@ Read-Only:
 - `size_gibibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*
 - `size_kibibytes` (Number) *Cannot be set alongside size_bytes, size_mebibytes or size_gibibytes.*
 - `size_mebibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_gibibytes.*
-- `source_image_family` (Attributes) *Cannot be set alongside source_image_id.* (see [below for nested schema](#nestedatt--boot_disk--managed_disk--spec--source_image_family))
-- `source_image_id` (String) *Cannot be set alongside source_image_family.*
+- `source_image_family` (Attributes) *Cannot be set alongside source_image_id or source_snapshot_id.* (see [below for nested schema](#nestedatt--boot_disk--managed_disk--spec--source_image_family))
+- `source_image_id` (String) *Cannot be set alongside source_image_family or source_snapshot_id.*
+- `source_snapshot_id` (String) *Cannot be set alongside source_image_id or source_image_family.*
 - `type` (String) :
 
    The type of disk defines the performance and reliability characteristics of the block device.
@@ -607,8 +608,9 @@ Read-Only:
 - `size_gibibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*
 - `size_kibibytes` (Number) *Cannot be set alongside size_bytes, size_mebibytes or size_gibibytes.*
 - `size_mebibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_gibibytes.*
-- `source_image_family` (Attributes) *Cannot be set alongside source_image_id.* (see [below for nested schema](#nestedatt--secondary_disks--managed_disk--spec--source_image_family))
-- `source_image_id` (String) *Cannot be set alongside source_image_family.*
+- `source_image_family` (Attributes) *Cannot be set alongside source_image_id or source_snapshot_id.* (see [below for nested schema](#nestedatt--secondary_disks--managed_disk--spec--source_image_family))
+- `source_image_id` (String) *Cannot be set alongside source_image_family or source_snapshot_id.*
+- `source_snapshot_id` (String) *Cannot be set alongside source_image_id or source_image_family.*
 - `type` (String) :
 
    The type of disk defines the performance and reliability characteristics of the block device.

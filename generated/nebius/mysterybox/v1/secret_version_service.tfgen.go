@@ -20,8 +20,8 @@ import (
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
-	v11 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v1 "github.com/nebius/gosdk/proto/nebius/mysterybox/v1"
+	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/mysterybox/v1"
 	v12 "github.com/nebius/gosdk/services/nebius/mysterybox/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
@@ -153,7 +153,9 @@ func (r *serviceSecretVersion) ResourceSchema() schema1.Schema {
 				},
 			},
 			"name": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSecretVersion),
+				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 				PlanModifiers: []planmodifier.String{
@@ -226,7 +228,7 @@ func (r *serviceSecretVersion) ResourceSchema() schema1.Schema {
 									"string_value",
 									"binary_value",
 								}, fieldNameMapSecretVersion),
-								validators.ProtoFieldValidator(&v1.Payload{}, "string_value", "string_value", fieldNameMapSecretVersion),
+								validators.ProtoFieldValidator(&v11.Payload{}, "string_value", "string_value", fieldNameMapSecretVersion),
 							},
 							Optional:            true,
 							Sensitive:           true,
@@ -242,7 +244,7 @@ func (r *serviceSecretVersion) ResourceSchema() schema1.Schema {
 									"string_value",
 									"binary_value",
 								}, fieldNameMapSecretVersion),
-								validators.ProtoFieldValidator(&v1.Payload{}, "binary_value", "binary_value", fieldNameMapSecretVersion),
+								validators.ProtoFieldValidator(&v11.Payload{}, "binary_value", "binary_value", fieldNameMapSecretVersion),
 							},
 							Optional:            true,
 							Sensitive:           true,
@@ -323,7 +325,7 @@ func (r *serviceSecretVersion) ResourceSchema() schema1.Schema {
 										"string_value",
 										"binary_value",
 									}, fieldNameMapSecretVersion),
-									validators.ProtoFieldValidator(&v1.Payload{}, "string_value", "string_value", fieldNameMapSecretVersion),
+									validators.ProtoFieldValidator(&v11.Payload{}, "string_value", "string_value", fieldNameMapSecretVersion),
 								},
 								WriteOnly:           true,
 								Optional:            true,
@@ -340,7 +342,7 @@ func (r *serviceSecretVersion) ResourceSchema() schema1.Schema {
 										"string_value",
 										"binary_value",
 									}, fieldNameMapSecretVersion),
-									validators.ProtoFieldValidator(&v1.Payload{}, "binary_value", "binary_value", fieldNameMapSecretVersion),
+									validators.ProtoFieldValidator(&v11.Payload{}, "binary_value", "binary_value", fieldNameMapSecretVersion),
 								},
 								WriteOnly:           true,
 								Optional:            true,
@@ -374,7 +376,7 @@ func (r *serviceSecretVersion) WriteOnlyFields() (*mask.Mask, error) {
 }
 
 func (r *serviceSecretVersion) StatusMessage() proto.Message {
-	return &v1.SecretVersionStatus{}
+	return &v11.SecretVersionStatus{}
 }
 
 var fieldNameMapSecretVersion = map[string]map[string]string{}
@@ -384,16 +386,16 @@ func (r *serviceSecretVersion) FieldNameMap() map[string]map[string]string {
 }
 
 func (r *serviceSecretVersion) SpecMessage() proto.Message {
-	return &v1.SecretVersionSpec{}
+	return &v11.SecretVersionSpec{}
 }
 
 func (r *serviceSecretVersion) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceSecretVersion) Read(ctx context.Context, id string) (*v11.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+func (r *serviceSecretVersion) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
 	service := v12.NewSecretVersionService(r.provider.SDK())
-	req := &v1.GetSecretVersionRequest{
+	req := &v11.GetSecretVersionRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -404,14 +406,14 @@ func (r *serviceSecretVersion) Read(ctx context.Context, id string) (*v11.Resour
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSecretVersion) Create(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+func (r *serviceSecretVersion) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
 	service := v12.NewSecretVersionService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v1.SecretVersionSpec)
+	specTyped, ok := spec.(*v11.SecretVersionSpec)
 	if !ok {
 		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.mysterybox.v1.SecretVersionSpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v1.CreateSecretVersionRequest{
+	req := &v11.CreateSecretVersionRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -430,14 +432,14 @@ func (r *serviceSecretVersion) Create(ctx context.Context, metadata *v11.Resourc
 	return id, reqCtx, nil
 }
 
-func (r *serviceSecretVersion) Update(ctx context.Context, metadata *v11.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+func (r *serviceSecretVersion) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
 	var reqCtx *requestcontext.Context
 	return reqCtx, fmt.Errorf("Update is unimplemented for nebius.mysterybox.v1.SecretVersionService")
 }
 
 func (r *serviceSecretVersion) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v1.DeleteSecretVersionRequest{
+	req := &v11.DeleteSecretVersionRequest{
 		Id: id,
 	}
 	service := v12.NewSecretVersionService(r.provider.SDK())
