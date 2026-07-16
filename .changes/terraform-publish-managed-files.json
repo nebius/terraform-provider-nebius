@@ -237,6 +237,7 @@
     "generated/nebius/logging/v1/metric_service.tfgen.go",
     "generated/nebius/logging/v1/registry.tfgenx.go",
     "generated/nebius/logging/v1/route_service.tfgen.go",
+    "generated/nebius/logging/v1/stream_service.tfgen.go",
     "generated/nebius/logging/v1/transformation_service.tfgen.go",
     "generated/nebius/maintenance.tfgen.go",
     "generated/nebius/maintenance/registry.tfgenx.go",
