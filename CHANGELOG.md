@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.28 (July 16, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.39`.
+
+FEATURES:
+
+* Added new resources and data sources: [nebius_capacity_v1_capacity_allowance](./docs/resources/capacity_v1_capacity_allowance.md).
+
 ## 0.6.27 (July 14, 2026)
 
 NOTES:

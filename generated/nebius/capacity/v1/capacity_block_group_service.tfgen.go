@@ -114,7 +114,7 @@ func (r *serviceCapacityBlockGroup) DataSourceSchema() schema.Schema {
 					},
 					"service": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "Service for which the Capacity Block Group is allocated.",
+						MarkdownDescription: ":\n\n   Service for which the Capacity Block Group is allocated.\n   Derived from the resource_affinity variant (compute_v1 -> \"compute\", tokenfactory_v1 -> \"tokenfactory\").\n",
 					},
 					"state": schema.StringAttribute{
 						Computed:            true,

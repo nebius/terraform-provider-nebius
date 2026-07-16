@@ -190,7 +190,10 @@ Read-Only:
    #### Inner value description
    
    Specification of the Capacity Block Group. (see [below for nested schema](#nestedatt--status--resource_affinity))
-- `service` (String) Service for which the Capacity Block Group is allocated.
+- `service` (String) :
+
+   Service for which the Capacity Block Group is allocated.
+   Derived from the resource_affinity variant (compute_v1 -> "compute", tokenfactory_v1 -> "tokenfactory").
 - `state` (String) :
 
    Capacity Block Group state with respect to quota allocation.
