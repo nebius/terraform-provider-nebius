@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.29 (July 20, 2026)
+
+NOTES:
+
+* deps: Update `google.golang.org/grpc` from `v1.82.0` to `v1.82.1`.
+
 ## 0.6.28 (July 16, 2026)
 
 NOTES:
