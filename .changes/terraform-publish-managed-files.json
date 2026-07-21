@@ -67,6 +67,7 @@
     "generated/nebius/billing/registry.tfgenx.go",
     "generated/nebius/billing/v1.tfgen.go",
     "generated/nebius/billing/v1/calculator_service.tfgen.go",
+    "generated/nebius/billing/v1/pricing_policy_service.tfgen.go",
     "generated/nebius/billing/v1/registry.tfgenx.go",
     "generated/nebius/billing/v1alpha1.tfgen.go",
     "generated/nebius/billing/v1alpha1/billing_group_service.tfgen.go",
