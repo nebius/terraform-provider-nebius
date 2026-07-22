@@ -114,6 +114,8 @@ data ... {
    be restarted and billed accordingly. Stop instance via API or UI to stop it to avoid recovering.
    - If set to RECOVER, instance will be restarted, if possible. It could be restarted on the same host or on another host.
    - If set to FAIL, instance will be stopped and not restarted.
+   - If set to ALWAYS, keep retrying recovery indefinitely until the instance is recovered. Available only for instances in
+     nvlinstancegroup
    
    #### Supported values
    
@@ -121,6 +123,7 @@ data ... {
    
    - `RECOVER`
    - `FAIL`
+   - `ALWAYS`
 - `reservation_policy` (Attributes) (see [below for nested schema](#nestedatt--reservation_policy))
 - `resource_version` (Number) :
 
