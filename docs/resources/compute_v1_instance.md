@@ -111,6 +111,8 @@ resource "nebius_compute_v1_instance" "vm" {
    be restarted and billed accordingly. Stop instance via API or UI to stop it to avoid recovering.
    - If set to RECOVER, instance will be restarted, if possible. It could be restarted on the same host or on another host.
    - If set to FAIL, instance will be stopped and not restarted.
+   - If set to ALWAYS, keep retrying recovery indefinitely until the instance is recovered. Available only for instances in
+     nvlinstancegroup
    
    #### Supported values
    
@@ -118,6 +120,7 @@ resource "nebius_compute_v1_instance" "vm" {
    
    - `RECOVER`
    - `FAIL`
+   - `ALWAYS`
 - `reservation_policy` (Attributes) (see [below for nested schema](#nestedatt--reservation_policy))
 - `secondary_disks` (Attributes List) List of additional data disks attached to the instance beyond the boot disk. (see [below for nested schema](#nestedatt--secondary_disks))
 - `service_account_id` (String) :
