@@ -80,7 +80,9 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
@@ -426,7 +428,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -682,7 +686,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 					"gpu_cluster": schema1.SingleNestedAttribute{
 						Attributes: map[string]schema1.Attribute{
 							"id": schema1.StringAttribute{
-								Validators:          []validator.String{},
+								Validators: []validator.String{
+									validators.NIDValidator(),
+								},
 								Optional:            true,
 								MarkdownDescription: "",
 								PlanModifiers:       []planmodifier.String{},
@@ -705,7 +711,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 									PlanModifiers:       []planmodifier.Object{},
 								},
 								"subnet_id": schema1.StringAttribute{
-									Validators:          []validator.String{},
+									Validators: []validator.String{
+										validators.NIDValidator(),
+									},
 									Computed:            true,
 									Optional:            true,
 									MarkdownDescription: ":\n\n   Subnet ID that will be attached to a node cloud instance network interface.\n   By default control plane subnet_id used.\n   Subnet should be located in the same network with control plane and have same parent ID as cluster.\n",
@@ -741,7 +749,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 								"existing_filesystem": schema1.SingleNestedAttribute{
 									Attributes: map[string]schema1.Attribute{
 										"id": schema1.StringAttribute{
-											Validators:          []validator.String{},
+											Validators: []validator.String{
+												validators.NIDValidator(),
+											},
 											Required:            true,
 											MarkdownDescription: "",
 											PlanModifiers:       []planmodifier.String{},
@@ -767,7 +777,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"service_account_id": schema1.StringAttribute{
-						Validators:          []validator.String{},
+						Validators: []validator.String{
+							validators.NIDValidator(),
+						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   the Nebius service account whose credentials will be available on the nodes of the group. With these credentials, it is possible to\n   make `nebius` CLI or public API requests from the nodes without the need for extra authentication. This service account is also used to\n   make requests to container registry.\n   \n   `resource.serviceaccount.issueAccessToken` permission is required to use this field.\n",
 						PlanModifiers:       []planmodifier.String{},

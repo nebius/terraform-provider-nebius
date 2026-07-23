@@ -80,7 +80,9 @@ func (r *serviceAllocation) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
@@ -243,7 +245,9 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -292,6 +296,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 								"subnet_id",
 								"pool_id",
 							}, fieldNameMapAllocation),
+							validators.NIDValidator(),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   ID of the subnet that allocation will be associated with.\n   IP address of the allocation must be within a CIDR block associated\n   with this subnet.\n   In order to assign an allocation to a resource (i.e. network interface)\n   both must be associated with the same subnet.\n   \n   *Cannot be set alongside pool_id.*\n",
@@ -305,6 +310,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 								"subnet_id",
 								"pool_id",
 							}, fieldNameMapAllocation),
+							validators.NIDValidator(),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   ID of the pool that allocation will receive its IP address from.\n   \n   *Cannot be set alongside subnet_id.*\n",
@@ -342,6 +348,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 								"subnet_id",
 								"pool_id",
 							}, fieldNameMapAllocation),
+							validators.NIDValidator(),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   ID of the subnet that allocation will be associated with.\n   IP address of the allocation must be within a CIDR block associated with\n   this subnet.\n   Assigning an allocation to a resource (i.e. network interface) requires\n   both to be associated with the same subnet.\n   \n   *Cannot be set alongside pool_id.*\n",
@@ -355,6 +362,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 								"subnet_id",
 								"pool_id",
 							}, fieldNameMapAllocation),
+							validators.NIDValidator(),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   ID of the pool that allocation will receive its IP address from.\n   \n   *Cannot be set alongside subnet_id.*\n",

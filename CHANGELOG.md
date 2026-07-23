@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.32 (July 23, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.42`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_compute_v1_instance](./docs/resources/compute_v1_instance.md):
+    * Added: `status.network_interfaces.security_groups`
+* Changed attributes for data source [nebius_compute_v1_instance](./docs/data-sources/compute_v1_instance.md):
+    * Added: `status.network_interfaces.security_groups`
+
 ## 0.6.31 (July 22, 2026)
 
 NOTES:

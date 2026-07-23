@@ -63,7 +63,7 @@ resource "nebius_mk8s_v1_node_group" "default" {
    *Cannot be set alongside fixed_node_count.* (see [below for nested schema](#nestedatt--autoscaling))
 - `fixed_node_count` (Number) :
 
-   Number of nodes in the group. Can be changed manually at any time.
+   Number of nodes in the group. Can be changed manually at any time, except for a node group with NVLink.
    
    *Cannot be set alongside autoscaling.*
 - `labels` (Map of String) Labels associated with the resource.

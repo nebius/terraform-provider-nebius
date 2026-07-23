@@ -170,7 +170,9 @@ func (r *serviceFederationCertificate) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{

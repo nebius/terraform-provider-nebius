@@ -140,14 +140,14 @@ func (r *serviceCapacityAllowance) DataSourceSchema() schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"parent_id": schema.StringAttribute{
 						Validators: []validator.String{
-							validators.NIDValidator([]string{"project"}),
+							validators.NIDValidator(),
 						},
 						Required:            true,
 						MarkdownDescription: "ID of the Project to get capacity allowance for.",
 					},
 					"capacity_block_group_id": schema.StringAttribute{
 						Validators: []validator.String{
-							validators.NIDValidator([]string{"capacityblockgroup"}),
+							validators.NIDValidator(),
 						},
 						Required:            true,
 						MarkdownDescription: "ID of a Capacity Block Group to get capacity allowance for.",
@@ -189,7 +189,9 @@ func (r *serviceCapacityAllowance) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -221,7 +223,9 @@ func (r *serviceCapacityAllowance) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.Map{},
 			},
 			"capacity_block_group_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Capacity Block Group NID.",
 				PlanModifiers:       []planmodifier.String{},

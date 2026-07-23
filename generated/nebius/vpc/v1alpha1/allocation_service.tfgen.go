@@ -80,7 +80,9 @@ func (r *serviceAllocation) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
@@ -235,7 +237,9 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -284,6 +288,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 								"subnet_id",
 								"pool_id",
 							}, fieldNameMapAllocation),
+							validators.NIDValidator(),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   Subnet ID.\n   Required same subnet to use allocation in subnet-resources (e.g. Network Interface)\n   \n   *Cannot be set alongside pool_id.*\n",
@@ -297,6 +302,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 								"subnet_id",
 								"pool_id",
 							}, fieldNameMapAllocation),
+							validators.NIDValidator(),
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   Pool for the IPv4 private allocation.\n   \n   *Cannot be set alongside subnet_id.*\n",
@@ -329,7 +335,9 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 						},
 					},
 					"pool_id": schema1.StringAttribute{
-						Validators:          []validator.String{},
+						Validators: []validator.String{
+							validators.NIDValidator(),
+						},
 						Optional:            true,
 						MarkdownDescription: "Pool for the IPv4 public allocation.",
 						PlanModifiers: []planmodifier.String{

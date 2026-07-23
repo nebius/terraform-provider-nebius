@@ -82,7 +82,7 @@ that registers in Kubernetes API and a Node object created.
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `fixed_node_count` (Number) :
 
-   Number of nodes in the group. Can be changed manually at any time.
+   Number of nodes in the group. Can be changed manually at any time, except for a node group with NVLink.
    
    *Cannot be set alongside autoscaling.*
 - `labels` (Map of String) Labels associated with the resource.

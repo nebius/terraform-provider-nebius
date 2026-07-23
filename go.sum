@@ -157,8 +157,8 @@ github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyua
 github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/mitchellh/reflectwalk v1.0.2 h1:G2LzWKi524PWgd3mLHV8Y5k7s6XUvT0Gef6zxSIeXaQ=
 github.com/mitchellh/reflectwalk v1.0.2/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
-github.com/nebius/gosdk v0.2.41 h1:jjD0thmeSoUlwBynIITIw59TdYLdp6VPoml7lHdC9Sc=
-github.com/nebius/gosdk v0.2.41/go.mod h1:M25m7hhesvpkwuj5UFUMtlmI2vHK7e5rrYBl7QgeZaM=
+github.com/nebius/gosdk v0.2.42 h1:8HC/JNMMVue1JNlCQfA+TyFXiYjGAojUBnknWWW/sDc=
+github.com/nebius/gosdk v0.2.42/go.mod h1:M25m7hhesvpkwuj5UFUMtlmI2vHK7e5rrYBl7QgeZaM=
 github.com/oklog/run v1.2.0 h1:O8x3yXwah4A73hJdlrwo/2X6J62gE5qTMusH0dvz60E=
 github.com/oklog/run v1.2.0/go.mod h1:mgDbKRSwPhJfesJ4PntqFUbKQRZ50NgmZTSPlFA0YFk=
 github.com/osteele/liquid v1.8.1 h1:b+uxMOkD1OOLxueaSvrE0yx6nMqf023DZPPAjPWT5eI=

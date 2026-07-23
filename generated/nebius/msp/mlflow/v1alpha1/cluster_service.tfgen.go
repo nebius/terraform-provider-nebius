@@ -84,7 +84,9 @@ func (r *serviceCluster) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
@@ -217,7 +219,9 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 				},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -292,7 +296,9 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 				},
 			},
 			"service_account_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Id of the service account that will be used to access S3 bucket (and create one if not provided).",
 				PlanModifiers: []planmodifier.String{
@@ -308,7 +314,9 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 				},
 			},
 			"network_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "ID of the vpc network.",
 				PlanModifiers: []planmodifier.String{

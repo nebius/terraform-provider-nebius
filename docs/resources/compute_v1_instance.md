@@ -777,6 +777,7 @@ Read-Only:
    Name for interface.
    Unique within instance's network interfaces
 - `public_ip_address` (Attributes) Effective Public IPv4 address (see [below for nested schema](#nestedatt--status--network_interfaces--public_ip_address))
+- `security_groups` (Attributes List) Effective security groups associated with the network interface. (see [below for nested schema](#nestedatt--status--network_interfaces--security_groups))
 
 <a id="nestedatt--status--network_interfaces--aliases"></a>
 ### Nested Schema for `status.network_interfaces.aliases`
@@ -807,3 +808,11 @@ Read-Only:
    If false - Allocation will be created/deleted during NetworkInterface.Allocate/NetworkInterface.Deallocate
    If true  - Allocation will be created/deleted during NetworkInterface.Create/NetworkInterface.Delete
    False by default
+
+
+<a id="nestedatt--status--network_interfaces--security_groups"></a>
+### Nested Schema for `status.network_interfaces.security_groups`
+
+Read-Only:
+
+- `id` (String) Security group identifier
