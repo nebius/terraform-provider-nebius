@@ -82,7 +82,9 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
@@ -571,6 +573,18 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 									Computed:            true,
 									MarkdownDescription: "FQDN of the interface",
 								},
+								"security_groups": schema.ListNestedAttribute{
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+											"id": schema.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Security group identifier",
+											},
+										},
+									},
+									Computed:            true,
+									MarkdownDescription: "Effective security groups associated with the network interface.",
+								},
 							},
 						},
 						Computed:            true,
@@ -656,7 +670,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -1541,6 +1557,20 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 									Computed:            true,
 									MarkdownDescription: "FQDN of the interface",
 									PlanModifiers:       []planmodifier.String{},
+								},
+								"security_groups": schema1.ListNestedAttribute{
+									NestedObject: schema1.NestedAttributeObject{
+										Attributes: map[string]schema1.Attribute{
+											"id": schema1.StringAttribute{
+												Computed:            true,
+												MarkdownDescription: "Security group identifier",
+												PlanModifiers:       []planmodifier.String{},
+											},
+										},
+									},
+									Computed:            true,
+									MarkdownDescription: "Effective security groups associated with the network interface.",
+									PlanModifiers:       []planmodifier.List{},
 								},
 							},
 						},

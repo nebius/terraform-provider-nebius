@@ -80,7 +80,9 @@ func (r *serviceZone) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
@@ -175,7 +177,9 @@ func (r *serviceZone) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -219,7 +223,9 @@ func (r *serviceZone) ResourceSchema() schema1.Schema {
 			"vpc": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{
 					"primary_network_id": schema1.StringAttribute{
-						Validators:          []validator.String{},
+						Validators: []validator.String{
+							validators.NIDValidator(),
+						},
 						Required:            true,
 						MarkdownDescription: ":\n\n   ID of the virtual network that this zone's records will be visible from\n   This value cannot be changed after creating the zone\n",
 						PlanModifiers: []planmodifier.String{

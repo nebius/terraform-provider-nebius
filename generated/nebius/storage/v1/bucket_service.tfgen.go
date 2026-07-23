@@ -80,7 +80,9 @@ func (r *serviceBucket) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
@@ -507,7 +509,9 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 				},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -974,6 +978,7 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 											"group_id",
 											"anonymous",
 										}, fieldNameMapBucket),
+										validators.NIDValidator(),
 									},
 									Optional:            true,
 									MarkdownDescription: ":\n\n   Group ID to grant access to.\n   \n   *Cannot be set alongside anonymous.*\n",

@@ -148,7 +148,7 @@ func (r *serviceQuotaAllowance) DataSourceSchema() schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"parent_id": schema.StringAttribute{
 						Validators: []validator.String{
-							validators.NIDValidator([]string{"tenant", "aitenant", "tractotenant", "project", "aiproject"}),
+							validators.NIDValidator(),
 						},
 						Required:            true,
 						MarkdownDescription: "ID of the Container to list quotas for.",
@@ -200,7 +200,9 @@ func (r *serviceQuotaAllowance) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{

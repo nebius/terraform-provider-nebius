@@ -80,7 +80,9 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
@@ -110,7 +112,7 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 			},
 			"fixed_node_count": schema.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Number of nodes in the group. Can be changed manually at any time.\n   \n   *Cannot be set alongside autoscaling.*\n",
+				MarkdownDescription: ":\n\n   Number of nodes in the group. Can be changed manually at any time, except for a node group with NVLink.\n   \n   *Cannot be set alongside autoscaling.*\n",
 			},
 			"autoscaling": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
@@ -577,7 +579,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -625,7 +629,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 					validators.ProtoFieldValidator(&v11.NodeGroupSpec{}, "fixed_node_count", "fixed_node_count", fieldNameMapNodeGroup),
 				},
 				Optional:            true,
-				MarkdownDescription: ":\n\n   Number of nodes in the group. Can be changed manually at any time.\n   \n   *Cannot be set alongside autoscaling.*\n",
+				MarkdownDescription: ":\n\n   Number of nodes in the group. Can be changed manually at any time, except for a node group with NVLink.\n   \n   *Cannot be set alongside autoscaling.*\n",
 				PlanModifiers:       []planmodifier.Int64{},
 			},
 			"autoscaling": schema1.SingleNestedAttribute{
@@ -839,7 +843,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 					"gpu_cluster": schema1.SingleNestedAttribute{
 						Attributes: map[string]schema1.Attribute{
 							"id": schema1.StringAttribute{
-								Validators:          []validator.String{},
+								Validators: []validator.String{
+									validators.NIDValidator(),
+								},
 								Optional:            true,
 								MarkdownDescription: "",
 								PlanModifiers:       []planmodifier.String{},
@@ -862,7 +868,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 									PlanModifiers:       []planmodifier.Object{},
 								},
 								"subnet_id": schema1.StringAttribute{
-									Validators:          []validator.String{},
+									Validators: []validator.String{
+										validators.NIDValidator(),
+									},
 									Computed:            true,
 									Optional:            true,
 									MarkdownDescription: ":\n\n   Nebius VPC Subnet ID that will be attached to a node cloud instance network interface.\n   By default Cluster control plane subnet_id used.\n   Subnet should be located in the same network with control plane.\n",
@@ -872,7 +880,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 									NestedObject: schema1.NestedAttributeObject{
 										Attributes: map[string]schema1.Attribute{
 											"id": schema1.StringAttribute{
-												Validators:          []validator.String{},
+												Validators: []validator.String{
+													validators.NIDValidator(),
+												},
 												Computed:            true,
 												Optional:            true,
 												MarkdownDescription: "",
@@ -916,7 +926,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 								"existing_filesystem": schema1.SingleNestedAttribute{
 									Attributes: map[string]schema1.Attribute{
 										"id": schema1.StringAttribute{
-											Validators:          []validator.String{},
+											Validators: []validator.String{
+												validators.NIDValidator(),
+											},
 											Required:            true,
 											MarkdownDescription: "",
 											PlanModifiers:       []planmodifier.String{},
@@ -942,7 +954,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"service_account_id": schema1.StringAttribute{
-						Validators:          []validator.String{},
+						Validators: []validator.String{
+							validators.NIDValidator(),
+						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   the Nebius service account whose credentials will be available on the nodes of the group.\n   With these credentials, it is possible to make `nebius` CLI or public API requests from the nodes\n   without the need for extra authentication.\n   This service account is also used to make requests to container registry.\n   \n   `resource.serviceaccount.issueAccessToken` permission is required to use this field.\n",
 						PlanModifiers:       []planmodifier.String{},
@@ -957,7 +971,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 					"nvlink": schema1.SingleNestedAttribute{
 						Attributes: map[string]schema1.Attribute{
 							"nvl_instance_group_id": schema1.StringAttribute{
-								Validators:          []validator.String{},
+								Validators: []validator.String{
+									validators.NIDValidator(),
+								},
 								Optional:            true,
 								MarkdownDescription: "Existing NVLInstanceGroup ID to use.",
 								PlanModifiers: []planmodifier.String{
@@ -983,8 +999,10 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 								PlanModifiers:       []planmodifier.String{},
 							},
 							"reservation_ids": schema1.ListAttribute{
-								ElementType:         types.StringType,
-								Validators:          []validator.List{},
+								ElementType: types.StringType,
+								Validators: []validator.List{
+									validators.ListNIDValidator(),
+								},
 								Optional:            true,
 								MarkdownDescription: "Capacity block groups, order matters",
 								PlanModifiers:       []planmodifier.List{},

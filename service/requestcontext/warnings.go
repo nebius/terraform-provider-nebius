@@ -35,6 +35,11 @@ func processWarnings(
 		if warning == nil {
 			continue
 		}
+		// Schema validators already report malformed Nebius IDs. Resource type
+		// mismatch warnings have a separate code and must remain visible.
+		if warning.GetCode() == commonpb.Warning_CODE_INVALID_NEBIUS_ID_FORMAT_REQUEST {
+			continue
+		}
 		if warning.GetCode() == commonpb.Warning_CODE_DEPRECATED_TOOL_VERSION {
 			unsupportedToolVersionWarning = warning
 			continue

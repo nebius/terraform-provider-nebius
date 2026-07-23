@@ -80,7 +80,9 @@ func (r *servicePool) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
@@ -204,7 +206,9 @@ func (r *servicePool) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -236,7 +240,9 @@ func (r *servicePool) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.Map{},
 			},
 			"source_pool_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   ID of the source pool.\n   CIDR blocks of a pool must be within the range defined by its source pool.\n",
 				PlanModifiers: []planmodifier.String{

@@ -83,7 +83,9 @@ func (r *serviceSecurityRule) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
@@ -254,7 +256,9 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -320,7 +324,9 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 			"ingress": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{
 					"source_security_group_id": schema1.StringAttribute{
-						Validators:          []validator.String{},
+						Validators: []validator.String{
+							validators.NIDValidator(),
+						},
 						Optional:            true,
 						MarkdownDescription: "ID of the referenced Security Group as the source.",
 						PlanModifiers: []planmodifier.String{
@@ -366,7 +372,9 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 			"egress": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{
 					"destination_security_group_id": schema1.StringAttribute{
-						Validators:          []validator.String{},
+						Validators: []validator.String{
+							validators.NIDValidator(),
+						},
 						Optional:            true,
 						MarkdownDescription: "ID of the referenced Security Group as the destination.",
 						PlanModifiers: []planmodifier.String{

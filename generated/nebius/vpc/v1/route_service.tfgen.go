@@ -82,7 +82,9 @@ func (r *serviceRoute) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
@@ -212,7 +214,9 @@ func (r *serviceRoute) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
@@ -274,7 +278,9 @@ func (r *serviceRoute) ResourceSchema() schema1.Schema {
 					"allocation": schema1.SingleNestedAttribute{
 						Attributes: map[string]schema1.Attribute{
 							"id": schema1.StringAttribute{
-								Validators:          []validator.String{},
+								Validators: []validator.String{
+									validators.NIDValidator(),
+								},
 								Required:            true,
 								MarkdownDescription: "ID of the IP allocation to use as the next hop.",
 								PlanModifiers: []planmodifier.String{

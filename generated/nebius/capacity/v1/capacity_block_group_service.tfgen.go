@@ -181,7 +181,7 @@ func (r *serviceCapacityBlockGroup) DataSourceSchema() schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"parent_id": schema.StringAttribute{
 						Validators: []validator.String{
-							validators.NIDValidator([]string{"tenant"}),
+							validators.NIDValidator(),
 						},
 						Required:            true,
 						MarkdownDescription: "Tenant ID of the Capacity Block Group.",
