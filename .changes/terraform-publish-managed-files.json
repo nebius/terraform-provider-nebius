@@ -87,7 +87,6 @@
     "generated/nebius/billing/v1alpha1/product_service.tfgen.go",
     "generated/nebius/billing/v1alpha1/registry.tfgenx.go",
     "generated/nebius/billing/v1alpha1/service_entity_service.tfgen.go",
-    "generated/nebius/billing/v1alpha1/sku_price_service.tfgen.go",
     "generated/nebius/billing/v1alpha1/sku_savings_plan_service.tfgen.go",
     "generated/nebius/billing/v1alpha1/sku_service.tfgen.go",
     "generated/nebius/billing/v1alpha1/tether_service.tfgen.go",
