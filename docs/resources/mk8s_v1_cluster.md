@@ -32,7 +32,6 @@ resource "nebius_mk8s_v1_cluster" "cluster" {
 ### Required
 
 - `control_plane` (Attributes) (see [below for nested schema](#nestedatt--control_plane))
-- `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 
 ### Optional
 
@@ -44,6 +43,7 @@ resource "nebius_mk8s_v1_cluster" "cluster" {
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
 - `name` (String) Human readable name for the resource.
+- `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 
 ### Read-Only
 
@@ -53,6 +53,7 @@ resource "nebius_mk8s_v1_cluster" "cluster" {
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `id` (String) Identifier for the resource, unique for its resource type.
+- `labels_all` (Map of String) Effective labels sent to the API after merging provider `default_labels` with resource `labels`.
 - `resource_version` (Number) :
 
    Version of the resource for safe concurrent modifications and consistent reads.

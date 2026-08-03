@@ -57,6 +57,10 @@ func (r *serviceNodeGroup) GetName() string {
 	return "mk8s_v1_node_group"
 }
 
+func (r *serviceNodeGroup) ParentTypes() []string {
+	return []string{"mk8scluster"}
+}
+
 func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -582,7 +586,8 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 				Validators: []validator.String{
 					validators.NIDValidator(),
 				},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -611,6 +616,11 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 				Optional:            true,
 				MarkdownDescription: "Labels associated with the resource.",
 				PlanModifiers:       []planmodifier.Map{},
+			},
+			"labels_all": schema1.MapAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
 			"version": schema1.StringAttribute{
 				Validators: []validator.String{
@@ -1367,6 +1377,9 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 		},
 		MarkdownDescription: "NodeGroup represents Kubernetes node pool - set of worker machines having the same configuration.\nA Node is a Nebius Compute Instance created in Cluster.metadata.parent_id container, running kubelet\nthat registers in Kubernetes API and a Node object created.",
 	}
+	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
+	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())
+	ret.Attributes["parent_id"] = parentIDAttribute
 	return ret
 }
 

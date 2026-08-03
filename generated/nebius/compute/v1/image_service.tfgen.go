@@ -45,6 +45,10 @@ func (r *serviceImage) GetName() string {
 	return "compute_v1_image"
 }
 
+func (r *serviceImage) ParentTypes() []string {
+	return []string{"*"}
+}
+
 func (r *serviceImage) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{

@@ -59,6 +59,10 @@ func (r *serviceAuthPublicKey) GetName() string {
 	return "iam_v1_auth_public_key"
 }
 
+func (r *serviceAuthPublicKey) ParentTypes() []string {
+	return []string{"*"}
+}
+
 func (r *serviceAuthPublicKey) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -202,7 +206,8 @@ func (r *serviceAuthPublicKey) ResourceSchema() schema1.Schema {
 				Validators: []validator.String{
 					validators.NIDValidator(),
 				},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -231,6 +236,11 @@ func (r *serviceAuthPublicKey) ResourceSchema() schema1.Schema {
 				Optional:            true,
 				MarkdownDescription: "Labels associated with the resource.",
 				PlanModifiers:       []planmodifier.Map{},
+			},
+			"labels_all": schema1.MapAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
 			"account": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{
@@ -359,6 +369,9 @@ func (r *serviceAuthPublicKey) ResourceSchema() schema1.Schema {
 		},
 		MarkdownDescription: "",
 	}
+	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
+	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())
+	ret.Attributes["parent_id"] = parentIDAttribute
 	return ret
 }
 

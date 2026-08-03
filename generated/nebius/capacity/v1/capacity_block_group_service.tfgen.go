@@ -45,6 +45,10 @@ func (r *serviceCapacityBlockGroup) GetName() string {
 	return "capacity_v1_capacity_block_group"
 }
 
+func (r *serviceCapacityBlockGroup) ParentTypes() []string {
+	return []string{"tenant", "aitenant"}
+}
+
 func (r *serviceCapacityBlockGroup) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{

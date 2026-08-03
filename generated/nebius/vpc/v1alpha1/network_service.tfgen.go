@@ -45,6 +45,10 @@ func (r *serviceNetwork) GetName() string {
 	return "vpc_v1alpha1_network"
 }
 
+func (r *serviceNetwork) ParentTypes() []string {
+	return []string{"project"}
+}
+
 func (r *serviceNetwork) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{

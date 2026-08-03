@@ -45,6 +45,10 @@ func (r *serviceTenant) GetName() string {
 	return "iam_v2_tenant"
 }
 
+func (r *serviceTenant) ParentTypes() []string {
+	return []string{"*"}
+}
+
 func (r *serviceTenant) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{

@@ -27,7 +27,6 @@ DNS zones are represented in this API by the `Zone` API Resource which is manage
    This should be the RDATA part of this Resource Record's
    [presentation (zonefile) format](https://datatracker.ietf.org/doc/html/rfc9499#name-resource-records).
    E.g., `10 xyz.tuv` for a `@ 600 IN MX 10 xyz.tuv.` resource record in a zonefile
-- `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `relative_name` (String) :
 
    Zone-relative name of this record (e.g., `www` for `www.<parent zone's domain name>`)
@@ -74,6 +73,7 @@ DNS zones are represented in this API by the `Zone` API Resource which is manage
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
 - `name` (String) Human readable name for the resource.
+- `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `ttl` (Number) Record TTL. If absent or negative, will be assumed to be the default value (`600`)
 
 ### Read-Only
@@ -84,6 +84,7 @@ DNS zones are represented in this API by the `Zone` API Resource which is manage
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `id` (String) Identifier for the resource, unique for its resource type.
+- `labels_all` (Map of String) Effective labels sent to the API after merging provider `default_labels` with resource `labels`.
 - `resource_version` (Number) :
 
    Version of the resource for safe concurrent modifications and consistent reads.

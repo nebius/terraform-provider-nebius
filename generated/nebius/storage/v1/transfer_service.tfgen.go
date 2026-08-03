@@ -58,6 +58,10 @@ func (r *serviceTransfer) GetName() string {
 	return "storage_v1_transfer"
 }
 
+func (r *serviceTransfer) ParentTypes() []string {
+	return []string{"*"}
+}
+
 func (r *serviceTransfer) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -452,7 +456,8 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 				Validators: []validator.String{
 					validators.NIDValidator(),
 				},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -481,6 +486,11 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 				Optional:            true,
 				MarkdownDescription: "Labels associated with the resource.",
 				PlanModifiers:       []planmodifier.Map{},
+			},
+			"labels_all": schema1.MapAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
 			"source": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{
@@ -1130,6 +1140,9 @@ func (r *serviceTransfer) ResourceSchema() schema1.Schema {
 		},
 		MarkdownDescription: "Transfer that migrates data from other providers or across different regions of Nebius Object Storage.\nTransfer consists of consecutive iterations where the service lists objects in the source bucket and\nmoves those that need to be transferred according to the specified overwrite strategy and touch unmanaged flag value.\nIf the enable deletes in destination flag is set, the service also lists destination bucket and deletes\nobjects which do not exist in the source bucket according to the touch unmanaged flag value.\nAfter an iteration completes, the transfer will stop if its stop condition is met. Otherwise,\nit will wait for the defined inter-iteration interval before starting the next iteration.",
 	}
+	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
+	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())
+	ret.Attributes["parent_id"] = parentIDAttribute
 	if r.provider.WriteOnlyFieldsSupported() {
 		ret.Attributes["sensitive"] = schema1.SingleNestedAttribute{
 			Attributes: map[string]schema1.Attribute{

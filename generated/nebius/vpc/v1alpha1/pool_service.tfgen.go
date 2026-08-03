@@ -45,6 +45,10 @@ func (r *servicePool) GetName() string {
 	return "vpc_v1alpha1_pool"
 }
 
+func (r *servicePool) ParentTypes() []string {
+	return []string{"project"}
+}
+
 func (r *servicePool) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{

@@ -2,6 +2,201 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.36 (August 3, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.46`.
+
+IMPROVEMENTS:
+
+* Changed [provider](docs/index.md) attributes:
+    * Added: `default_labels`
+* Changed attributes for resource [nebius_applications_v1alpha1_k8s_release](./docs/resources/applications_v1alpha1_k8s_release.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_capacity_v1_capacity_allowance](./docs/resources/capacity_v1_capacity_allowance.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_compute_v1_disk](./docs/resources/compute_v1_disk.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_compute_v1_disk_snapshot](./docs/resources/compute_v1_disk_snapshot.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_compute_v1_filesystem](./docs/resources/compute_v1_filesystem.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_compute_v1_gpu_cluster](./docs/resources/compute_v1_gpu_cluster.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_compute_v1_instance](./docs/resources/compute_v1_instance.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_compute_v1_nvl_instance_group](./docs/resources/compute_v1_nvl_instance_group.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_dns_v1_record](./docs/resources/dns_v1_record.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_dns_v1_zone](./docs/resources/dns_v1_zone.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_iam_v1_access_permit](./docs/resources/iam_v1_access_permit.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_iam_v1_auth_public_key](./docs/resources/iam_v1_auth_public_key.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_iam_v1_federated_credentials](./docs/resources/iam_v1_federated_credentials.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_iam_v1_federation](./docs/resources/iam_v1_federation.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_iam_v1_federation_certificate](./docs/resources/iam_v1_federation_certificate.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_iam_v1_group](./docs/resources/iam_v1_group.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_iam_v1_group_membership](./docs/resources/iam_v1_group_membership.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_iam_v1_invitation](./docs/resources/iam_v1_invitation.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_iam_v1_service_account](./docs/resources/iam_v1_service_account.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_iam_v2_access_key](./docs/resources/iam_v2_access_key.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_iam_v2_project](./docs/resources/iam_v2_project.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_kms_v1_asymmetric_key](./docs/resources/kms_v1_asymmetric_key.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_kms_v1_symmetric_key](./docs/resources/kms_v1_symmetric_key.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_mk8s_v1_cluster](./docs/resources/mk8s_v1_cluster.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_mk8s_v1alpha1_cluster](./docs/resources/mk8s_v1alpha1_cluster.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_mk8s_v1alpha1_node_group](./docs/resources/mk8s_v1alpha1_node_group.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_msp_mlflow_v1alpha1_cluster](./docs/resources/msp_mlflow_v1alpha1_cluster.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_msp_postgresql_v1alpha1_cluster](./docs/resources/msp_postgresql_v1alpha1_cluster.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_mysterybox_v1_secret](./docs/resources/mysterybox_v1_secret.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_mysterybox_v1_secret_version](./docs/resources/mysterybox_v1_secret_version.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_quotas_v1_quota_allowance](./docs/resources/quotas_v1_quota_allowance.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_registry_v1_registry](./docs/resources/registry_v1_registry.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_storage_v1_bucket](./docs/resources/storage_v1_bucket.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_storage_v1_transfer](./docs/resources/storage_v1_transfer.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_storage_v1alpha1_transfer](./docs/resources/storage_v1alpha1_transfer.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_tunnel_v1_tunnel](./docs/resources/tunnel_v1_tunnel.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_vpc_v1_allocation](./docs/resources/vpc_v1_allocation.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_vpc_v1_network](./docs/resources/vpc_v1_network.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_vpc_v1_pool](./docs/resources/vpc_v1_pool.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_vpc_v1_route](./docs/resources/vpc_v1_route.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_vpc_v1_route_table](./docs/resources/vpc_v1_route_table.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_vpc_v1_security_group](./docs/resources/vpc_v1_security_group.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_vpc_v1_security_rule](./docs/resources/vpc_v1_security_rule.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_vpc_v1_subnet](./docs/resources/vpc_v1_subnet.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+* Changed attributes for resource [nebius_vpc_v1alpha1_allocation](./docs/resources/vpc_v1alpha1_allocation.md):
+    * Added: `labels_all`
+    * Became optional: `parent_id`
+    * Became computed: `parent_id`
+
 ## 0.6.35 (July 29, 2026)
 
 NOTES:

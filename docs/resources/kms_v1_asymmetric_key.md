@@ -29,7 +29,6 @@ An asymmetric KMS key that may contain several versions of the cryptographic mat
    - `ECDSA_NIST_P256_SHA_256` - ECDSA signature with NIST P-256 curve and SHA-256
    - `ECDSA_NIST_P384_SHA_384` - ECDSA signature with NIST P-384 curve and SHA-384
    - `RSA_4096_ENC_OAEP_SHA_256` - RSA encryption with RSA-4096 key, OAEP padding and SHA-256.
-- `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 
 ### Optional
 
@@ -41,6 +40,7 @@ An asymmetric KMS key that may contain several versions of the cryptographic mat
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
 - `name` (String) Human readable name for the resource.
+- `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 
 ### Read-Only
 
@@ -50,6 +50,7 @@ An asymmetric KMS key that may contain several versions of the cryptographic mat
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `id` (String) Identifier for the resource, unique for its resource type.
+- `labels_all` (Map of String) Effective labels sent to the API after merging provider `default_labels` with resource `labels`.
 - `resource_version` (Number) :
 
    Version of the resource for safe concurrent modifications and consistent reads.

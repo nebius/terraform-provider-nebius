@@ -60,6 +60,10 @@ func (r *serviceGroupMembership) GetName() string {
 	return "iam_v1_group_membership"
 }
 
+func (r *serviceGroupMembership) ParentTypes() []string {
+	return []string{"*"}
+}
+
 func (r *serviceGroupMembership) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -219,7 +223,8 @@ func (r *serviceGroupMembership) ResourceSchema() schema1.Schema {
 				Validators: []validator.String{
 					validators.NIDValidator(),
 				},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -256,6 +261,11 @@ func (r *serviceGroupMembership) ResourceSchema() schema1.Schema {
 				PlanModifiers: []planmodifier.Map{
 					mapplanmodifier.RequiresReplace(),
 				},
+			},
+			"labels_all": schema1.MapAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
 			"member_id": schema1.StringAttribute{
 				Validators:          []validator.String{},
@@ -359,6 +369,9 @@ func (r *serviceGroupMembership) ResourceSchema() schema1.Schema {
 		},
 		MarkdownDescription: "",
 	}
+	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
+	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())
+	ret.Attributes["parent_id"] = parentIDAttribute
 	return ret
 }
 

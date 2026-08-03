@@ -45,6 +45,10 @@ func (r *serviceSubnet) GetName() string {
 	return "vpc_v1alpha1_subnet"
 }
 
+func (r *serviceSubnet) ParentTypes() []string {
+	return []string{"project"}
+}
+
 func (r *serviceSubnet) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{

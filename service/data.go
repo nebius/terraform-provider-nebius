@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"sort"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
@@ -24,6 +24,7 @@ import (
 	common "github.com/nebius/gosdk/proto/nebius/common/v1"
 	"github.com/nebius/gosdk/serviceerror"
 	"github.com/nebius/terraform-provider-nebius/conversion"
+	"github.com/nebius/terraform-provider-nebius/provider"
 )
 
 func isNotFoundError(err error) bool {
@@ -235,6 +236,67 @@ func metadataFromTF(
 	return metadata2, diags
 }
 
+func objectWithEffectiveLabels(
+	ctx context.Context,
+	data types.Object,
+) (types.Object, diag.Diagnostics) {
+	attrs := data.Attributes()
+	labelsAll, hasLabelsAll := attrs[constants.FieldLabelsAll]
+	if !hasLabelsAll {
+		return data, nil
+	}
+	if _, hasLabels := attrs[constants.FieldLabels]; !hasLabels {
+		return data, nil
+	}
+	labelsAllMap, ok := labelsAll.(types.Map)
+	if !ok {
+		diags := diag.Diagnostics{}
+		diags.AddAttributeError(
+			path.Root(constants.FieldLabelsAll),
+			"labels_all is not a map",
+			fmt.Sprintf("Expected labels_all to be a map, got %s.", labelsAll.Type(ctx)),
+		)
+		return data, diags
+	}
+	diags := provider.ValidateLabels(
+		labelsAllMap,
+		path.Root(constants.FieldLabelsAll),
+		true,
+	)
+	if diags.HasError() {
+		return data, diags
+	}
+
+	cloned := maps.Clone(attrs)
+	delete(cloned, constants.FieldLabelsAll)
+	cloned[constants.FieldLabels] = labelsAll
+	clonedTypes := maps.Clone(data.AttributeTypes(ctx))
+	delete(clonedTypes, constants.FieldLabelsAll)
+	ret, innerDiags := basetypes.NewObjectValue(clonedTypes, cloned)
+	diags.Append(innerDiags...)
+	return ret, diags
+}
+
+func requestMessagesFromTF(
+	ctx context.Context,
+	data types.Object,
+	spec proto.Message,
+	nameMap map[string]map[string]string,
+) (*common.ResourceMetadata, diag.Diagnostics) {
+	requestData, diags := objectWithEffectiveLabels(ctx, data)
+	if diags.HasError() {
+		return nil, diags
+	}
+	metadata, innerDiags := metadataFromTF(ctx, requestData, nameMap)
+	diags.Append(innerDiags...)
+	if innerDiags.HasError() {
+		return nil, diags
+	}
+	_, innerDiags = conversion.MessageFromTF(ctx, requestData, spec, nameMap)
+	diags.Append(innerDiags...)
+	return metadata, diags
+}
+
 func convertToObject(
 	ctx context.Context,
 	metadata, spec, status proto.Message,
@@ -246,6 +308,9 @@ func convertToObject(
 	attrTypes := data.AttributeTypes(ctx)
 	if metadata != nil {
 		attrs := data.Attributes()
+		resourceLabels, hasLabels := attrs[constants.FieldLabels]
+		_, hasLabelsAll := attrTypes[constants.FieldLabelsAll]
+		hasLabelsAll = hasLabelsAll && hasLabels
 		mdAttr, ok := attrs[constants.FieldMetadata]
 		if ok {
 			mdAttr, innerDiag, ok = conversion.MessageValueToTFRecursive(
@@ -283,30 +348,36 @@ func convertToObject(
 			tempAttrs[string(fieldName)] = mdAttr
 			tempTypes[string(fieldName)] = mdType
 		}
-		tmpObj, innerDiag := basetypes.NewObjectValue(tempTypes, tempAttrs)
-		diags.Append(innerDiag...)
-		tmpObjvalue, innerDiag := conversion.MessageToTF(ctx, metadata, tmpObj, nameMap)
-		diags.Append(innerDiag...)
-		tmpObj, innerDiag = tmpObjvalue.ToObjectValue(ctx)
-		diags.Append(innerDiag...)
-		tflog.Debug(ctx, "some metadatas", map[string]interface{}{
-			"mdsource": fmt.Sprint(metadata),
-			"md1":      fmt.Sprint(mdAttr),
-			"md2":      fmt.Sprint(tmpObj),
-		})
+		tmpObj, metadataDiags := basetypes.NewObjectValue(tempTypes, tempAttrs)
+		diags.Append(metadataDiags...)
+		tmpObjvalue, metadataDiags := conversion.MessageToTF(ctx, metadata, tmpObj, nameMap)
+		diags.Append(metadataDiags...)
+		tmpObj, metadataDiags = tmpObjvalue.ToObjectValue(ctx)
+		diags.Append(metadataDiags...)
 		for _, fieldName := range unwrappedFields {
 			if mdAttr, ok := tmpObj.Attributes()[string(fieldName)]; ok {
 				attrs[string(fieldName)] = mdAttr
 			}
 		}
+		if hasLabelsAll {
+			effectiveLabels := attrs[constants.FieldLabels]
+			if effectiveLabels.IsNull() {
+				effectiveLabels = types.MapValueMust(
+					types.StringType,
+					map[string]attr.Value{},
+				)
+			}
+			attrs[constants.FieldLabelsAll] = effectiveLabels
+			attrs[constants.FieldLabels] = resourceLabels
+		}
 		data, innerDiag = basetypes.NewObjectValue(attrTypes, attrs)
 		diags.Append(innerDiag...)
 	}
 	if spec != nil {
-		tmpObjvalue, innerDiag := conversion.MessageToTF(ctx, spec, data, nameMap)
-		diags.Append(innerDiag...)
-		tmpObj, innerDiag := tmpObjvalue.ToObjectValue(ctx)
-		diags.Append(innerDiag...)
+		tmpObjvalue, specDiags := conversion.MessageToTF(ctx, spec, data, nameMap)
+		diags.Append(specDiags...)
+		tmpObj, specDiags := tmpObjvalue.ToObjectValue(ctx)
+		diags.Append(specDiags...)
 		data = tmpObj
 	}
 	if status != nil {
