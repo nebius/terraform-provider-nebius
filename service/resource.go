@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"maps"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -13,17 +16,18 @@ import (
 	"github.com/nebius/gosdk/constants"
 	"github.com/nebius/gosdk/proto/fieldmask/mask"
 	common "github.com/nebius/gosdk/proto/nebius/common/v1"
-	"github.com/nebius/terraform-provider-nebius/conversion"
 	"github.com/nebius/terraform-provider-nebius/provider"
 	"github.com/nebius/terraform-provider-nebius/service/requestcontext"
 )
 
 const (
 	ReadOnCreateTimeout = 5 * time.Second
+	importLabelsMarker  = "default_labels_import_inference"
 )
 
 type ResourceInterface interface {
 	GetName() string
+	ParentTypes() []string
 	ResourceSchema() schema.Schema
 	SpecMessage() proto.Message
 	Create(
@@ -51,15 +55,24 @@ type ResourceInterface interface {
 type commonResource struct {
 	implementation ResourceInterface
 	provider       provider.Provider
+	resourceSchema schema.Schema
+	hasLabelsAll   bool
 }
 
 func NewResource(
 	implementation ResourceInterface,
 	provider provider.Provider,
 ) resource.Resource {
+	resourceSchema := implementation.ResourceSchema()
+	_, hasLabelsAll := resourceSchema.Attributes[constants.FieldLabelsAll]
+	if hasLabelsAll {
+		resourceSchema.Version = 1
+	}
 	return &commonResource{
 		implementation: implementation,
 		provider:       provider,
+		resourceSchema: resourceSchema,
+		hasLabelsAll:   hasLabelsAll,
 	}
 }
 
@@ -76,7 +89,119 @@ func (r *commonResource) Metadata(
 func (r *commonResource) Schema(
 	_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse,
 ) {
-	resp.Schema = r.implementation.ResourceSchema()
+	resp.Schema = r.resourceSchema
+}
+
+var _ resource.ResourceWithModifyPlan = (*commonResource)(nil)
+var _ resource.ResourceWithValidateConfig = (*commonResource)(nil)
+var _ resource.ResourceWithUpgradeState = (*commonResource)(nil)
+
+func (r *commonResource) UpgradeState(
+	_ context.Context,
+) map[int64]resource.StateUpgrader {
+	if !r.hasLabelsAll {
+		return nil
+	}
+	priorSchema := r.resourceSchema
+	priorSchema.Version = 0
+	priorAttrs := maps.Clone(priorSchema.Attributes)
+	delete(priorAttrs, constants.FieldLabelsAll)
+	priorSchema.Attributes = priorAttrs
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema:   &priorSchema,
+			StateUpgrader: r.upgradeLabelsState,
+		},
+	}
+}
+
+func (r *commonResource) upgradeLabelsState(
+	ctx context.Context,
+	req resource.UpgradeStateRequest,
+	resp *resource.UpgradeStateResponse,
+) {
+	var data types.Object
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	attrs := data.Attributes()
+	labels, ok := attrs[constants.FieldLabels]
+	if !ok {
+		resp.Diagnostics.AddError(
+			"labels not found in prior state",
+			"Cannot upgrade resource state because labels are missing.",
+		)
+		return
+	}
+	if labels.IsNull() {
+		labels = types.MapValueMust(types.StringType, map[string]attr.Value{})
+	}
+	attrs[constants.FieldLabelsAll] = labels
+
+	objectType, ok := r.resourceSchema.Type().(types.ObjectType)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"unexpected resource schema type",
+			fmt.Sprintf("Expected an object schema type, got %T.", r.resourceSchema.Type()),
+		)
+		return
+	}
+	upgraded, diags := types.ObjectValue(objectType.AttrTypes, attrs)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(resp.State.Set(ctx, &upgraded)...)
+}
+
+func (r *commonResource) ValidateConfig(
+	ctx context.Context,
+	req resource.ValidateConfigRequest,
+	resp *resource.ValidateConfigResponse,
+) {
+	if !r.hasLabelsAll {
+		return
+	}
+	var labels types.Map
+	resp.Diagnostics.Append(
+		req.Config.GetAttribute(ctx, path.Root(constants.FieldLabels), &labels)...,
+	)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(
+		provider.ValidateLabels(labels, path.Root(constants.FieldLabels), false)...,
+	)
+}
+
+func (r *commonResource) ModifyPlan(
+	ctx context.Context,
+	req resource.ModifyPlanRequest,
+	resp *resource.ModifyPlanResponse,
+) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+	if !r.hasLabelsAll {
+		return
+	}
+
+	var labels types.Map
+	resp.Diagnostics.Append(
+		req.Plan.GetAttribute(ctx, path.Root(constants.FieldLabels), &labels)...,
+	)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	labelsAll, diags := mergeDefaultLabels(r.provider.DefaultLabels(), labels)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(
+		resp.Plan.SetAttribute(ctx, path.Root(constants.FieldLabelsAll), labelsAll)...,
+	)
 }
 
 func (r *commonResource) createRequest(
@@ -108,17 +233,12 @@ func (r *commonResource) createRequest(
 	}
 	dataWithWriteOnly := *dataPtr
 
-	metadata, diag := metadataFromTF(
-		ctx, dataWithWriteOnly, r.implementation.FieldNameMap(),
-	)
-	resp.Diagnostics.Append(diag...)
-	if diag.HasError() {
-		return nil
-	}
-
 	spec := r.implementation.SpecMessage()
-	_, diag = conversion.MessageFromTF(
-		ctx, dataWithWriteOnly, spec, r.implementation.FieldNameMap(),
+	metadata, diag := requestMessagesFromTF(
+		ctx,
+		dataWithWriteOnly,
+		spec,
+		r.implementation.FieldNameMap(),
 	)
 	resp.Diagnostics.Append(diag...)
 	if diag.HasError() {
@@ -200,7 +320,7 @@ func (r *commonResource) Create(
 	if reqCtx != nil {
 		resp.Diagnostics = reqCtx.WrapDiagnostics(
 			resp.Diagnostics,
-			r.implementation.ResourceSchema().Type(),
+			r.resourceSchema.Type(),
 			r.implementation.FieldNameMap(),
 		)
 	}
@@ -214,6 +334,15 @@ func (r *commonResource) readRequest(
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return nil
+	}
+	inferImportedLabels := false
+	if r.hasLabelsAll {
+		marker, markerDiags := req.Private.GetKey(ctx, importLabelsMarker)
+		resp.Diagnostics.Append(markerDiags...)
+		if resp.Diagnostics.HasError() {
+			return nil
+		}
+		inferImportedLabels = len(marker) > 0
 	}
 
 	id, diag := getIDFromObject(ctx, data, path.Empty())
@@ -234,6 +363,21 @@ func (r *commonResource) readRequest(
 		)
 		return reqCtx
 	}
+	if inferImportedLabels {
+		labels, innerDiags := inferImportedResourceLabels(
+			r.provider.DefaultLabels(),
+			metadata.GetLabels(),
+		)
+		resp.Diagnostics.Append(innerDiags...)
+		if resp.Diagnostics.HasError() {
+			return reqCtx
+		}
+		data, innerDiags = objectWithResourceLabels(ctx, data, labels)
+		resp.Diagnostics.Append(innerDiags...)
+		if resp.Diagnostics.HasError() {
+			return reqCtx
+		}
+	}
 	data, diag = convertToObject(
 		ctx, metadata, spec, status, data, r.implementation.FieldNameMap(),
 	)
@@ -243,6 +387,9 @@ func (r *commonResource) readRequest(
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	if !resp.Diagnostics.HasError() && inferImportedLabels {
+		resp.Diagnostics.Append(resp.Private.SetKey(ctx, importLabelsMarker, nil)...)
+	}
 	return reqCtx
 }
 
@@ -254,7 +401,7 @@ func (r *commonResource) Read(
 	if reqCtx != nil {
 		resp.Diagnostics = reqCtx.WrapDiagnostics(
 			resp.Diagnostics,
-			r.implementation.ResourceSchema().Type(),
+			r.resourceSchema.Type(),
 			r.implementation.FieldNameMap(),
 		)
 	}
@@ -288,17 +435,12 @@ func (r *commonResource) updateRequest(
 	}
 	dataWithWriteOnly := *dataPtr
 
-	metadata, diag := metadataFromTF(
-		ctx, dataWithWriteOnly, r.implementation.FieldNameMap(),
-	)
-	resp.Diagnostics.Append(diag...)
-	if diag.HasError() {
-		return nil
-	}
-
 	spec := r.implementation.SpecMessage()
-	_, diag = conversion.MessageFromTF(
-		ctx, dataWithWriteOnly, spec, r.implementation.FieldNameMap(),
+	metadata, diag := requestMessagesFromTF(
+		ctx,
+		dataWithWriteOnly,
+		spec,
+		r.implementation.FieldNameMap(),
 	)
 	resp.Diagnostics.Append(diag...)
 	if diag.HasError() {
@@ -349,7 +491,7 @@ func (r *commonResource) Update(
 	if reqCtx != nil {
 		resp.Diagnostics = reqCtx.WrapDiagnostics(
 			resp.Diagnostics,
-			r.implementation.ResourceSchema().Type(),
+			r.resourceSchema.Type(),
 			r.implementation.FieldNameMap(),
 		)
 	}
@@ -395,7 +537,7 @@ func (r *commonResource) Delete(
 	if reqCtx != nil {
 		resp.Diagnostics = reqCtx.WrapDiagnostics(
 			resp.Diagnostics,
-			r.implementation.ResourceSchema().Type(),
+			r.resourceSchema.Type(),
 			r.implementation.FieldNameMap(),
 		)
 	}
@@ -406,5 +548,13 @@ func (r *commonResource) ImportState(
 	req resource.ImportStateRequest,
 	resp *resource.ImportStateResponse,
 ) {
+	if r.hasLabelsAll {
+		resp.Diagnostics.Append(
+			resp.Private.SetKey(ctx, importLabelsMarker, []byte("true"))...,
+		)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
 	resource.ImportStatePassthroughID(ctx, path.Root(constants.FieldID), req, resp)
 }

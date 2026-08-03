@@ -57,6 +57,10 @@ func (r *serviceRecord) GetName() string {
 	return "dns_v1_record"
 }
 
+func (r *serviceRecord) ParentTypes() []string {
+	return []string{"dnszone"}
+}
+
 func (r *serviceRecord) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -180,7 +184,8 @@ func (r *serviceRecord) ResourceSchema() schema1.Schema {
 				Validators: []validator.String{
 					validators.NIDValidator(),
 				},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -209,6 +214,11 @@ func (r *serviceRecord) ResourceSchema() schema1.Schema {
 				Optional:            true,
 				MarkdownDescription: "Labels associated with the resource.",
 				PlanModifiers:       []planmodifier.Map{},
+			},
+			"labels_all": schema1.MapAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
 			"relative_name": schema1.StringAttribute{
 				Validators: []validator.String{
@@ -273,6 +283,9 @@ func (r *serviceRecord) ResourceSchema() schema1.Schema {
 		},
 		MarkdownDescription: "API Resource: DNS *Resource Record* (RR), an information entry about a specific domain\n\nEach record is contained within a DNS zone, which is a container for DNS data of a specific domain, and, possibly, its subdomains\nDNS zones are represented in this API by the `Zone` API Resource which is managed by the `ZoneService`",
 	}
+	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
+	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())
+	ret.Attributes["parent_id"] = parentIDAttribute
 	return ret
 }
 

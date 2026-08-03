@@ -57,6 +57,10 @@ func (r *serviceZone) GetName() string {
 	return "dns_v1_zone"
 }
 
+func (r *serviceZone) ParentTypes() []string {
+	return []string{"project"}
+}
+
 func (r *serviceZone) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -180,7 +184,8 @@ func (r *serviceZone) ResourceSchema() schema1.Schema {
 				Validators: []validator.String{
 					validators.NIDValidator(),
 				},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -209,6 +214,11 @@ func (r *serviceZone) ResourceSchema() schema1.Schema {
 				Optional:            true,
 				MarkdownDescription: "Labels associated with the resource.",
 				PlanModifiers:       []planmodifier.Map{},
+			},
+			"labels_all": schema1.MapAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
 			"domain_name": schema1.StringAttribute{
 				Validators: []validator.String{
@@ -272,6 +282,9 @@ func (r *serviceZone) ResourceSchema() schema1.Schema {
 		},
 		MarkdownDescription: "API Resource: *DNS zone*, a container for DNS data\n\nEach DNS zone starts at a particular domain within the hierarchical DNS namespace tree,\ne.g., `example.com.`, and is also responsible for its subdomains (e.g., `sales.example.com.`)\nunless there are explicit DNS zones defined for them.\n\nDNS zones contain *Resource Records* (RRs), which are individual information entries about the domain(s),\ne.g., a domain's IP address.\nEach Resource Record is represented in this API by the `Record` API Resource which is managed by the `RecordService`.\n\nSee the [graphical explanation of DNS zones and Resource Records on\nWikipedia](https://en.wikipedia.org/wiki/Domain_Name_System#/media/File:Domain_name_space.svg)",
 	}
+	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
+	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())
+	ret.Attributes["parent_id"] = parentIDAttribute
 	return ret
 }
 

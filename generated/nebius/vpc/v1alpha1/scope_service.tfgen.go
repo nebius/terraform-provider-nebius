@@ -45,6 +45,10 @@ func (r *serviceScope) GetName() string {
 	return "vpc_v1alpha1_scope"
 }
 
+func (r *serviceScope) ParentTypes() []string {
+	return []string{"project"}
+}
+
 func (r *serviceScope) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{

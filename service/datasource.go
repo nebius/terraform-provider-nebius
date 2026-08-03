@@ -37,6 +37,7 @@ type AdditionalGetter struct {
 
 type DataSourceInterface interface {
 	GetName() string
+	ParentTypes() []string
 	DataSourceSchema() schema.Schema
 	Read(ctx context.Context, id string) (
 		*common.ResourceMetadata,
@@ -59,6 +60,10 @@ type GetByNameInterface interface {
 	)
 }
 
+type GetByNameParentTypesInterface interface {
+	GetByNameParentTypes() []string
+}
+
 type GetByNameWithRegionInterface interface {
 	GetByNameWithRegion(ctx context.Context, name, parentID, region string) (
 		*common.ResourceMetadata,
@@ -70,15 +75,19 @@ type GetByNameWithRegionInterface interface {
 }
 
 type commonDataSource struct {
-	implementation DataSourceInterface
+	implementation   DataSourceInterface
+	provider         provider.Provider
+	dataSourceSchema schema.Schema
 }
 
 func NewDataSource(
 	implementation DataSourceInterface,
-	_ provider.Provider,
+	provider provider.Provider,
 ) datasource.DataSource {
 	return &commonDataSource{
-		implementation: implementation,
+		implementation:   implementation,
+		provider:         provider,
+		dataSourceSchema: implementation.DataSourceSchema(),
 	}
 }
 
@@ -97,7 +106,7 @@ func (r *commonDataSource) Schema(
 	_ datasource.SchemaRequest,
 	resp *datasource.SchemaResponse,
 ) {
-	resp.Schema = r.implementation.DataSourceSchema()
+	resp.Schema = r.dataSourceSchema
 }
 
 func (r *commonDataSource) Read(
@@ -109,7 +118,7 @@ func (r *commonDataSource) Read(
 	if reqCtx != nil {
 		resp.Diagnostics = reqCtx.WrapDiagnostics(
 			resp.Diagnostics,
-			r.implementation.DataSourceSchema().Type(),
+			r.dataSourceSchema.Type(),
 			r.implementation.FieldNameMap(),
 		)
 	}
@@ -172,6 +181,42 @@ func (r *commonDataSource) getFromServer(ctx context.Context, data types.Object)
 		diags.Append(diag...)
 		if diag.HasError() {
 			return nil, nil, nil, nil, diags
+		}
+		parentAttr := data.Attributes()[constants.FieldParentID]
+		if ppid == nil && pname != nil && parentAttr.IsUnknown() {
+			diags.AddAttributeError(
+				path.Root(constants.FieldParentID),
+				"parent_id is unknown",
+				"The data source cannot be read by name until parent_id is known.",
+			)
+			return nil, nil, nil, nil, diags
+		}
+		if ppid == nil && pname != nil {
+			parentTypes := r.implementation.ParentTypes()
+			if getByNameParentTypes, ok :=
+				r.implementation.(GetByNameParentTypesInterface); ok {
+				parentTypes = getByNameParentTypes.GetByNameParentTypes()
+			}
+			defaultParent, innerDiags := compatibleDefaultParent(
+				r.provider.DefaultParentID(),
+				parentTypes,
+				path.Root(constants.FieldParentID),
+			)
+			diags.Append(innerDiags...)
+			if innerDiags.HasError() {
+				return nil, nil, nil, nil, diags
+			}
+			if defaultParent.IsUnknown() {
+				diags.AddAttributeError(
+					path.Root(constants.FieldParentID),
+					"provider parent_id is unknown",
+					"The data source cannot be read by name until the provider parent_id is known.",
+				)
+				return nil, nil, nil, nil, diags
+			}
+			if isKnown(defaultParent) {
+				ppid = defaultParent.ValueStringPointer()
+			}
 		}
 		var pregion *string
 		if hasGBNRegion {

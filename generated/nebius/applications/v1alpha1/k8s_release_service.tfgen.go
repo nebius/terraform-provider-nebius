@@ -57,6 +57,10 @@ func (r *serviceK8SRelease) GetName() string {
 	return "applications_v1alpha1_k8s_release"
 }
 
+func (r *serviceK8SRelease) ParentTypes() []string {
+	return []string{"project"}
+}
+
 func (r *serviceK8SRelease) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -163,7 +167,8 @@ func (r *serviceK8SRelease) ResourceSchema() schema1.Schema {
 				Validators: []validator.String{
 					validators.NIDValidator(),
 				},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -192,6 +197,11 @@ func (r *serviceK8SRelease) ResourceSchema() schema1.Schema {
 				Optional:            true,
 				MarkdownDescription: "Labels associated with the resource.",
 				PlanModifiers:       []planmodifier.Map{},
+			},
+			"labels_all": schema1.MapAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
 			"cluster_id": schema1.StringAttribute{
 				Validators:          []validator.String{},
@@ -264,6 +274,9 @@ func (r *serviceK8SRelease) ResourceSchema() schema1.Schema {
 		},
 		MarkdownDescription: "",
 	}
+	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
+	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())
+	ret.Attributes["parent_id"] = parentIDAttribute
 	if r.provider.WriteOnlyFieldsSupported() {
 		ret.Attributes["sensitive"] = schema1.SingleNestedAttribute{
 			Attributes: map[string]schema1.Attribute{

@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -43,7 +44,9 @@ import (
 	"github.com/nebius/terraform-provider-nebius/custom/api"
 	"github.com/nebius/terraform-provider-nebius/custom/iam/token"
 	"github.com/nebius/terraform-provider-nebius/generated/nebius"
+	tfprovider "github.com/nebius/terraform-provider-nebius/provider"
 	"github.com/nebius/terraform-provider-nebius/provider/version"
+	tfvalidators "github.com/nebius/terraform-provider-nebius/validators"
 )
 
 const (
@@ -57,17 +60,22 @@ const (
 
 func New() func() provider.Provider {
 	return func() provider.Provider {
-		return &internalProvider{}
+		return &internalProvider{
+			defaultLabels: types.MapNull(types.StringType),
+			parentID:      types.StringNull(),
+		}
 	}
 }
 
 type internalProvider struct {
 	sdk                 *gosdk.SDK
 	versionedEphemerals map[string]attr.Value
-	parentID            string
+	defaultLabels       types.Map
+	parentID            types.String
 }
 
 var _ provider.ProviderWithEphemeralResources = (*internalProvider)(nil)
+var _ provider.ProviderWithValidateConfig = (*internalProvider)(nil)
 
 type saConfig struct {
 	CredentialsFile    types.String `tfsdk:"credentials_file"`
@@ -111,6 +119,7 @@ type config struct {
 	ServiceAccount      types.Object      `tfsdk:"service_account"`
 	ModuleName          types.String      `tfsdk:"module_name"`
 	VersionedEphemerals types.Dynamic     `tfsdk:"versioned_ephemeral_values"`
+	DefaultLabels       types.Map         `tfsdk:"default_labels"`
 	ParentID            types.String      `tfsdk:"parent_id"`
 	Profile             types.Object      `tfsdk:"profile"`
 	Timeout             duration.Duration `tfsdk:"timeout"`
@@ -121,6 +130,14 @@ type config struct {
 
 func (p *internalProvider) SDK() *gosdk.SDK {
 	return p.sdk
+}
+
+func (p *internalProvider) DefaultLabels() types.Map {
+	return p.defaultLabels
+}
+
+func (p *internalProvider) DefaultParentID() types.String {
+	return p.parentID
 }
 
 func (p *internalProvider) Schema(
@@ -318,6 +335,14 @@ func (p *internalProvider) Schema(
 				Optional: true,
 				Description: "Parent ID if it is not read from the profile, " +
 					"or if you want to overwrite it.",
+				Validators: []validator.String{
+					tfvalidators.NIDValidator(),
+				},
+			},
+			"default_labels": schema.MapAttribute{
+				Optional:    true,
+				ElementType: types.StringType,
+				Description: "Labels to apply by default to managed resources that support labels. Resource labels override matching provider labels.",
 			},
 			"profile": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
@@ -364,6 +389,23 @@ func (p *internalProvider) Schema(
 				"passed to nebius_hash for hashing",
 		}
 	}
+}
+
+func (p *internalProvider) ValidateConfig(
+	ctx context.Context,
+	req provider.ValidateConfigRequest,
+	resp *provider.ValidateConfigResponse,
+) {
+	var labels types.Map
+	resp.Diagnostics.Append(
+		req.Config.GetAttribute(ctx, path.Root("default_labels"), &labels)...,
+	)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	resp.Diagnostics.Append(
+		tfprovider.ValidateLabels(labels, path.Root("default_labels"), false)...,
+	)
 }
 
 func isKnown(val attr.Value) bool {
@@ -555,7 +597,9 @@ func (p *internalProvider) parseProfile(
 		)
 		return nil, diags
 	}
-	p.parentID = cfg.ParentID()
+	if parentID := cfg.ParentID(); parentID != "" {
+		p.parentID = types.StringValue(parentID)
+	}
 	return cfg, diags
 }
 
@@ -608,6 +652,8 @@ func (p *internalProvider) Configure(
 ) {
 	var data config
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	p.defaultLabels = data.DefaultLabels
+	p.parentID = types.StringNull()
 
 	ver, err := version.BuildVersion()
 	if err != nil {
@@ -760,8 +806,8 @@ func (p *internalProvider) Configure(
 		))
 	}
 
-	if isKnown(data.ParentID) { // must be after parseProfile
-		p.parentID = data.ParentID.ValueString()
+	if !data.ParentID.IsNull() { // must be after parseProfile
+		p.parentID = data.ParentID
 	}
 	if isKnown(data.Resolvers) {
 		for k, v := range data.Resolvers.Elements() {
@@ -776,13 +822,13 @@ func (p *internalProvider) Configure(
 	}
 	overrideDialOpts := []grpc.DialOption{}
 	if isKnown(data.ResolversEnv) {
-		resolverFromEnv, dialOptionsFromEnv, err := conn.ParseResolverAndDialOptions(
+		resolverFromEnv, dialOptionsFromEnv, parseErr := conn.ParseResolverAndDialOptions(
 			os.Getenv(data.ResolversEnv.ValueString()),
 		)
-		if err != nil {
+		if parseErr != nil {
 			resp.Diagnostics.AddError(
 				"failed to parse resolver from env",
-				fmt.Sprintf("failed to parse resolver from env: %s", err),
+				fmt.Sprintf("failed to parse resolver from env: %s", parseErr),
 			)
 		} else {
 			resolvers = append(resolvers, resolverFromEnv)
@@ -885,8 +931,8 @@ func (p *internalProvider) Configure(
 
 	options = append(options, gosdk.WithLoggerHandler(&slogHandler{}))
 
-	// terraform must set everything explicitly
-	// use `nebius_parent_id` data source to obtain the default parent ID
+	// Keep SDK parent resolution disabled: Terraform resolves parent_id from
+	// explicit configuration, the provider default, or the parent ID data source.
 	options = append(options, gosdk.WithoutParentID())
 
 	sdk, err := gosdk.New(ctx, options...)
@@ -954,7 +1000,11 @@ func (p *internalProvider) DataSources(
 ) []func() datasource.DataSource {
 	ret := []func() datasource.DataSource{
 		func() datasource.DataSource {
-			return api.NewParentID(p.parentID)
+			parentID := ""
+			if isKnown(p.parentID) {
+				parentID = p.parentID.ValueString()
+			}
+			return api.NewParentID(parentID)
 		},
 	}
 	for _, f := range nebius.DatasourceFactories {

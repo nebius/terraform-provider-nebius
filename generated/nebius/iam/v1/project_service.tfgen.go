@@ -45,6 +45,10 @@ func (r *serviceProject) GetName() string {
 	return "iam_v1_project"
 }
 
+func (r *serviceProject) ParentTypes() []string {
+	return []string{"*"}
+}
+
 func (r *serviceProject) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{

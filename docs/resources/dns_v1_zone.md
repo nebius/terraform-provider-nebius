@@ -38,7 +38,6 @@ Wikipedia](https://en.wikipedia.org/wiki/Domain_Name_System#/media/File:Domain_n
 
    Fully qualified domain name of this zone, including `.` at the end
    Cannot be changed after creating the zone
-- `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 
 ### Optional
 
@@ -52,6 +51,7 @@ Wikipedia](https://en.wikipedia.org/wiki/Domain_Name_System#/media/File:Domain_n
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
 - `name` (String) Human readable name for the resource.
+- `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `soa_spec` (Attributes) :
 
    Custom SOA (Start of Authority) record specification for the zone
@@ -75,6 +75,7 @@ Wikipedia](https://en.wikipedia.org/wiki/Domain_Name_System#/media/File:Domain_n
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `id` (String) Identifier for the resource, unique for its resource type.
+- `labels_all` (Map of String) Effective labels sent to the API after merging provider `default_labels` with resource `labels`.
 - `resource_version` (Number) :
 
    Version of the resource for safe concurrent modifications and consistent reads.

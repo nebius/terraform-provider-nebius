@@ -57,6 +57,10 @@ func (r *serviceDiskSnapshot) GetName() string {
 	return "compute_v1_disk_snapshot"
 }
 
+func (r *serviceDiskSnapshot) ParentTypes() []string {
+	return []string{"*"}
+}
+
 func (r *serviceDiskSnapshot) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -183,7 +187,8 @@ func (r *serviceDiskSnapshot) ResourceSchema() schema1.Schema {
 				Validators: []validator.String{
 					validators.NIDValidator(),
 				},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -212,6 +217,11 @@ func (r *serviceDiskSnapshot) ResourceSchema() schema1.Schema {
 				Optional:            true,
 				MarkdownDescription: "Labels associated with the resource.",
 				PlanModifiers:       []planmodifier.Map{},
+			},
+			"labels_all": schema1.MapAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
 			"source_disk_id": schema1.StringAttribute{
 				Validators:          []validator.String{},
@@ -272,6 +282,9 @@ func (r *serviceDiskSnapshot) ResourceSchema() schema1.Schema {
 		},
 		MarkdownDescription: "DiskSnapshot resource",
 	}
+	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
+	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())
+	ret.Attributes["parent_id"] = parentIDAttribute
 	return ret
 }
 

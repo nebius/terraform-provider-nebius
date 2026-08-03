@@ -60,6 +60,10 @@ func (r *serviceNVLInstanceGroup) GetName() string {
 	return "compute_v1_nvl_instance_group"
 }
 
+func (r *serviceNVLInstanceGroup) ParentTypes() []string {
+	return []string{"*"}
+}
+
 func (r *serviceNVLInstanceGroup) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -179,7 +183,8 @@ func (r *serviceNVLInstanceGroup) ResourceSchema() schema1.Schema {
 				Validators: []validator.String{
 					validators.NIDValidator(),
 				},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -216,6 +221,11 @@ func (r *serviceNVLInstanceGroup) ResourceSchema() schema1.Schema {
 				PlanModifiers: []planmodifier.Map{
 					mapplanmodifier.RequiresReplace(),
 				},
+			},
+			"labels_all": schema1.MapAttribute{
+				Computed:            true,
+				ElementType:         types.StringType,
+				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
 			"type": schema1.StringAttribute{
 				Validators: []validator.String{
@@ -266,6 +276,9 @@ func (r *serviceNVLInstanceGroup) ResourceSchema() schema1.Schema {
 		},
 		MarkdownDescription: "Represents an NVLink InstanceGroup.",
 	}
+	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
+	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())
+	ret.Attributes["parent_id"] = parentIDAttribute
 	return ret
 }
 
