@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.37 (August 4, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.47`.
+
+IMPROVEMENTS:
+
+* Changed attributes for data source [nebius_compute_v1_image](./docs/data-sources/compute_v1_image.md):
+    * Added: `unsupported_presets`
+
 ## 0.6.36 (August 3, 2026)
 
 NOTES:
