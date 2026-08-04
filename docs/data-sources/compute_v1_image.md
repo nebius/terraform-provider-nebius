@@ -100,6 +100,7 @@ data ... {
 - `source_storage` (Attributes) *Cannot be set alongside source_disk_id or source_disk_snapshot_id.* (see [below for nested schema](#nestedatt--source_storage))
 - `status` (Attributes) (see [below for nested schema](#nestedatt--status))
 - `unsupported_platforms` (Map of String) list of platforms where this image is not supported with explanation
+- `unsupported_presets` (Attributes List) Platform presets that cannot use this image. Each item includes the reason. (see [below for nested schema](#nestedatt--unsupported_presets))
 - `updated_at` (String) :
 
    Timestamp indicating when the resource was last updated.
@@ -154,3 +155,14 @@ Read-Only:
 
 - `deprecated_at` (String) A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `message` (String)
+
+
+
+<a id="nestedatt--unsupported_presets"></a>
+### Nested Schema for `unsupported_presets`
+
+Read-Only:
+
+- `platform` (String)
+- `preset` (String)
+- `reason` (String)

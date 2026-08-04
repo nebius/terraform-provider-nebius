@@ -150,6 +150,26 @@ func (r *serviceImage) DataSourceSchema() schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "list of platforms where this image is not supported with explanation",
 			},
+			"unsupported_presets": schema.ListNestedAttribute{
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"platform": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "",
+						},
+						"preset": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "",
+						},
+						"reason": schema.StringAttribute{
+							Computed:            true,
+							MarkdownDescription: "",
+						},
+					},
+				},
+				Computed:            true,
+				MarkdownDescription: "Platform presets that cannot use this image. Each item includes the reason.",
+			},
 			"status": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
