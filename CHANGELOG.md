@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.38 (August 6, 2026)
+
+NOTES:
+
+* deps: Update `google.golang.org/genproto/googleapis/rpc` from `v0.0.0-20260414002931-afd174a4e478` to `v0.0.0-20260526163538-3dc84a4a5aaa`.
+* deps: Update `google.golang.org/grpc` from `v1.82.1` to `v1.83.0`.
+
 ## 0.6.37 (August 4, 2026)
 
 NOTES:

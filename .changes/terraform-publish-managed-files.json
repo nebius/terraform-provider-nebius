@@ -122,6 +122,8 @@
     "generated/nebius/connect/registry.tfgenx.go",
     "generated/nebius/connect/v1.tfgen.go",
     "generated/nebius/connect/v1/dedicated_connection_service.tfgen.go",
+    "generated/nebius/connect/v1/partner_connection_service.tfgen.go",
+    "generated/nebius/connect/v1/partner_service.tfgen.go",
     "generated/nebius/connect/v1/point_of_presence_service.tfgen.go",
     "generated/nebius/connect/v1/private_peering_service.tfgen.go",
     "generated/nebius/connect/v1/redistribution_policy_service.tfgen.go",
