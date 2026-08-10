@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.39 (August 10, 2026)
+
+NOTES:
+
+* deps: Update `github.com/hashicorp/terraform-plugin-log` from `v0.10.0` to `v0.11.0`.
+* provider: Update Nebius Go SDK to `v0.2.48`.
+
 ## 0.6.38 (August 6, 2026)
 
 NOTES:
