@@ -115,7 +115,7 @@ func (r *serviceCluster) DataSourceSchema() schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"version": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Desired Kubernetes version of the cluster. For now only acceptable format is\n   `<major>.<minor>` like \"1.31\". Option for patch version update will be added later.\n",
+						MarkdownDescription: ":\n\n   Desired Kubernetes version of the cluster. May be lower than the actual cluster version\n   if the desired version is no longer supported and the cluster has been automatically updated.\n   For now only acceptable format is `<major>.<minor>` like \"1.31\".\n   Option for patch version update will be added later.\n",
 					},
 					"subnet_id": schema.StringAttribute{
 						Computed:            true,
@@ -340,7 +340,7 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 							validators.ProtoFieldValidator(&v11.ControlPlaneSpec{}, "version", "version", fieldNameMapCluster),
 						},
 						Optional:            true,
-						MarkdownDescription: ":\n\n   Desired Kubernetes version of the cluster. For now only acceptable format is\n   `<major>.<minor>` like \"1.31\". Option for patch version update will be added later.\n",
+						MarkdownDescription: ":\n\n   Desired Kubernetes version of the cluster. May be lower than the actual cluster version\n   if the desired version is no longer supported and the cluster has been automatically updated.\n   For now only acceptable format is `<major>.<minor>` like \"1.31\".\n   Option for patch version update will be added later.\n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"subnet_id": schema1.StringAttribute{

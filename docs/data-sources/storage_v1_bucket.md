@@ -493,6 +493,10 @@ Read-Only:
 
    The domain of the endpoint where the bucket can be accessed. It omits the scheme (HTTPS) and the port (443)
    and contains only the FQDN address.
+- `insecure_endpoint` (Attributes) :
+
+   Insecure endpoint mode shows whether plain HTTP (without TLS) is forbidden, allowed for traffic from the
+   same region or allowed from everywhere. (see [below for nested schema](#nestedatt--status--insecure_endpoint))
 - `purge_at` (String) :
 
    The time when the bucket will be automatically purged in case it was soft-deleted.
@@ -571,3 +575,24 @@ Read-Only:
 - `multipart_objects_size` (Number)
 - `simple_objects_quantity` (Number)
 - `simple_objects_size` (Number)
+
+
+
+<a id="nestedatt--status--insecure_endpoint"></a>
+### Nested Schema for `status.insecure_endpoint`
+
+Read-Only:
+
+- `mode` (String) :
+
+   Determines where the plain HTTP endpoint is available.
+   
+   #### Supported values
+   
+   Defines where the plain HTTP endpoint is available.
+   Possible values:
+   
+   - `MODE_UNSPECIFIED`
+   - `DISABLED` - Plain HTTP access is disabled.
+   - `REGION_LOCAL` - Plain HTTP access is available only from the same region.
+   - `ALL` - Plain HTTP access is available from any network.
