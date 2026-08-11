@@ -116,8 +116,10 @@ Read-Only:
    Also will be default NodeGroup subnet.
 - `version` (String) :
 
-   Desired Kubernetes version of the cluster. For now only acceptable format is
-   `<major>.<minor>` like "1.31". Option for patch version update will be added later.
+   Desired Kubernetes version of the cluster. May be lower than the actual cluster version
+   if the desired version is no longer supported and the cluster has been automatically updated.
+   For now only acceptable format is `<major>.<minor>` like "1.31".
+   Option for patch version update will be added later.
 
 <a id="nestedatt--control_plane--audit_logs"></a>
 ### Nested Schema for `control_plane.audit_logs`

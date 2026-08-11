@@ -474,6 +474,16 @@ func (r *serviceBucket) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Indicator flag showing whether the bucket has any BucketPolicy rule\n   that grants anonymous access to any object, prefix, or the entire bucket.\n",
 					},
+					"insecure_endpoint": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"mode": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Determines where the plain HTTP endpoint is available.\n   \n   #### Supported values\n   \n   Defines where the plain HTTP endpoint is available.\n   Possible values:\n   \n   - `MODE_UNSPECIFIED`\n   - `DISABLED` - Plain HTTP access is disabled.\n   - `REGION_LOCAL` - Plain HTTP access is available only from the same region.\n   - `ALL` - Plain HTTP access is available from any network.\n   \n",
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Insecure endpoint mode shows whether plain HTTP (without TLS) is forbidden, allowed for traffic from the\n   same region or allowed from everywhere.\n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: "",
@@ -1142,6 +1152,18 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Indicator flag showing whether the bucket has any BucketPolicy rule\n   that grants anonymous access to any object, prefix, or the entire bucket.\n",
 						PlanModifiers:       []planmodifier.Bool{},
+					},
+					"insecure_endpoint": schema1.SingleNestedAttribute{
+						Attributes: map[string]schema1.Attribute{
+							"mode": schema1.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Determines where the plain HTTP endpoint is available.\n   \n   #### Supported values\n   \n   Defines where the plain HTTP endpoint is available.\n   Possible values:\n   \n   - `MODE_UNSPECIFIED`\n   - `DISABLED` - Plain HTTP access is disabled.\n   - `REGION_LOCAL` - Plain HTTP access is available only from the same region.\n   - `ALL` - Plain HTTP access is available from any network.\n   \n",
+								PlanModifiers:       []planmodifier.String{},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Insecure endpoint mode shows whether plain HTTP (without TLS) is forbidden, allowed for traffic from the\n   same region or allowed from everywhere.\n",
+						PlanModifiers:       []planmodifier.Object{},
 					},
 				},
 				Computed:            true,

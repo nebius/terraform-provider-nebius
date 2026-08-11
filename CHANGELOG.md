@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.40 (August 11, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.49`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_storage_v1_bucket](./docs/resources/storage_v1_bucket.md):
+    * Added: `status.insecure_endpoint`
+* Changed attributes for data source [nebius_storage_v1_bucket](./docs/data-sources/storage_v1_bucket.md):
+    * Added: `status.insecure_endpoint`
+
 ## 0.6.39 (August 10, 2026)
 
 NOTES:
