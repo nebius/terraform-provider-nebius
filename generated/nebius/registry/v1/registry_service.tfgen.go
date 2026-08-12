@@ -58,7 +58,7 @@ func (r *serviceRegistry) GetName() string {
 }
 
 func (r *serviceRegistry) ParentTypes() []string {
-	return []string{"*"}
+	return []string{"project"}
 }
 
 func (r *serviceRegistry) DataSourceSchema() schema.Schema {
