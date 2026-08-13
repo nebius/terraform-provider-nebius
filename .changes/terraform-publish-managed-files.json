@@ -489,6 +489,7 @@
     "service/requestcontext/context.go",
     "service/requestcontext/diagnostic.go",
     "service/requestcontext/fingerprint.go",
+    "service/requestcontext/formattable_diagnostics.go",
     "service/requestcontext/warnings.go",
     "service/resource.go",
     "service/simple_datasource.go",

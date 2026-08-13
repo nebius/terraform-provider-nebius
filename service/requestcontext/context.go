@@ -163,6 +163,7 @@ func (c *Context) WrapDiagnostics(
 	schemaType attr.Type,
 	fieldNameMap map[string]map[string]string,
 ) diag.Diagnostics {
+	diags = resolveFormattableDiagnostics(diags, schemaType, fieldNameMap)
 	diags = processWarnings(c.RequestWarnings(), diags, schemaType, fieldNameMap)
 
 	fp := c.RequestFingerprint()

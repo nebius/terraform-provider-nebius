@@ -25,6 +25,7 @@ import (
 	"github.com/nebius/gosdk/serviceerror"
 	"github.com/nebius/terraform-provider-nebius/conversion"
 	"github.com/nebius/terraform-provider-nebius/provider"
+	"github.com/nebius/terraform-provider-nebius/service/requestcontext"
 )
 
 func isNotFoundError(err error) bool {
@@ -100,6 +101,14 @@ func ErrorToDiag(
 ) diag.Diagnostics {
 	if err == nil {
 		return diags
+	}
+	formattableDiags, remainingErr := requestcontext.ExtractFormattableDiagnostics(err, summary)
+	if len(formattableDiags) > 0 {
+		diags.Append(formattableDiags...)
+		if remainingErr == nil {
+			return diags
+		}
+		err = remainingErr
 	}
 	if _, isServiceError := errors.AsType[*serviceerror.Error](err); isServiceError {
 		diags.AddError(
@@ -331,7 +340,7 @@ func convertToObject(
 		tempAttrs := map[string]attr.Value{}
 		tempTypes := map[string]attr.Type{}
 		for _, fieldName := range unwrappedFields {
-			mdAttr, ok1 := attrs[string(fieldName)]
+			fieldAttr, ok1 := attrs[string(fieldName)]
 			mdType, ok2 := attrTypes[string(fieldName)]
 			if !ok1 || !ok2 {
 				if fieldName == constants.FieldRegion {
@@ -345,7 +354,7 @@ func convertToObject(
 				)
 				continue
 			}
-			tempAttrs[string(fieldName)] = mdAttr
+			tempAttrs[string(fieldName)] = fieldAttr
 			tempTypes[string(fieldName)] = mdType
 		}
 		tmpObj, metadataDiags := basetypes.NewObjectValue(tempTypes, tempAttrs)
