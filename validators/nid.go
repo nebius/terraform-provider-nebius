@@ -270,17 +270,19 @@ func checkMessageNIDs(
 		}
 
 		switch {
-		case fd.IsMap() && fd.MapValue().Kind() == protoreflect.MessageKind:
-			value.Map().Range(func(key protoreflect.MapKey, item protoreflect.Value) bool {
-				checkMessageNIDs(item.Message(), mapNIDPath(fieldPath, key.String()), childPaths, warnings)
-				return true
-			})
-		case fd.IsList() && fd.Kind() == protoreflect.MessageKind:
+		case fd.IsMap():
+			if fd.MapValue().Message() != nil {
+				value.Map().Range(func(key protoreflect.MapKey, item protoreflect.Value) bool {
+					checkMessageNIDs(item.Message(), mapNIDPath(fieldPath, key.String()), childPaths, warnings)
+					return true
+				})
+			}
+		case fd.IsList() && fd.Message() != nil:
 			list := value.List()
 			for i := range list.Len() {
 				checkMessageNIDs(list.Get(i).Message(), indexNIDPath(fieldPath, i), childPaths, warnings)
 			}
-		case fd.Kind() == protoreflect.MessageKind && msg.Has(fd):
+		case fd.Message() != nil:
 			checkMessageNIDs(value.Message(), fieldPath, childPaths, warnings)
 		}
 		return true

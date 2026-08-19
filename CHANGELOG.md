@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.44 (August 19, 2026)
+
+NOTES:
+
+* deps: Update `buf.build/go/protovalidate` from `v1.2.0` to `v1.3.0`.
+* provider: Update Nebius Go SDK to `v0.2.53`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_vpc_v1_subnet](./docs/resources/vpc_v1_subnet.md):
+    * Added: `status.default`
+* Changed attributes for data source [nebius_iam_v1_project](./docs/data-sources/iam_v1_project.md):
+    * Added: `status.generation`
+* Changed attributes for data source [nebius_iam_v1_tenant](./docs/data-sources/iam_v1_tenant.md):
+    * Added: `status.generation`
+* Changed attributes for data source [nebius_vpc_v1_subnet](./docs/data-sources/vpc_v1_subnet.md):
+    * Added: `status.default`
+
 ## 0.6.43 (August 18, 2026)
 
 NOTES:
