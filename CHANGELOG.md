@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.45 (August 24, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.54`.
+
 ## 0.6.44 (August 19, 2026)
 
 NOTES:
