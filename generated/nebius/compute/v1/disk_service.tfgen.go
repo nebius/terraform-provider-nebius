@@ -60,7 +60,7 @@ func (r *serviceDisk) GetName() string {
 }
 
 func (r *serviceDisk) ParentTypes() []string {
-	return []string{"*"}
+	return []string{"project"}
 }
 
 func (r *serviceDisk) DataSourceSchema() schema.Schema {
@@ -384,6 +384,7 @@ func (r *serviceDisk) ResourceSchema() schema1.Schema {
 						"source_image_family",
 						"source_snapshot_id",
 					}, fieldNameMapDisk),
+					validators.NIDValidator(),
 				},
 				Optional:            true,
 				MarkdownDescription: "*Cannot be set alongside source_image_family or source_snapshot_id.*",
@@ -402,7 +403,9 @@ func (r *serviceDisk) ResourceSchema() schema1.Schema {
 						},
 					},
 					"parent_id": schema1.StringAttribute{
-						Validators:          []validator.String{},
+						Validators: []validator.String{
+							validators.NIDValidator(),
+						},
 						Optional:            true,
 						MarkdownDescription: "",
 						PlanModifiers: []planmodifier.String{
@@ -430,6 +433,7 @@ func (r *serviceDisk) ResourceSchema() schema1.Schema {
 						"source_image_family",
 						"source_snapshot_id",
 					}, fieldNameMapDisk),
+					validators.NIDValidator(),
 				},
 				Optional:            true,
 				MarkdownDescription: "*Cannot be set alongside source_image_id or source_image_family.*",

@@ -310,9 +310,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   ID of the subnet that allocation will be associated with.\n   IP address of the allocation must be within a CIDR block associated\n   with this subnet.\n   In order to assign an allocation to a resource (i.e. network interface)\n   both must be associated with the same subnet.\n   \n   *Cannot be set alongside pool_id.*\n",
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
+						PlanModifiers:       []planmodifier.String{},
 					},
 					"pool_id": schema1.StringAttribute{
 						Validators: []validator.String{
@@ -324,9 +322,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   ID of the pool that allocation will receive its IP address from.\n   \n   *Cannot be set alongside subnet_id.*\n",
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
+						PlanModifiers:       []planmodifier.String{},
 					},
 				},
 				Validators: []validator.Object{
@@ -362,9 +358,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   ID of the subnet that allocation will be associated with.\n   IP address of the allocation must be within a CIDR block associated with\n   this subnet.\n   Assigning an allocation to a resource (i.e. network interface) requires\n   both to be associated with the same subnet.\n   \n   *Cannot be set alongside pool_id.*\n",
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
+						PlanModifiers:       []planmodifier.String{},
 					},
 					"pool_id": schema1.StringAttribute{
 						Validators: []validator.String{
@@ -376,9 +370,7 @@ func (r *serviceAllocation) ResourceSchema() schema1.Schema {
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   ID of the pool that allocation will receive its IP address from.\n   \n   *Cannot be set alongside subnet_id.*\n",
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
-						},
+						PlanModifiers:       []planmodifier.String{},
 					},
 				},
 				Validators: []validator.Object{
