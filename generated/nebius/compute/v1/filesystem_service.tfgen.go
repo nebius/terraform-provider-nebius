@@ -59,7 +59,7 @@ func (r *serviceFilesystem) GetName() string {
 }
 
 func (r *serviceFilesystem) ParentTypes() []string {
-	return []string{"*"}
+	return []string{"project"}
 }
 
 func (r *serviceFilesystem) DataSourceSchema() schema.Schema {

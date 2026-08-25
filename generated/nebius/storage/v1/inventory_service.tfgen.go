@@ -16,8 +16,8 @@ import (
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
 	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
-	v11 "github.com/nebius/gosdk/proto/nebius/kms/v1"
-	v12 "github.com/nebius/gosdk/services/nebius/kms/v1"
+	v11 "github.com/nebius/gosdk/proto/nebius/storage/v1"
+	v12 "github.com/nebius/gosdk/services/nebius/storage/v1"
 	wellknown "github.com/nebius/terraform-provider-nebius/conversion/wellknown"
 	provider "github.com/nebius/terraform-provider-nebius/provider"
 	service "github.com/nebius/terraform-provider-nebius/service"
@@ -28,40 +28,40 @@ import (
 
 func init() {
 	DatasourceFactories = append(
-		DatasourceFactories, newDataSourceSymmetricKey,
+		DatasourceFactories, newDataSourceInventory,
 	)
 	ResourceFactories = append(
-		ResourceFactories, newResourceSymmetricKey,
+		ResourceFactories, newResourceInventory,
 	)
 }
 
-func newDataSourceSymmetricKey(provider provider.Provider) datasource.DataSource {
-	return service.NewDataSource(newServiceSymmetricKey(provider), provider)
+func newDataSourceInventory(provider provider.Provider) datasource.DataSource {
+	return service.NewDataSource(newServiceInventory(provider), provider)
 }
 
-func newResourceSymmetricKey(provider provider.Provider) resource.Resource {
-	return service.NewResource(newServiceSymmetricKey(provider), provider)
+func newResourceInventory(provider provider.Provider) resource.Resource {
+	return service.NewResource(newServiceInventory(provider), provider)
 }
 
-type serviceSymmetricKey struct {
+type serviceInventory struct {
 	provider provider.Provider
 }
 
-func newServiceSymmetricKey(provider provider.Provider) *serviceSymmetricKey {
-	return &serviceSymmetricKey{
+func newServiceInventory(provider provider.Provider) *serviceInventory {
+	return &serviceInventory{
 		provider: provider,
 	}
 }
 
-func (r *serviceSymmetricKey) GetName() string {
-	return "kms_v1_symmetric_key"
+func (r *serviceInventory) GetName() string {
+	return "storage_v1_inventory"
 }
 
-func (r *serviceSymmetricKey) ParentTypes() []string {
-	return []string{"project"}
+func (r *serviceInventory) ParentTypes() []string {
+	return []string{"storagebucket"}
 }
 
-func (r *serviceSymmetricKey) DataSourceSchema() schema.Schema {
+func (r *serviceInventory) DataSourceSchema() schema.Schema {
 	ret := schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"metadata": schema.SingleNestedAttribute{
@@ -77,7 +77,7 @@ func (r *serviceSymmetricKey) DataSourceSchema() schema.Schema {
 			},
 			"name": schema.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSymmetricKey),
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapInventory),
 				},
 				Computed:            true,
 				Optional:            true,
@@ -110,46 +110,51 @@ func (r *serviceSymmetricKey) DataSourceSchema() schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Labels associated with the resource.",
 			},
-			"description": schema.StringAttribute{
+			"enabled": schema.BoolAttribute{
 				Computed:            true,
-				MarkdownDescription: "Description of the key.",
+				MarkdownDescription: "Enable or disable inventory generation.",
 			},
-			"algorithm": schema.StringAttribute{
+			"source_prefix": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Encryption algorithm that should be used when using the key to encrypt plaintext.\n   Must be specified only during create operations. Cannot be updated.\n   \n   #### Supported values\n   \n   Supported symmetric encryption algorithms.\n   Possible values:\n   \n   - `SYMMETRIC_ALGORITHM_UNSPECIFIED`\n   - `AES_128`:\n      Deprecated. It is impossible to create new keys with this algorithm.\n      AES algorithm with 128-bit keys.\n   \n   - `AES_256` - AES algorithm with 256-bit keys.\n   \n",
+				MarkdownDescription: "Prefix to filter objects in the source bucket.",
 			},
-			"rotation_period": schema.StringAttribute{
-				CustomType:          wellknown.WellKnownByName("google.protobuf.Duration").Type().(basetypes.StringTypable),
+			"destination_bucket_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Key rotation period.\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
+				MarkdownDescription: "ID of the destination bucket.",
+			},
+			"destination_prefix": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Prefix under which bucket inventory will be stored in the destination bucket.",
+			},
+			"output_format": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: ":\n\n   Inventory format.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `OUTPUT_FORMAT_UNSPECIFIED`\n   - `CSV_GZIP` - CSV compressed with GZIP.\n   - `PARQUET_SNAPPY` - Parquet compressed with Snappy.\n   \n",
+			},
+			"noncurrent_versions": schema.BoolAttribute{
+				Computed:            true,
+				MarkdownDescription: "Include noncurrent versions in inventory if set to true.",
+			},
+			"optional_fields": schema.ListAttribute{
+				ElementType:         types.StringType,
+				Computed:            true,
+				MarkdownDescription: ":\n\n   Optional fields to include in inventory.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `OPTIONAL_FIELD_UNSPECIFIED`\n   - `LAST_ACCESS` - Timestamp of the last access.\n   - `CHECKSUM_ALGORITHMS` - Checksum algorithms used.\n   - `INTELLIGENT_TIER` - Current intelligent tier (for Intelligent Storage Class).\n   - `IS_MULTIPART_UPLOAD` - True for multipart uploads, false for simple objects.\n   - `LIFECYCLE_EXPIRATION` - Timestamp of lifecycle expiration.\n   - `TAGS` - Object tags.\n   \n",
+			},
+			"schedule": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: ":\n\n   How often to generate the inventory.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `SCHEDULE_UNSPECIFIED`\n   - `DAILY` - Run once a day.\n   - `WEEKLY` - Run once a week.\n   \n",
 			},
 			"status": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"state": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: ":\n\n   State (ACTIVE, SCHEDULED_FOR_DELETION).\n   \n   #### Supported values\n   \n   Key state\n   Possible values:\n   \n   - `KEY_STATE_UNSPECIFIED`\n   - `ACTIVE` - Key is active, ready for use\n   - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.\n   \n",
-					},
-					"deleted_at": schema.StringAttribute{
-						CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
-						Computed:            true,
-						MarkdownDescription: ":\n\n   Time when the key was scheduled for deletion.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
-					},
-					"purge_at": schema.StringAttribute{
-						CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
-						Computed:            true,
-						MarkdownDescription: ":\n\n   Time when the key will be permanently deleted.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
-					},
-				},
+				Attributes:          map[string]schema.Attribute{},
 				Computed:            true,
-				MarkdownDescription: "The current status of the symmetric key.",
+				MarkdownDescription: "",
 			},
 		},
-		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n\n\nA symmetric KMS key.",
+		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n\n\nInventory configures periodic generation of an object listing for a bucket.",
 	}
 	return ret
 }
 
-func (r *serviceSymmetricKey) ResourceSchema() schema1.Schema {
+func (r *serviceInventory) ResourceSchema() schema1.Schema {
 	ret := schema1.Schema{
 		Attributes: map[string]schema1.Attribute{
 			"metadata": schema1.SingleNestedAttribute{
@@ -169,11 +174,13 @@ func (r *serviceSymmetricKey) ResourceSchema() schema1.Schema {
 			},
 			"name": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSymmetricKey),
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapInventory),
 				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
-				PlanModifiers:       []planmodifier.String{},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"parent_id": schema1.StringAttribute{
 				Validators: []validator.String{
@@ -215,61 +222,73 @@ func (r *serviceSymmetricKey) ResourceSchema() schema1.Schema {
 				ElementType:         types.StringType,
 				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
-			"description": schema1.StringAttribute{
-				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v11.SymmetricKeySpec{}, "description", "description", fieldNameMapSymmetricKey),
-				},
+			"enabled": schema1.BoolAttribute{
+				Validators:          []validator.Bool{},
 				Optional:            true,
-				MarkdownDescription: "Description of the key.",
+				MarkdownDescription: "Enable or disable inventory generation.",
+				PlanModifiers:       []planmodifier.Bool{},
+			},
+			"source_prefix": schema1.StringAttribute{
+				Validators:          []validator.String{},
+				Optional:            true,
+				MarkdownDescription: "Prefix to filter objects in the source bucket.",
 				PlanModifiers:       []planmodifier.String{},
 			},
-			"algorithm": schema1.StringAttribute{
+			"destination_bucket_id": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.EnumValidator(v11.SymmetricAlgorithm_value),
-					validators.ProtoFieldValidator(&v11.SymmetricKeySpec{}, "algorithm", "algorithm", fieldNameMapSymmetricKey),
+					validators.NIDValidator(),
 				},
 				Required:            true,
-				MarkdownDescription: ":\n\n   Encryption algorithm that should be used when using the key to encrypt plaintext.\n   Must be specified only during create operations. Cannot be updated.\n   \n   #### Supported values\n   \n   Supported symmetric encryption algorithms.\n   Possible values:\n   \n   - `SYMMETRIC_ALGORITHM_UNSPECIFIED`\n   - `AES_128`:\n      Deprecated. It is impossible to create new keys with this algorithm.\n      AES algorithm with 128-bit keys.\n   \n   - `AES_256` - AES algorithm with 256-bit keys.\n   \n",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
+				MarkdownDescription: "ID of the destination bucket.",
+				PlanModifiers:       []planmodifier.String{},
 			},
-			"rotation_period": schema1.StringAttribute{
-				CustomType: wellknown.WellKnownByName("google.protobuf.Duration").Type().(basetypes.StringTypable),
+			"destination_prefix": schema1.StringAttribute{
 				Validators: []validator.String{
-					validators.ProtoFieldValidator(&v11.SymmetricKeySpec{}, "rotation_period", "rotation_period", fieldNameMapSymmetricKey),
+					validators.ProtoFieldValidator(&v11.InventorySpec{}, "destination_prefix", "destination_prefix", fieldNameMapInventory),
 				},
-				Computed:            true,
 				Optional:            true,
-				MarkdownDescription: ":\n\n   Key rotation period.\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
+				MarkdownDescription: "Prefix under which bucket inventory will be stored in the destination bucket.",
+				PlanModifiers:       []planmodifier.String{},
+			},
+			"output_format": schema1.StringAttribute{
+				Validators: []validator.String{
+					validators.EnumValidator(v11.InventorySpec_OutputFormat_value),
+				},
+				Required:            true,
+				MarkdownDescription: ":\n\n   Inventory format.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `OUTPUT_FORMAT_UNSPECIFIED`\n   - `CSV_GZIP` - CSV compressed with GZIP.\n   - `PARQUET_SNAPPY` - Parquet compressed with Snappy.\n   \n",
+				PlanModifiers:       []planmodifier.String{},
+			},
+			"noncurrent_versions": schema1.BoolAttribute{
+				Validators:          []validator.Bool{},
+				Optional:            true,
+				MarkdownDescription: "Include noncurrent versions in inventory if set to true.",
+				PlanModifiers:       []planmodifier.Bool{},
+			},
+			"optional_fields": schema1.ListAttribute{
+				ElementType: types.StringType,
+				Validators: []validator.List{
+					validators.ListEnumValidator(v11.InventorySpec_OptionalField_value),
+				},
+				Optional:            true,
+				MarkdownDescription: ":\n\n   Optional fields to include in inventory.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `OPTIONAL_FIELD_UNSPECIFIED`\n   - `LAST_ACCESS` - Timestamp of the last access.\n   - `CHECKSUM_ALGORITHMS` - Checksum algorithms used.\n   - `INTELLIGENT_TIER` - Current intelligent tier (for Intelligent Storage Class).\n   - `IS_MULTIPART_UPLOAD` - True for multipart uploads, false for simple objects.\n   - `LIFECYCLE_EXPIRATION` - Timestamp of lifecycle expiration.\n   - `TAGS` - Object tags.\n   \n",
+				PlanModifiers:       []planmodifier.List{},
+			},
+			"schedule": schema1.StringAttribute{
+				Validators: []validator.String{
+					validators.EnumValidator(v11.InventorySpec_Schedule_value),
+				},
+				Required:            true,
+				MarkdownDescription: ":\n\n   How often to generate the inventory.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `SCHEDULE_UNSPECIFIED`\n   - `DAILY` - Run once a day.\n   - `WEEKLY` - Run once a week.\n   \n",
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"status": schema1.SingleNestedAttribute{
-				Attributes: map[string]schema1.Attribute{
-					"state": schema1.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: ":\n\n   State (ACTIVE, SCHEDULED_FOR_DELETION).\n   \n   #### Supported values\n   \n   Key state\n   Possible values:\n   \n   - `KEY_STATE_UNSPECIFIED`\n   - `ACTIVE` - Key is active, ready for use\n   - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.\n   \n",
-						PlanModifiers:       []planmodifier.String{},
-					},
-					"deleted_at": schema1.StringAttribute{
-						CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
-						Computed:            true,
-						MarkdownDescription: ":\n\n   Time when the key was scheduled for deletion.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
-						PlanModifiers:       []planmodifier.String{},
-					},
-					"purge_at": schema1.StringAttribute{
-						CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
-						Computed:            true,
-						MarkdownDescription: ":\n\n   Time when the key will be permanently deleted.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
-						PlanModifiers:       []planmodifier.String{},
-					},
-				},
+				Attributes:          map[string]schema1.Attribute{},
 				Computed:            true,
-				MarkdownDescription: "The current status of the symmetric key.",
+				MarkdownDescription: "",
 				PlanModifiers:       []planmodifier.Object{},
 			},
 		},
-		MarkdownDescription: "A symmetric KMS key.",
+		MarkdownDescription: "Inventory configures periodic generation of an object listing for a bucket.",
 	}
 	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
 	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())
@@ -277,31 +296,31 @@ func (r *serviceSymmetricKey) ResourceSchema() schema1.Schema {
 	return ret
 }
 
-func (r *serviceSymmetricKey) WriteOnlyFields() (*mask.Mask, error) {
+func (r *serviceInventory) WriteOnlyFields() (*mask.Mask, error) {
 	return nil, nil
 }
 
-func (r *serviceSymmetricKey) StatusMessage() proto.Message {
-	return &v11.SymmetricKeyStatus{}
+func (r *serviceInventory) StatusMessage() proto.Message {
+	return &v11.InventoryStatus{}
 }
 
-var fieldNameMapSymmetricKey = map[string]map[string]string{}
+var fieldNameMapInventory = map[string]map[string]string{}
 
-func (r *serviceSymmetricKey) FieldNameMap() map[string]map[string]string {
-	return fieldNameMapSymmetricKey
+func (r *serviceInventory) FieldNameMap() map[string]map[string]string {
+	return fieldNameMapInventory
 }
 
-func (r *serviceSymmetricKey) SpecMessage() proto.Message {
-	return &v11.SymmetricKeySpec{}
+func (r *serviceInventory) SpecMessage() proto.Message {
+	return &v11.InventorySpec{}
 }
 
-func (r *serviceSymmetricKey) GetAdditionalGetters() map[string]service.AdditionalGetter {
+func (r *serviceInventory) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
 }
 
-func (r *serviceSymmetricKey) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
-	service := v12.NewSymmetricKeyService(r.provider.SDK())
-	req := &v11.GetSymmetricKeyRequest{
+func (r *serviceInventory) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+	service := v12.NewInventoryService(r.provider.SDK())
+	req := &v11.GetInventoryRequest{
 		Id: id,
 	}
 	reqCtx := &requestcontext.Context{}
@@ -312,9 +331,9 @@ func (r *serviceSymmetricKey) Read(ctx context.Context, id string) (*v1.Resource
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSymmetricKey) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
-	service := v12.NewSymmetricKeyService(r.provider.SDK())
-	req := &v11.GetSymmetricKeyByNameRequest{
+func (r *serviceInventory) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+	service := v12.NewInventoryService(r.provider.SDK())
+	req := &v1.GetByNameRequest{
 		Name:     name,
 		ParentId: parentID,
 	}
@@ -326,14 +345,14 @@ func (r *serviceSymmetricKey) GetByName(ctx context.Context, name, parentID stri
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
 
-func (r *serviceSymmetricKey) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
-	service := v12.NewSymmetricKeyService(r.provider.SDK())
+func (r *serviceInventory) Create(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message, wellKnownID string) (string, *requestcontext.Context, error) {
+	service := v12.NewInventoryService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v11.SymmetricKeySpec)
+	specTyped, ok := spec.(*v11.InventorySpec)
 	if !ok {
-		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.kms.v1.SymmetricKeySpec", spec.ProtoReflect().Descriptor().FullName())
+		return "", reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.storage.v1.InventorySpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v11.CreateSymmetricKeyRequest{
+	req := &v11.CreateInventoryRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -352,14 +371,14 @@ func (r *serviceSymmetricKey) Create(ctx context.Context, metadata *v1.ResourceM
 	return id, reqCtx, nil
 }
 
-func (r *serviceSymmetricKey) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
-	service := v12.NewSymmetricKeyService(r.provider.SDK())
+func (r *serviceInventory) Update(ctx context.Context, metadata *v1.ResourceMetadata, spec proto.Message) (*requestcontext.Context, error) {
+	service := v12.NewInventoryService(r.provider.SDK())
 	reqCtx := &requestcontext.Context{}
-	specTyped, ok := spec.(*v11.SymmetricKeySpec)
+	specTyped, ok := spec.(*v11.InventorySpec)
 	if !ok {
-		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.kms.v1.SymmetricKeySpec", spec.ProtoReflect().Descriptor().FullName())
+		return reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.storage.v1.InventorySpec", spec.ProtoReflect().Descriptor().FullName())
 	}
-	req := &v11.UpdateSymmetricKeyRequest{
+	req := &v11.UpdateInventoryRequest{
 		Spec:     specTyped,
 		Metadata: metadata,
 	}
@@ -374,12 +393,12 @@ func (r *serviceSymmetricKey) Update(ctx context.Context, metadata *v1.ResourceM
 	return reqCtx, nil
 }
 
-func (r *serviceSymmetricKey) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
+func (r *serviceInventory) Delete(ctx context.Context, id string) (*requestcontext.Context, error) {
 	reqCtx := &requestcontext.Context{}
-	req := &v11.DeleteSymmetricKeyRequest{
+	req := &v11.DeleteInventoryRequest{
 		Id: id,
 	}
-	service := v12.NewSymmetricKeyService(r.provider.SDK())
+	service := v12.NewInventoryService(r.provider.SDK())
 	op, err := service.Delete(ctx, req, reqCtx.MainRequestOptions()...)
 	if err != nil {
 		return reqCtx, fmt.Errorf("service delete: %w", err)

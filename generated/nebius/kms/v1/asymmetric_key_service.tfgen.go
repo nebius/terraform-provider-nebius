@@ -9,9 +9,6 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resource "github.com/hashicorp/terraform-plugin-framework/resource"
 	schema1 "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	int64planmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	mapplanmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/mapplanmodifier"
-	objectplanmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	planmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	stringplanmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -156,9 +153,7 @@ func (r *serviceAsymmetricKey) ResourceSchema() schema1.Schema {
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n",
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
-				},
+				PlanModifiers:       []planmodifier.Object{},
 			},
 			"id": schema1.StringAttribute{
 				Computed:            true,
@@ -173,9 +168,7 @@ func (r *serviceAsymmetricKey) ResourceSchema() schema1.Schema {
 				},
 				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
+				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
 				Validators: []validator.String{
@@ -191,34 +184,26 @@ func (r *serviceAsymmetricKey) ResourceSchema() schema1.Schema {
 			"resource_version": schema1.Int64Attribute{
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n",
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.RequiresReplace(),
-				},
+				PlanModifiers:       []planmodifier.Int64{},
 			},
 			"created_at": schema1.StringAttribute{
 				CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Timestamp indicating when the resource was created.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
+				PlanModifiers:       []planmodifier.String{},
 			},
 			"updated_at": schema1.StringAttribute{
 				CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Timestamp indicating when the resource was last updated.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
+				PlanModifiers:       []planmodifier.String{},
 			},
 			"labels": schema1.MapAttribute{
 				ElementType:         types.StringType,
 				Validators:          []validator.Map{},
 				Optional:            true,
 				MarkdownDescription: "Labels associated with the resource.",
-				PlanModifiers: []planmodifier.Map{
-					mapplanmodifier.RequiresReplace(),
-				},
+				PlanModifiers:       []planmodifier.Map{},
 			},
 			"labels_all": schema1.MapAttribute{
 				Computed:            true,
@@ -231,9 +216,7 @@ func (r *serviceAsymmetricKey) ResourceSchema() schema1.Schema {
 				},
 				Optional:            true,
 				MarkdownDescription: "Description of the key.",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
+				PlanModifiers:       []planmodifier.String{},
 			},
 			"algorithm": schema1.StringAttribute{
 				Validators: []validator.String{

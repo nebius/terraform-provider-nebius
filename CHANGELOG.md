@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.46 (August 25, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.55`.
+* deps: Update `github.com/osteele/liquid` from `v1.8.1` to `v1.9.2`.
+* deps: Update `github.com/stretchr/testify` from `v1.11.1` to `v1.12.1`.
+* deps: Update `google.golang.org/protobuf` from `v1.36.11` to `v1.36.12`.
+
+FEATURES:
+
+* Added new resources and data sources: [nebius_storage_v1_inventory](./docs/resources/storage_v1_inventory.md).
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_tunnel_v1_tunnel](./docs/resources/tunnel_v1_tunnel.md):
+    * Added: `status.services`
+* Changed attributes for data source [nebius_tunnel_v1_tunnel](./docs/data-sources/tunnel_v1_tunnel.md):
+    * Added: `status.services`
+
 ## 0.6.45 (August 24, 2026)
 
 NOTES:
