@@ -115,6 +115,22 @@ func (r *serviceTunnel) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Current lifecycle state of the tunnel.\n   \n   #### Supported values\n   \n   State represents the lifecycle state of the tunnel.\n   Possible values:\n   \n   - `UNSPECIFIED` - Default unspecified state.\n   - `CREATED` - The tunnel has been created and is active.\n   - `DELETED` - The tunnel has been deleted.\n   \n",
 					},
+					"services": schema.ListNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"name": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Name of the service, as the agent announced it. 1-20 characters, lowercase\n   letters and digits only: the hostname joins the name to the tunnel id with\n   a dash, so a name may not contain one. For example, \"app\".\n",
+								},
+								"endpoint": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Where to reach the service, as host:port. The tunnel terminates TLS, so a\n   client connects over TLS and sends the host as SNI. What travels inside is\n   whatever the service speaks, which the tunnel does not interpret.\n   For example, \"app-hy3wnb3wstpk7dz.tunnel.example.com:443\".\n",
+								},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Services reachable through the tunnel. A service is listed while at least\n   one agent announces it, and follows the agents within about 30 seconds.\n   \n   #### Inner value description\n   \n   ServiceStatus is a service reachable through the tunnel.\n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Current status of the tunnel.\n   \n   #### Inner value description\n   \n   TunnelStatus represents the current state of the tunnel.\n",
@@ -213,6 +229,25 @@ func (r *serviceTunnel) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Current lifecycle state of the tunnel.\n   \n   #### Supported values\n   \n   State represents the lifecycle state of the tunnel.\n   Possible values:\n   \n   - `UNSPECIFIED` - Default unspecified state.\n   - `CREATED` - The tunnel has been created and is active.\n   - `DELETED` - The tunnel has been deleted.\n   \n",
 						PlanModifiers:       []planmodifier.String{},
+					},
+					"services": schema1.ListNestedAttribute{
+						NestedObject: schema1.NestedAttributeObject{
+							Attributes: map[string]schema1.Attribute{
+								"name": schema1.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Name of the service, as the agent announced it. 1-20 characters, lowercase\n   letters and digits only: the hostname joins the name to the tunnel id with\n   a dash, so a name may not contain one. For example, \"app\".\n",
+									PlanModifiers:       []planmodifier.String{},
+								},
+								"endpoint": schema1.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   Where to reach the service, as host:port. The tunnel terminates TLS, so a\n   client connects over TLS and sends the host as SNI. What travels inside is\n   whatever the service speaks, which the tunnel does not interpret.\n   For example, \"app-hy3wnb3wstpk7dz.tunnel.example.com:443\".\n",
+									PlanModifiers:       []planmodifier.String{},
+								},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Services reachable through the tunnel. A service is listed while at least\n   one agent announces it, and follows the agents within about 30 seconds.\n   \n   #### Inner value description\n   \n   ServiceStatus is a service reachable through the tunnel.\n",
+						PlanModifiers:       []planmodifier.List{},
 					},
 				},
 				Computed:            true,

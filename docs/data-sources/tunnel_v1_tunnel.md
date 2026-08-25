@@ -90,6 +90,14 @@ It enables connectivity between applications and external services within a pare
 
 Read-Only:
 
+- `services` (Attributes List) :
+
+   Services reachable through the tunnel. A service is listed while at least
+   one agent announces it, and follows the agents within about 30 seconds.
+   
+   #### Inner value description
+   
+   ServiceStatus is a service reachable through the tunnel. (see [below for nested schema](#nestedatt--status--services))
 - `state` (String) :
 
    Current lifecycle state of the tunnel.
@@ -102,3 +110,20 @@ Read-Only:
    - `UNSPECIFIED` - Default unspecified state.
    - `CREATED` - The tunnel has been created and is active.
    - `DELETED` - The tunnel has been deleted.
+
+<a id="nestedatt--status--services"></a>
+### Nested Schema for `status.services`
+
+Read-Only:
+
+- `endpoint` (String) :
+
+   Where to reach the service, as host:port. The tunnel terminates TLS, so a
+   client connects over TLS and sends the host as SNI. What travels inside is
+   whatever the service speaks, which the tunnel does not interpret.
+   For example, "app-hy3wnb3wstpk7dz.tunnel.example.com:443".
+- `name` (String) :
+
+   Name of the service, as the agent announced it. 1-20 characters, lowercase
+   letters and digits only: the hostname joins the name to the tunnel id with
+   a dash, so a name may not contain one. For example, "app".
