@@ -71,15 +71,24 @@ func (r *serviceRegistry) DataSourceSchema() schema.Schema {
 			},
 			"id": schema.StringAttribute{
 				Validators:          []validator.String{},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapRegistry),
+				},
 				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 			},
 			"resource_version": schema.Int64Attribute{
@@ -128,7 +137,7 @@ func (r *serviceRegistry) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "This is filled in by the server and reports the current state of the system.",
 			},
 		},
-		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by only ID.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n",
+		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n",
 	}
 	return ret
 }
@@ -272,6 +281,20 @@ func (r *serviceRegistry) Read(ctx context.Context, id string) (*v1.ResourceMeta
 	res, err := service.Get(ctx, req, reqCtx.MainRequestOptions()...)
 	if err != nil {
 		return nil, nil, nil, reqCtx, fmt.Errorf("service get: %w", err)
+	}
+	return res.Metadata, res.Spec, res.Status, reqCtx, nil
+}
+
+func (r *serviceRegistry) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+	service := v12.NewRegistryService(r.provider.SDK())
+	req := &v1.GetByNameRequest{
+		Name:     name,
+		ParentId: parentID,
+	}
+	reqCtx := &requestcontext.Context{}
+	res, err := service.GetByName(ctx, req, reqCtx.MainRequestOptions()...)
+	if err != nil {
+		return nil, nil, nil, reqCtx, fmt.Errorf("service get by name: %w", err)
 	}
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.47 (August 26, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.56`.
+
+IMPROVEMENTS:
+
+* Changed attributes for data source [nebius_registry_v1_registry](./docs/data-sources/registry_v1_registry.md):
+    * Became optional: `id`, `name`, `parent_id`
+    * Became computed: `id`
+
 ## 0.6.46 (August 25, 2026)
 
 NOTES:

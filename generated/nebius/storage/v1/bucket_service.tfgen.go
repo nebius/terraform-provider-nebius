@@ -58,7 +58,7 @@ func (r *serviceBucket) GetName() string {
 }
 
 func (r *serviceBucket) ParentTypes() []string {
-	return []string{"*"}
+	return []string{"project"}
 }
 
 func (r *serviceBucket) DataSourceSchema() schema.Schema {

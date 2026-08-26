@@ -660,7 +660,15 @@ func (p *internalProvider) Configure(
 		resp.Diagnostics.AddWarning("Failed to get provider build version",
 			err.Error())
 	}
-
+	if strings.HasPrefix(ver, "0.5.") {
+		resp.Diagnostics.AddWarning(
+			"Migrate the Nebius provider to the Terraform Registry",
+			"Version 0.5.x uses a Nebius custom registry. Change the provider source to "+
+				"`nebius/nebius`, upgrade to the matching 0.6.x version, and replace the provider "+
+				"address in the Terraform state. This migration does not change existing resources. "+
+				"For migration instructions, see https://docs.nebius.com/terraform-provider/manage/migrate",
+		)
+	}
 	uaComments := []string{}
 	if isKnown(data.ModuleName) {
 		uaComments = append(uaComments, fmt.Sprintf("%q", data.ModuleName.ValueString()))

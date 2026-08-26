@@ -23,11 +23,11 @@ import (
 )
 
 type gettable interface {
-	Get(ctx context.Context, target interface{}) diag.Diagnostics
+	Get(ctx context.Context, target any) diag.Diagnostics
 }
 
 type settable interface {
-	Set(ctx context.Context, target interface{}) diag.Diagnostics
+	Set(ctx context.Context, target any) diag.Diagnostics
 }
 
 type removable interface {
