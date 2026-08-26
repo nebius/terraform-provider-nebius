@@ -58,7 +58,7 @@ func (r *serviceDiskSnapshot) GetName() string {
 }
 
 func (r *serviceDiskSnapshot) ParentTypes() []string {
-	return []string{"*"}
+	return []string{"tenant", "project"}
 }
 
 func (r *serviceDiskSnapshot) DataSourceSchema() schema.Schema {
@@ -224,7 +224,9 @@ func (r *serviceDiskSnapshot) ResourceSchema() schema1.Schema {
 				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
 			"source_disk_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Required:            true,
 				MarkdownDescription: "Identifier of the source disk. May become stale if the disk is deleted.",
 				PlanModifiers: []planmodifier.String{

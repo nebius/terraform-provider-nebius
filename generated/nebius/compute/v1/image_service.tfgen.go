@@ -130,7 +130,7 @@ func (r *serviceImage) DataSourceSchema() schema.Schema {
 			},
 			"source_disk_snapshot_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "*Cannot be set alongside source_disk_id or source_storage.*",
+				MarkdownDescription: ":\n\n   Identifier of the disk snapshot to create the image from.\n   \n   *Cannot be set alongside source_disk_id or source_storage.*\n",
 			},
 			"cpu_architecture": schema.StringAttribute{
 				Computed:            true,
