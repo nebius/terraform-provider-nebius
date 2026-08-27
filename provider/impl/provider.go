@@ -430,7 +430,7 @@ func parseAddressOptions(ctx context.Context, opts types.Map) (
 					diags.AddWarning("both insecure and no_tls_verify set",
 						fmt.Sprintf(
 							"both insecure and no_tls_verify set for %q, "+
-								"insecure takes precedense", addr,
+								"insecure takes precedence", addr,
 						),
 					)
 				}

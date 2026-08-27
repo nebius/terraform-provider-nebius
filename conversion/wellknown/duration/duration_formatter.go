@@ -15,7 +15,7 @@ const (
 	SDay    = SHour * 24
 )
 
-// FormatDuration formats duration as NdNhNmNsNmsNusNns ommitting parts that are
+// FormatDuration formats duration as NdNhNmNsNmsNusNns omitting parts that are
 // zeroes. If duration is 0, it will return 0s.
 func FormatDuration(d *durationpb.Duration) string {
 	if d == nil {

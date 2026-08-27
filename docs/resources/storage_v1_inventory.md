@@ -97,3 +97,24 @@ Inventory configures periodic generation of an object listing for a bucket.
 
 <a id="nestedatt--status"></a>
 ### Nested Schema for `status`
+
+Read-Only:
+
+- `error_code` (String) :
+
+   Error code, if the last run was not successful, otherwise NO_ERROR.
+   
+   #### Supported values
+   
+   Possible values:
+   
+   - `NO_ERROR` - No error.
+   - `DESTINATION_BUCKET_NOT_FOUND` - Destination bucket not found.
+   - `PERMISSION_DENIED` - Permission denied: you don't have permission to the destination bucket.
+   - `INVALID_INTENT` - Intent is invalid, does not exist or expired.
+   - `QUOTA_EXCEEDED` - Quota exceeded in destination.
+- `last_success` (String) :
+
+   Timestamp of the last successful run.
+   
+   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`

@@ -144,7 +144,17 @@ func (r *serviceInventory) DataSourceSchema() schema.Schema {
 				MarkdownDescription: ":\n\n   How often to generate the inventory.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `SCHEDULE_UNSPECIFIED`\n   - `DAILY` - Run once a day.\n   - `WEEKLY` - Run once a week.\n   \n",
 			},
 			"status": schema.SingleNestedAttribute{
-				Attributes:          map[string]schema.Attribute{},
+				Attributes: map[string]schema.Attribute{
+					"last_success": schema.StringAttribute{
+						CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Timestamp of the last successful run.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+					},
+					"error_code": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Error code, if the last run was not successful, otherwise NO_ERROR.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `NO_ERROR` - No error.\n   - `DESTINATION_BUCKET_NOT_FOUND` - Destination bucket not found.\n   - `PERMISSION_DENIED` - Permission denied: you don't have permission to the destination bucket.\n   - `INVALID_INTENT` - Intent is invalid, does not exist or expired.\n   - `QUOTA_EXCEEDED` - Quota exceeded in destination.\n   \n",
+					},
+				},
 				Computed:            true,
 				MarkdownDescription: "",
 			},
@@ -282,7 +292,19 @@ func (r *serviceInventory) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"status": schema1.SingleNestedAttribute{
-				Attributes:          map[string]schema1.Attribute{},
+				Attributes: map[string]schema1.Attribute{
+					"last_success": schema1.StringAttribute{
+						CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Timestamp of the last successful run.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+						PlanModifiers:       []planmodifier.String{},
+					},
+					"error_code": schema1.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Error code, if the last run was not successful, otherwise NO_ERROR.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `NO_ERROR` - No error.\n   - `DESTINATION_BUCKET_NOT_FOUND` - Destination bucket not found.\n   - `PERMISSION_DENIED` - Permission denied: you don't have permission to the destination bucket.\n   - `INVALID_INTENT` - Intent is invalid, does not exist or expired.\n   - `QUOTA_EXCEEDED` - Quota exceeded in destination.\n   \n",
+						PlanModifiers:       []planmodifier.String{},
+					},
+				},
 				Computed:            true,
 				MarkdownDescription: "",
 				PlanModifiers:       []planmodifier.Object{},
