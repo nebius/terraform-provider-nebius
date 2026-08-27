@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.48 (August 27, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.57`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_storage_v1_inventory](./docs/resources/storage_v1_inventory.md):
+    * Added: `status.error_code`, `status.last_success`
+* Changed attributes for data source [nebius_storage_v1_inventory](./docs/data-sources/storage_v1_inventory.md):
+    * Added: `status.error_code`, `status.last_success`
+
 ## 0.6.47 (August 26, 2026)
 
 NOTES:
