@@ -58,7 +58,7 @@ func (r *serviceGpuCluster) GetName() string {
 }
 
 func (r *serviceGpuCluster) ParentTypes() []string {
-	return []string{"*"}
+	return []string{"project"}
 }
 
 func (r *serviceGpuCluster) DataSourceSchema() schema.Schema {
@@ -119,7 +119,7 @@ func (r *serviceGpuCluster) DataSourceSchema() schema.Schema {
 					"instances": schema.ListAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "IDs of Compute instances that belong to this GPU cluster.",
 					},
 					"reconciling": schema.BoolAttribute{
 						Computed:            true,
@@ -237,7 +237,7 @@ func (r *serviceGpuCluster) ResourceSchema() schema1.Schema {
 					"instances": schema1.ListAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "IDs of Compute instances that belong to this GPU cluster.",
 						PlanModifiers:       []planmodifier.List{},
 					},
 					"reconciling": schema1.BoolAttribute{

@@ -67,6 +67,22 @@ It enables connectivity between applications and external services within a pare
 
 Read-Only:
 
+- `connection_state` (String) :
+
+   Whether any agent is connected to the tunnel now.
+   
+   #### Supported values
+   
+   ConnectionState reports whether the tunnel has an agent behind it. Values are
+   prefixed because a top-level enum puts them in the package scope.
+   Possible values:
+   
+   - `CONNECTION_STATE_UNSPECIFIED`:
+      Proto3 zero value. A read of the tunnel never returns it; a mutation
+      records it, because it reports the tunnel that was written.
+   
+   - `CONNECTION_STATE_DISCONNECTED` - No agent is connected. Nothing the tunnel exposes is reachable.
+   - `CONNECTION_STATE_CONNECTED` - At least one agent is connected.
 - `services` (Attributes List) :
 
    Services reachable through the tunnel. A service is listed while at least
