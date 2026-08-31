@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.49 (August 31, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.58`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_tunnel_v1_tunnel](./docs/resources/tunnel_v1_tunnel.md):
+    * Added: `status.connection_state`
+* Changed attributes for data source [nebius_tunnel_v1_tunnel](./docs/data-sources/tunnel_v1_tunnel.md):
+    * Added: `status.connection_state`
+
 ## 0.6.48 (August 27, 2026)
 
 NOTES:

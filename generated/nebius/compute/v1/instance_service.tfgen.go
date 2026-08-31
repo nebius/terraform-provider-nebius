@@ -746,7 +746,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 			"gpu_cluster": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{
 					"id": schema1.StringAttribute{
-						Validators:          []validator.String{},
+						Validators: []validator.String{
+							validators.NIDValidator(),
+						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   If you want to interconnect several instances in a GPU cluster via NVIDIA InfiniBand,\n   set the ID of an existing GPU cluster.\n   You can only add the VM to the cluster when creating the VM.\n   For details, see https://docs.nebius.com/compute/clusters/gpu\n",
 						PlanModifiers: []planmodifier.String{

@@ -131,6 +131,10 @@ func (r *serviceTunnel) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Services reachable through the tunnel. A service is listed while at least\n   one agent announces it, and follows the agents within about 30 seconds.\n   \n   #### Inner value description\n   \n   ServiceStatus is a service reachable through the tunnel.\n",
 					},
+					"connection_state": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Whether any agent is connected to the tunnel now.\n   \n   #### Supported values\n   \n   ConnectionState reports whether the tunnel has an agent behind it. Values are\n   prefixed because a top-level enum puts them in the package scope.\n   Possible values:\n   \n   - `CONNECTION_STATE_UNSPECIFIED`:\n      Proto3 zero value. A read of the tunnel never returns it; a mutation\n      records it, because it reports the tunnel that was written.\n   \n   - `CONNECTION_STATE_DISCONNECTED` - No agent is connected. Nothing the tunnel exposes is reachable.\n   - `CONNECTION_STATE_CONNECTED` - At least one agent is connected.\n   \n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Current status of the tunnel.\n   \n   #### Inner value description\n   \n   TunnelStatus represents the current state of the tunnel.\n",
@@ -248,6 +252,11 @@ func (r *serviceTunnel) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Services reachable through the tunnel. A service is listed while at least\n   one agent announces it, and follows the agents within about 30 seconds.\n   \n   #### Inner value description\n   \n   ServiceStatus is a service reachable through the tunnel.\n",
 						PlanModifiers:       []planmodifier.List{},
+					},
+					"connection_state": schema1.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Whether any agent is connected to the tunnel now.\n   \n   #### Supported values\n   \n   ConnectionState reports whether the tunnel has an agent behind it. Values are\n   prefixed because a top-level enum puts them in the package scope.\n   Possible values:\n   \n   - `CONNECTION_STATE_UNSPECIFIED`:\n      Proto3 zero value. A read of the tunnel never returns it; a mutation\n      records it, because it reports the tunnel that was written.\n   \n   - `CONNECTION_STATE_DISCONNECTED` - No agent is connected. Nothing the tunnel exposes is reachable.\n   - `CONNECTION_STATE_CONNECTED` - At least one agent is connected.\n   \n",
+						PlanModifiers:       []planmodifier.String{},
 					},
 				},
 				Computed:            true,

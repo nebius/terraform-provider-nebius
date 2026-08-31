@@ -63,7 +63,7 @@ description: |-
 Read-Only:
 
 - `infiniband_topology_path` (Attributes) (see [below for nested schema](#nestedatt--status--infiniband_topology_path))
-- `instances` (List of String)
+- `instances` (List of String) IDs of Compute instances that belong to this GPU cluster.
 - `reconciling` (Boolean) Indicates whether there is an ongoing operation
 
 <a id="nestedatt--status--infiniband_topology_path"></a>
