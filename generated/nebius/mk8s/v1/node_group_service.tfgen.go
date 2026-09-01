@@ -213,7 +213,7 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 						Attributes: map[string]schema.Attribute{
 							"drivers_preset": schema.StringAttribute{
 								Computed:            true,
-								MarkdownDescription: ":\n\n   Identifier of the predefined set of drivers included in the ComputeImage deployed on ComputeInstances that are part of the NodeGroup.\n   Supported presets for different platform / Kubernetes version combinations:\n   * `gpu-l40s-a`, `gpu-l40s-d`, `gpu-h100-sxm`, `gpu-h200-sxm`:\n     * `version`: 1.30 → `\"cuda12\"` (CUDA 12.4)\n     * `version`: 1.31 → `\"cuda12\"` (CUDA 12.4), `\"cuda12.4\"`, `\"cuda12.8\"`\n   * `gpu-b200-sxm`:\n     * `version`: 1.31 → `\"cuda12\"` (CUDA 12.8), `\"cuda12.8\"`\n   * `gpu-b200-sxm-a`:\n     * `version`: 1.31 → `\"cuda12.8\"`\n",
+								MarkdownDescription: ":\n\n   Identifier of the predefined set of drivers included in the ComputeImage deployed on ComputeInstances that are part of the NodeGroup.\n   Supported presets depend on the platform and Kubernetes version.\n   To get the up-to-date list of supported presets for a given Kubernetes version and platform, run:\n   nebius mk8s node-group get-compatibility-matrix --cluster-kubernetes-version VERSION --platform PLATFORM\n   Leave empty for GPU nodes that do not have preinstalled drivers, including DRA-enabled node groups.\n",
 							},
 						},
 						Computed:            true,
@@ -221,7 +221,7 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 					},
 					"os": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   OS version that will be used to create the boot disk of Compute Instances in the NodeGroup.\n   Supported platform / Kubernetes version / OS / driver presets combinations\n   * `gpu-l40s-a`, `gpu-l40s-d`, `gpu-h100-sxm`, `gpu-h200-sxm`, `cpu-e1`, `cpu-e2`, `cpu-d3`:\n     * `drivers_preset`: `\"\"`\n       * `version`: 1.30 → `\"ubuntu22.04\"`\n       * `version`: 1.31 → `\"ubuntu22.04\"` (default), `\"ubuntu24.04\"`\n   * `gpu-l40s-a`, `gpu-l40s-d`, `gpu-h100-sxm`, `gpu-h200-sxm`:\n     * `drivers_preset`: `\"cuda12\"` (CUDA 12.4)\n       * `version`: 1.30, 1.31 → `\"ubuntu22.04\"`\n     * `drivers_preset`: `\"cuda12.4\"`\n       * `version`: 1.31 → `\"ubuntu22.04\"`\n     * `drivers_preset`: `\"cuda12.8\"`\n       * `version`: 1.31 → `\"ubuntu24.04\"`\n   * `gpu-b200-sxm`:\n     * `drivers_preset`: `\"\"`\n       * `version`: 1.30, 1.31 → `\"ubuntu24.04\"`\n     * `drivers_preset`: `\"cuda12\"` (CUDA 12.8)\n       * `version`: 1.30, 1.31 → `\"ubuntu24.04\"`\n     * `drivers_preset`: `\"cuda12.8\"`\n       * `version`: 1.31 → `\"ubuntu24.04\"`\n   * `gpu-b200-sxm-a`:\n     * `drivers_preset`: `\"\"`\n       * `version`: 1.31 → `\"ubuntu24.04\"`\n     * `drivers_preset`: `\"cuda12.8\"`\n       * `version`: 1.31 → `\"ubuntu24.04\"`\n",
+						MarkdownDescription: ":\n\n   OS version that will be used to create the boot disk of Compute Instances in the NodeGroup.\n   Supported OS depend on the platform and Kubernetes version.\n   To get the up-to-date list of supported OS for a given Kubernetes version and platform, run:\n   nebius mk8s node-group get-compatibility-matrix --cluster-kubernetes-version VERSION --platform PLATFORM\n",
 					},
 					"gpu_cluster": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
@@ -834,8 +834,8 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						Attributes: map[string]schema1.Attribute{
 							"drivers_preset": schema1.StringAttribute{
 								Validators:          []validator.String{},
-								Required:            true,
-								MarkdownDescription: ":\n\n   Identifier of the predefined set of drivers included in the ComputeImage deployed on ComputeInstances that are part of the NodeGroup.\n   Supported presets for different platform / Kubernetes version combinations:\n   * `gpu-l40s-a`, `gpu-l40s-d`, `gpu-h100-sxm`, `gpu-h200-sxm`:\n     * `version`: 1.30 → `\"cuda12\"` (CUDA 12.4)\n     * `version`: 1.31 → `\"cuda12\"` (CUDA 12.4), `\"cuda12.4\"`, `\"cuda12.8\"`\n   * `gpu-b200-sxm`:\n     * `version`: 1.31 → `\"cuda12\"` (CUDA 12.8), `\"cuda12.8\"`\n   * `gpu-b200-sxm-a`:\n     * `version`: 1.31 → `\"cuda12.8\"`\n",
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Identifier of the predefined set of drivers included in the ComputeImage deployed on ComputeInstances that are part of the NodeGroup.\n   Supported presets depend on the platform and Kubernetes version.\n   To get the up-to-date list of supported presets for a given Kubernetes version and platform, run:\n   nebius mk8s node-group get-compatibility-matrix --cluster-kubernetes-version VERSION --platform PLATFORM\n   Leave empty for GPU nodes that do not have preinstalled drivers, including DRA-enabled node groups.\n",
 								PlanModifiers:       []planmodifier.String{},
 							},
 						},
@@ -847,7 +847,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 					"os": schema1.StringAttribute{
 						Validators:          []validator.String{},
 						Optional:            true,
-						MarkdownDescription: ":\n\n   OS version that will be used to create the boot disk of Compute Instances in the NodeGroup.\n   Supported platform / Kubernetes version / OS / driver presets combinations\n   * `gpu-l40s-a`, `gpu-l40s-d`, `gpu-h100-sxm`, `gpu-h200-sxm`, `cpu-e1`, `cpu-e2`, `cpu-d3`:\n     * `drivers_preset`: `\"\"`\n       * `version`: 1.30 → `\"ubuntu22.04\"`\n       * `version`: 1.31 → `\"ubuntu22.04\"` (default), `\"ubuntu24.04\"`\n   * `gpu-l40s-a`, `gpu-l40s-d`, `gpu-h100-sxm`, `gpu-h200-sxm`:\n     * `drivers_preset`: `\"cuda12\"` (CUDA 12.4)\n       * `version`: 1.30, 1.31 → `\"ubuntu22.04\"`\n     * `drivers_preset`: `\"cuda12.4\"`\n       * `version`: 1.31 → `\"ubuntu22.04\"`\n     * `drivers_preset`: `\"cuda12.8\"`\n       * `version`: 1.31 → `\"ubuntu24.04\"`\n   * `gpu-b200-sxm`:\n     * `drivers_preset`: `\"\"`\n       * `version`: 1.30, 1.31 → `\"ubuntu24.04\"`\n     * `drivers_preset`: `\"cuda12\"` (CUDA 12.8)\n       * `version`: 1.30, 1.31 → `\"ubuntu24.04\"`\n     * `drivers_preset`: `\"cuda12.8\"`\n       * `version`: 1.31 → `\"ubuntu24.04\"`\n   * `gpu-b200-sxm-a`:\n     * `drivers_preset`: `\"\"`\n       * `version`: 1.31 → `\"ubuntu24.04\"`\n     * `drivers_preset`: `\"cuda12.8\"`\n       * `version`: 1.31 → `\"ubuntu24.04\"`\n",
+						MarkdownDescription: ":\n\n   OS version that will be used to create the boot disk of Compute Instances in the NodeGroup.\n   Supported OS depend on the platform and Kubernetes version.\n   To get the up-to-date list of supported OS for a given Kubernetes version and platform, run:\n   nebius mk8s node-group get-compatibility-matrix --cluster-kubernetes-version VERSION --platform PLATFORM\n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"gpu_cluster": schema1.SingleNestedAttribute{

@@ -46,7 +46,7 @@ func (r *serviceImage) GetName() string {
 }
 
 func (r *serviceImage) ParentTypes() []string {
-	return []string{"*"}
+	return []string{"project"}
 }
 
 func (r *serviceImage) DataSourceSchema() schema.Schema {

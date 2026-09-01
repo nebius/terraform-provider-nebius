@@ -468,7 +468,7 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 					},
 				},
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Include these parameters to create a Preemptible VM and omit them to create a Regular VM\n   For details, see https://docs.nebius.com/compute/virtual-machines/preemptible\n",
+				MarkdownDescription: ":\n\n   Set this field to create a preemptible VM, or omit it to create a regular VM.\n   For details, see https://docs.nebius.com/compute/virtual-machines/preemptible\n   A preemptible VM cannot be converted to a regular VM or vice versa. Once set, this field cannot be removed; if the\n   VM was created without it, the field cannot be added later.\n",
 			},
 			"hostname": schema.StringAttribute{
 				Computed:            true,
@@ -1430,10 +1430,8 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				},
 				Validators:          []validator.Object{},
 				Optional:            true,
-				MarkdownDescription: ":\n\n   Include these parameters to create a Preemptible VM and omit them to create a Regular VM\n   For details, see https://docs.nebius.com/compute/virtual-machines/preemptible\n",
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
-				},
+				MarkdownDescription: ":\n\n   Set this field to create a preemptible VM, or omit it to create a regular VM.\n   For details, see https://docs.nebius.com/compute/virtual-machines/preemptible\n   A preemptible VM cannot be converted to a regular VM or vice versa. Once set, this field cannot be removed; if the\n   VM was created without it, the field cannot be added later.\n",
+				PlanModifiers:       []planmodifier.Object{},
 			},
 			"hostname": schema1.StringAttribute{
 				Validators: []validator.String{
