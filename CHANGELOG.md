@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.50 (September 1, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.59`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group.md):
+    * Became optional: `template.gpu_settings.drivers_preset`
+
 ## 0.6.49 (August 31, 2026)
 
 NOTES:

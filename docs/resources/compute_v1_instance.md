@@ -101,8 +101,10 @@ resource "nebius_compute_v1_instance" "vm" {
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `preemptible` (Attributes) :
 
-   Include these parameters to create a Preemptible VM and omit them to create a Regular VM
-   For details, see https://docs.nebius.com/compute/virtual-machines/preemptible (see [below for nested schema](#nestedatt--preemptible))
+   Set this field to create a preemptible VM, or omit it to create a regular VM.
+   For details, see https://docs.nebius.com/compute/virtual-machines/preemptible
+   A preemptible VM cannot be converted to a regular VM or vice versa. Once set, this field cannot be removed; if the
+   VM was created without it, the field cannot be added later. (see [below for nested schema](#nestedatt--preemptible))
 - `recovery_policy` (String) :
 
    Recovery policy defines how the instance will be treated in case of a failure.
