@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.52 (September 3, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.61`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group.md):
+    * Added: `template.boot_disk.disk_encryption`
+* Changed attributes for data source [nebius_mk8s_v1_node_group](./docs/data-sources/mk8s_v1_node_group.md):
+    * Added: `template.boot_disk.disk_encryption`
+
 ## 0.6.51 (September 2, 2026)
 
 NOTES:
