@@ -205,6 +205,16 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 								Computed:            true,
 								MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `NETWORK_SSD`\n   - `NETWORK_HDD`\n   - `NETWORK_SSD_IO_M3`\n   - `NETWORK_SSD_NON_REPLICATED`\n   \n",
 							},
+							"disk_encryption": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"type": schema.StringAttribute{
+										Computed:            true,
+										MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `DISK_ENCRYPTION_UNSPECIFIED`\n   - `DISK_ENCRYPTION_MANAGED`\n   \n",
+									},
+								},
+								Computed:            true,
+								MarkdownDescription: "",
+							},
 						},
 						Computed:            true,
 						MarkdownDescription: "Parameters of a Node Nebius Compute Instance boot disk.",
@@ -820,6 +830,24 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 								Optional:            true,
 								MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `UNSPECIFIED`\n   - `NETWORK_SSD`\n   - `NETWORK_HDD`\n   - `NETWORK_SSD_IO_M3`\n   - `NETWORK_SSD_NON_REPLICATED`\n   \n",
 								PlanModifiers:       []planmodifier.String{},
+							},
+							"disk_encryption": schema1.SingleNestedAttribute{
+								Attributes: map[string]schema1.Attribute{
+									"type": schema1.StringAttribute{
+										Validators: []validator.String{
+											validators.EnumValidator(v11.DiskEncryption_DiskEncryptionType_value),
+										},
+										Computed:            true,
+										Optional:            true,
+										MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `DISK_ENCRYPTION_UNSPECIFIED`\n   - `DISK_ENCRYPTION_MANAGED`\n   \n",
+										PlanModifiers:       []planmodifier.String{},
+									},
+								},
+								Validators:          []validator.Object{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "",
+								PlanModifiers:       []planmodifier.Object{},
 							},
 						},
 						Validators: []validator.Object{

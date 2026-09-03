@@ -419,6 +419,7 @@
     "generated/nebius/registry/v1/artifact_service.tfgen.go",
     "generated/nebius/registry/v1/images_service.tfgen.go",
     "generated/nebius/registry/v1/registry.tfgenx.go",
+    "generated/nebius/registry/v1/registry_proxy_service.tfgen.go",
     "generated/nebius/registry/v1/registry_service.tfgen.go",
     "generated/nebius/sched.tfgen.go",
     "generated/nebius/sched/legacy.tfgen.go",

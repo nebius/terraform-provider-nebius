@@ -521,6 +521,7 @@ Read-Only:
 Read-Only:
 
 - `block_size_bytes` (Number)
+- `disk_encryption` (Attributes) (see [below for nested schema](#nestedatt--template--boot_disk--disk_encryption))
 - `size_bytes` (Number) *Cannot be set alongside size_kibibytes, size_mebibytes or size_gibibytes.*
 - `size_gibibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*
 - `size_kibibytes` (Number) *Cannot be set alongside size_bytes, size_mebibytes or size_gibibytes.*
@@ -536,6 +537,21 @@ Read-Only:
    - `NETWORK_HDD`
    - `NETWORK_SSD_IO_M3`
    - `NETWORK_SSD_NON_REPLICATED`
+
+<a id="nestedatt--template--boot_disk--disk_encryption"></a>
+### Nested Schema for `template.boot_disk.disk_encryption`
+
+Read-Only:
+
+- `type` (String) :
+
+   #### Supported values
+   
+   Possible values:
+   
+   - `DISK_ENCRYPTION_UNSPECIFIED`
+   - `DISK_ENCRYPTION_MANAGED`
+
 
 
 <a id="nestedatt--template--filesystems"></a>
