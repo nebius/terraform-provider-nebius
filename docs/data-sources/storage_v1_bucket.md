@@ -92,6 +92,7 @@ data ... {
    - `ENHANCED_THROUGHPUT`
    - `INTELLIGENT`
    - `FILESYSTEM` - Special storage class only for filesystem buckets.
+- `filesystem_bucket` (Attributes) Bucket that uses the existing client's compute filesystem. (see [below for nested schema](#nestedatt--filesystem_bucket))
 - `force_storage_class` (Boolean) Flag to force usage of default_storage_class, ignoring `x-amz-storage-class` header.
 - `labels` (Map of String) Labels associated with the resource.
 - `lifecycle_configuration` (Attributes) :
@@ -217,6 +218,37 @@ Read-Only:
 - `id` (String) Optional rule identifier.
 - `max_age_seconds` (Number) Time in seconds that your browser can cache the response for a preflight request as identified by the resource.
 
+
+
+<a id="nestedatt--filesystem_bucket"></a>
+### Nested Schema for `filesystem_bucket`
+
+Read-Only:
+
+- `directory` (String) :
+
+   Directory within the filesystem that will be used as a root for the bucket.
+   If not empty, it must be an absolute normalized path (no ., .., or doubled /).
+   Empty value means that the bucket will be mounted at the filesystem root (/).
+- `directory_mode` (String) :
+
+   Linux permissions that will be applied for uploaded directories.
+   Permissions are specified in octal format (one to four octal numbers), e.g. "644" or "755".
+   The default value is 755 (rwxr-xr-x).
+- `file_mode` (String) :
+
+   Linux permissions that will be applied for uploaded files.
+   Permissions are specified in octal format (one to four octal numbers), e.g. "644" or "755".
+   The default value is 644 (rw-r--r--).
+- `filesystem_id` (String) Identifier of filesystem to be exposed via Object Storage API.
+- `gid` (Number) :
+
+   GID that will be used for write operations to the filesystem.
+   By default, root user (UID=0, GID=0) is used.
+- `uid` (Number) :
+
+   UID that will be used for write operations to the filesystem.
+   By default, root user (UID=0, GID=0) is used.
 
 
 <a id="nestedatt--lifecycle_configuration"></a>
@@ -482,6 +514,16 @@ Read-Only:
 
    Indicator flag showing whether the bucket has any BucketPolicy rule
    that grants anonymous access to any object, prefix, or the entire bucket.
+- `bucket_type` (String) :
+
+   #### Supported values
+   
+   BucketType is a type of the bucket.
+   Possible values:
+   
+   - `BUCKET_TYPE_UNSPECIFIED`
+   - `REGULAR` - Regular object storage bucket.
+   - `FILESYSTEM` - Object storage bucket that is mounted to an existing compute filesystem.
 - `counters` (Attributes List) (see [below for nested schema](#nestedatt--status--counters))
 - `deleted_at` (String) :
 
