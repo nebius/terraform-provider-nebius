@@ -374,6 +374,36 @@ func (r *serviceBucket) DataSourceSchema() schema.Schema {
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Bucket policy specifies granular permissions for a bucket.\n   \n   #### Inner value description\n   \n   Bucket policy specifies granular permissions for a bucket.\n",
 			},
+			"filesystem_bucket": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"filesystem_id": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "Identifier of filesystem to be exposed via Object Storage API.",
+					},
+					"directory": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Directory within the filesystem that will be used as a root for the bucket.\n   If not empty, it must be an absolute normalized path (no ., .., or doubled /).\n   Empty value means that the bucket will be mounted at the filesystem root (/).\n",
+					},
+					"uid": schema.Int64Attribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   UID that will be used for write operations to the filesystem.\n   By default, root user (UID=0, GID=0) is used.\n",
+					},
+					"gid": schema.Int64Attribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   GID that will be used for write operations to the filesystem.\n   By default, root user (UID=0, GID=0) is used.\n",
+					},
+					"file_mode": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Linux permissions that will be applied for uploaded files.\n   Permissions are specified in octal format (one to four octal numbers), e.g. \"644\" or \"755\".\n   The default value is 644 (rw-r--r--).\n",
+					},
+					"directory_mode": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Linux permissions that will be applied for uploaded directories.\n   Permissions are specified in octal format (one to four octal numbers), e.g. \"644\" or \"755\".\n   The default value is 755 (rwxr-xr-x).\n",
+					},
+				},
+				Computed:            true,
+				MarkdownDescription: "Bucket that uses the existing client's compute filesystem.",
+			},
 			"status": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"counters": schema.ListNestedAttribute{
@@ -483,6 +513,10 @@ func (r *serviceBucket) DataSourceSchema() schema.Schema {
 						},
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Insecure endpoint mode shows whether plain HTTP (without TLS) is forbidden, allowed for traffic from the\n   same region or allowed from everywhere.\n",
+					},
+					"bucket_type": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   #### Supported values\n   \n   BucketType is a type of the bucket.\n   Possible values:\n   \n   - `BUCKET_TYPE_UNSPECIFIED`\n   - `REGULAR` - Regular object storage bucket.\n   - `FILESYSTEM` - Object storage bucket that is mounted to an existing compute filesystem.\n   \n",
 					},
 				},
 				Computed:            true,
@@ -1031,6 +1065,66 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 				MarkdownDescription: ":\n\n   Bucket policy specifies granular permissions for a bucket.\n   \n   #### Inner value description\n   \n   Bucket policy specifies granular permissions for a bucket.\n",
 				PlanModifiers:       []planmodifier.Object{},
 			},
+			"filesystem_bucket": schema1.SingleNestedAttribute{
+				Attributes: map[string]schema1.Attribute{
+					"filesystem_id": schema1.StringAttribute{
+						Validators: []validator.String{
+							validators.NIDValidator(),
+						},
+						Required:            true,
+						MarkdownDescription: "Identifier of filesystem to be exposed via Object Storage API.",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"directory": schema1.StringAttribute{
+						Validators:          []validator.String{},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   Directory within the filesystem that will be used as a root for the bucket.\n   If not empty, it must be an absolute normalized path (no ., .., or doubled /).\n   Empty value means that the bucket will be mounted at the filesystem root (/).\n",
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.RequiresReplace(),
+						},
+					},
+					"uid": schema1.Int64Attribute{
+						Validators: []validator.Int64{
+							validators.Uint32Validator(),
+							validators.ProtoFieldValidator(&v11.BucketSpec_FilesystemBucketType{}, "uid", "uid", fieldNameMapBucket),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   UID that will be used for write operations to the filesystem.\n   By default, root user (UID=0, GID=0) is used.\n",
+						PlanModifiers:       []planmodifier.Int64{},
+					},
+					"gid": schema1.Int64Attribute{
+						Validators: []validator.Int64{
+							validators.Uint32Validator(),
+							validators.ProtoFieldValidator(&v11.BucketSpec_FilesystemBucketType{}, "gid", "gid", fieldNameMapBucket),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   GID that will be used for write operations to the filesystem.\n   By default, root user (UID=0, GID=0) is used.\n",
+						PlanModifiers:       []planmodifier.Int64{},
+					},
+					"file_mode": schema1.StringAttribute{
+						Validators: []validator.String{
+							validators.ProtoFieldValidator(&v11.BucketSpec_FilesystemBucketType{}, "file_mode", "file_mode", fieldNameMapBucket),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   Linux permissions that will be applied for uploaded files.\n   Permissions are specified in octal format (one to four octal numbers), e.g. \"644\" or \"755\".\n   The default value is 644 (rw-r--r--).\n",
+						PlanModifiers:       []planmodifier.String{},
+					},
+					"directory_mode": schema1.StringAttribute{
+						Validators: []validator.String{
+							validators.ProtoFieldValidator(&v11.BucketSpec_FilesystemBucketType{}, "directory_mode", "directory_mode", fieldNameMapBucket),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   Linux permissions that will be applied for uploaded directories.\n   Permissions are specified in octal format (one to four octal numbers), e.g. \"644\" or \"755\".\n   The default value is 755 (rwxr-xr-x).\n",
+						PlanModifiers:       []planmodifier.String{},
+					},
+				},
+				Validators:          []validator.Object{},
+				Optional:            true,
+				MarkdownDescription: "Bucket that uses the existing client's compute filesystem.",
+				PlanModifiers:       []planmodifier.Object{},
+			},
 			"status": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{
 					"counters": schema1.ListNestedAttribute{
@@ -1164,6 +1258,11 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Insecure endpoint mode shows whether plain HTTP (without TLS) is forbidden, allowed for traffic from the\n   same region or allowed from everywhere.\n",
 						PlanModifiers:       []planmodifier.Object{},
+					},
+					"bucket_type": schema1.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   #### Supported values\n   \n   BucketType is a type of the bucket.\n   Possible values:\n   \n   - `BUCKET_TYPE_UNSPECIFIED`\n   - `REGULAR` - Regular object storage bucket.\n   - `FILESYSTEM` - Object storage bucket that is mounted to an existing compute filesystem.\n   \n",
+						PlanModifiers:       []planmodifier.String{},
 					},
 				},
 				Computed:            true,
