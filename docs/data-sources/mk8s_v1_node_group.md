@@ -456,6 +456,11 @@ Read-Only:
 
    Static attachments of Compute Filesystem.
    Can be used as a workaround, until CSI for Compute Disk and Filesystem will be available. (see [below for nested schema](#nestedatt--template--filesystems))
+- `follows_spot_price` (Attributes) :
+
+   The preemptible VM accepts the current spot price.
+   
+   *Cannot be set alongside on_demand or spot_pricing_policy.* (see [below for nested schema](#nestedatt--template--follows_spot_price))
 - `gpu_cluster` (Attributes) Nebius Compute GPUCluster ID that will be attached to node. (see [below for nested schema](#nestedatt--template--gpu_cluster))
 - `gpu_settings` (Attributes) :
 
@@ -477,6 +482,11 @@ Read-Only:
 - `metadata` (Attributes) (see [below for nested schema](#nestedatt--template--metadata))
 - `network_interfaces` (Attributes List) (see [below for nested schema](#nestedatt--template--network_interfaces))
 - `nvlink` (Attributes) NVLinkSpec configures NVLink settings for the NodeGroup. (see [below for nested schema](#nestedatt--template--nvlink))
+- `on_demand` (Attributes) :
+
+   A regular, non-preemptible VM.
+   
+   *Cannot be set alongside follows_spot_price or spot_pricing_policy.* (see [below for nested schema](#nestedatt--template--on_demand))
 - `os` (String) :
 
    OS version that will be used to create the boot disk of Compute Instances in the NodeGroup.
@@ -503,6 +513,12 @@ Read-Only:
    This service account is also used to make requests to container registry.
    
    `resource.serviceaccount.issueAccessToken` permission is required to use this field.
+- `spot_pricing_policy` (Attributes) :
+
+   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected
+   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.
+   
+   *Cannot be set alongside on_demand or follows_spot_price.* (see [below for nested schema](#nestedatt--template--spot_pricing_policy))
 - `taints` (Attributes List) :
 
    Kubernetes Node taints.
@@ -578,6 +594,10 @@ Read-Only:
 
 - `id` (String)
 
+
+
+<a id="nestedatt--template--follows_spot_price"></a>
+### Nested Schema for `template.follows_spot_price`
 
 
 <a id="nestedatt--template--gpu_cluster"></a>
@@ -720,6 +740,10 @@ Read-Only:
 - `nvl_instance_group_id` (String) Existing NVLInstanceGroup ID to use.
 
 
+<a id="nestedatt--template--on_demand"></a>
+### Nested Schema for `template.on_demand`
+
+
 <a id="nestedatt--template--preemptible"></a>
 ### Nested Schema for `template.preemptible`
 
@@ -759,6 +783,14 @@ Read-Only:
 
 - `platform` (String)
 - `preset` (String)
+
+
+<a id="nestedatt--template--spot_pricing_policy"></a>
+### Nested Schema for `template.spot_pricing_policy`
+
+Read-Only:
+
+- `id` (String) PricingPolicy ID used as the maximum agreed price for the preemptible VM.
 
 
 <a id="nestedatt--template--taints"></a>
