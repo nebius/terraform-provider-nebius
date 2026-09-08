@@ -60,7 +60,7 @@ func (r *serviceInstance) GetName() string {
 }
 
 func (r *serviceInstance) ParentTypes() []string {
-	return []string{"*"}
+	return []string{"project"}
 }
 
 func (r *serviceInstance) DataSourceSchema() schema.Schema {
@@ -509,6 +509,26 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Local disks are meaningfully different from regular (remote) disks:\n   they are provided by the underlying host and are tied to a particular VM run.\n   Local disk data is not preserved across Stop-Start initiated via Compute API.\n   Local disks are not provided by default. To get them, explicitly request them via this field.\n   Availability depends on the selected platform, preset and region.\n   Changing this field will result in disks change and content loss, but only after stop and start the instance.\n",
 			},
+			"on_demand": schema.SingleNestedAttribute{
+				Attributes:          map[string]schema.Attribute{},
+				Computed:            true,
+				MarkdownDescription: ":\n\n   A regular, non-preemptible VM.\n   \n   *Cannot be set alongside follows_spot_price or spot_pricing_policy.*\n",
+			},
+			"follows_spot_price": schema.SingleNestedAttribute{
+				Attributes:          map[string]schema.Attribute{},
+				Computed:            true,
+				MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price.\n   \n   *Cannot be set alongside on_demand or spot_pricing_policy.*\n",
+			},
+			"spot_pricing_policy": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"id": schema.StringAttribute{
+						Computed:            true,
+						MarkdownDescription: "PricingPolicy ID used as the maximum agreed price for the preemptible VM.",
+					},
+				},
+				Computed:            true,
+				MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected\n   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.\n   \n   *Cannot be set alongside on_demand or follows_spot_price.*\n",
+			},
 			"status": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
@@ -600,7 +620,7 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 					},
 					"maintenance_event_id": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "Identifier of the maintenance event associated with the instance, if any.",
 					},
 					"infiniband_topology_path": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
@@ -714,7 +734,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				MarkdownDescription: "Effective labels sent to the API after merging provider `default_labels` with resource `labels`.",
 			},
 			"service_account_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Unique identifier of the service account associated with this instance.\n   For details, see https://docs.nebius.com/iam/service-accounts/manage\n",
 				PlanModifiers: []planmodifier.String{
@@ -767,7 +789,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				NestedObject: schema1.NestedAttributeObject{
 					Attributes: map[string]schema1.Attribute{
 						"subnet_id": schema1.StringAttribute{
-							Validators:          []validator.String{},
+							Validators: []validator.String{
+								validators.NIDValidator(),
+							},
 							Required:            true,
 							MarkdownDescription: "Subnet ID",
 							PlanModifiers: []planmodifier.String{
@@ -787,7 +811,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 						"ip_address": schema1.SingleNestedAttribute{
 							Attributes: map[string]schema1.Attribute{
 								"allocation_id": schema1.StringAttribute{
-									Validators:          []validator.String{},
+									Validators: []validator.String{
+										validators.NIDValidator(),
+									},
 									Optional:            true,
 									MarkdownDescription: "Allocation identifier if it was created before.",
 									PlanModifiers: []planmodifier.String{
@@ -805,7 +831,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 						"public_ip_address": schema1.SingleNestedAttribute{
 							Attributes: map[string]schema1.Attribute{
 								"allocation_id": schema1.StringAttribute{
-									Validators:          []validator.String{},
+									Validators: []validator.String{
+										validators.NIDValidator(),
+									},
 									Optional:            true,
 									MarkdownDescription: "Allocation identifier if it was created before.",
 									PlanModifiers:       []planmodifier.String{},
@@ -826,7 +854,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 							NestedObject: schema1.NestedAttributeObject{
 								Attributes: map[string]schema1.Attribute{
 									"allocation_id": schema1.StringAttribute{
-										Validators:          []validator.String{},
+										Validators: []validator.String{
+											validators.NIDValidator(),
+										},
 										Required:            true,
 										MarkdownDescription: "ID of allocation",
 										PlanModifiers:       []planmodifier.String{},
@@ -842,7 +872,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 							NestedObject: schema1.NestedAttributeObject{
 								Attributes: map[string]schema1.Attribute{
 									"id": schema1.StringAttribute{
-										Validators:          []validator.String{},
+										Validators: []validator.String{
+											validators.NIDValidator(),
+										},
 										Optional:            true,
 										MarkdownDescription: "Security group identifier",
 										PlanModifiers:       []planmodifier.String{},
@@ -876,7 +908,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 					"existing_disk": schema1.SingleNestedAttribute{
 						Attributes: map[string]schema1.Attribute{
 							"id": schema1.StringAttribute{
-								Validators:          []validator.String{},
+								Validators: []validator.String{
+									validators.NIDValidator(),
+								},
 								Required:            true,
 								MarkdownDescription: "",
 								PlanModifiers:       []planmodifier.String{},
@@ -1114,7 +1148,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 						"existing_disk": schema1.SingleNestedAttribute{
 							Attributes: map[string]schema1.Attribute{
 								"id": schema1.StringAttribute{
-									Validators:          []validator.String{},
+									Validators: []validator.String{
+										validators.NIDValidator(),
+									},
 									Required:            true,
 									MarkdownDescription: "",
 									PlanModifiers:       []planmodifier.String{},
@@ -1361,7 +1397,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 						"existing_filesystem": schema1.SingleNestedAttribute{
 							Attributes: map[string]schema1.Attribute{
 								"id": schema1.StringAttribute{
-									Validators:          []validator.String{},
+									Validators: []validator.String{
+										validators.NIDValidator(),
+									},
 									Required:            true,
 									MarkdownDescription: "",
 									PlanModifiers:       []planmodifier.String{},
@@ -1442,7 +1480,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"nvl_instance_group_id": schema1.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Optional:            true,
 				MarkdownDescription: "NVLink Instance Group ID associated with the VM",
 				PlanModifiers:       []planmodifier.String{},
@@ -1492,6 +1532,52 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Local disks are meaningfully different from regular (remote) disks:\n   they are provided by the underlying host and are tied to a particular VM run.\n   Local disk data is not preserved across Stop-Start initiated via Compute API.\n   Local disks are not provided by default. To get them, explicitly request them via this field.\n   Availability depends on the selected platform, preset and region.\n   Changing this field will result in disks change and content loss, but only after stop and start the instance.\n",
+				PlanModifiers:       []planmodifier.Object{},
+			},
+			"on_demand": schema1.SingleNestedAttribute{
+				Attributes: map[string]schema1.Attribute{},
+				Validators: []validator.Object{
+					validators.OneofValidator([]string{
+						"on_demand",
+						"follows_spot_price",
+						"spot_pricing_policy",
+					}, fieldNameMapInstance),
+				},
+				Optional:            true,
+				MarkdownDescription: ":\n\n   A regular, non-preemptible VM.\n   \n   *Cannot be set alongside follows_spot_price or spot_pricing_policy.*\n",
+				PlanModifiers:       []planmodifier.Object{},
+			},
+			"follows_spot_price": schema1.SingleNestedAttribute{
+				Attributes: map[string]schema1.Attribute{},
+				Validators: []validator.Object{
+					validators.OneofValidator([]string{
+						"on_demand",
+						"follows_spot_price",
+						"spot_pricing_policy",
+					}, fieldNameMapInstance),
+				},
+				Optional:            true,
+				MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price.\n   \n   *Cannot be set alongside on_demand or spot_pricing_policy.*\n",
+				PlanModifiers:       []planmodifier.Object{},
+			},
+			"spot_pricing_policy": schema1.SingleNestedAttribute{
+				Attributes: map[string]schema1.Attribute{
+					"id": schema1.StringAttribute{
+						Validators:          []validator.String{},
+						Required:            true,
+						MarkdownDescription: "PricingPolicy ID used as the maximum agreed price for the preemptible VM.",
+						PlanModifiers:       []planmodifier.String{},
+					},
+				},
+				Validators: []validator.Object{
+					validators.OneofValidator([]string{
+						"on_demand",
+						"follows_spot_price",
+						"spot_pricing_policy",
+					}, fieldNameMapInstance),
+				},
+				Optional:            true,
+				MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected\n   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.\n   \n   *Cannot be set alongside on_demand or follows_spot_price.*\n",
 				PlanModifiers:       []planmodifier.Object{},
 			},
 			"status": schema1.SingleNestedAttribute{
@@ -1603,7 +1689,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 					},
 					"maintenance_event_id": schema1.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: "",
+						MarkdownDescription: "Identifier of the maintenance event associated with the instance, if any.",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"infiniband_topology_path": schema1.SingleNestedAttribute{

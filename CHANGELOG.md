@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.54 (September 8, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.63`.
+
+FEATURES:
+
+* Added new resources and data sources: [nebius_monitoring_v1_recording_rule](./docs/resources/monitoring_v1_recording_rule.md).
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_compute_v1_instance](./docs/resources/compute_v1_instance.md):
+    * Added: `follows_spot_price`, `on_demand`, `spot_pricing_policy`
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group.md):
+    * Added: `template.follows_spot_price`, `template.on_demand`, `template.spot_pricing_policy`
+* Changed attributes for data source [nebius_compute_v1_instance](./docs/data-sources/compute_v1_instance.md):
+    * Added: `follows_spot_price`, `on_demand`, `spot_pricing_policy`
+* Changed attributes for data source [nebius_mk8s_v1_node_group](./docs/data-sources/mk8s_v1_node_group.md):
+    * Added: `template.follows_spot_price`, `template.on_demand`, `template.spot_pricing_policy`
+
 ## 0.6.53 (September 7, 2026)
 
 NOTES:
