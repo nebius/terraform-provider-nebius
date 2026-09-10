@@ -13,23 +13,30 @@ import (
 	"github.com/nebius/terraform-provider-nebius/conversion/writeonly"
 )
 
+type writeOnlyData struct {
+	value              *types.Object
+	planUnknowns       *mask.Mask
+	configuredUnknowns *mask.Mask
+	supplied           *mask.Mask
+}
+
 func (r *commonResource) addWriteOnlyFields(
 	ctx context.Context,
 	config tfsdk.Config,
 	data *types.Object,
-) (*types.Object, *mask.Mask, diag.Diagnostics) {
+) (writeOnlyData, diag.Diagnostics) {
 	if !r.provider.WriteOnlyFieldsSupported() {
-		return data, nil, diag.Diagnostics{}
+		return writeOnlyData{value: data}, nil
 	}
 	var diags diag.Diagnostics
 
 	woMask, err := r.implementation.WriteOnlyFields()
 	if err != nil {
 		diags = ErrorToDiag(diags, err, "failed to get write only fields mask")
-		return data, nil, diags
+		return writeOnlyData{value: data}, diags
 	}
 	if woMask == nil { // no write only fields, nothing to do
-		return data, nil, diags
+		return writeOnlyData{value: data}, diags
 	}
 
 	var dataMirror types.Object
@@ -38,17 +45,28 @@ func (r *commonResource) addWriteOnlyFields(
 	)
 	diags.Append(innerDiag...)
 	if diags.HasError() {
-		return data, nil, diags
+		return writeOnlyData{value: data}, diags
 	}
 
-	data, unk, dataUnk, innerDiag := writeonly.ParseWriteOnlyFields(
+	data, unk, dataUnk, supplied, innerDiag := writeonly.ParseWriteOnlyFields(
 		ctx, data, dataMirror,
 		woMask, mask.NewFieldPath(), path.Empty(),
 	)
 	diags.Append(innerDiag...)
 	if diags.HasError() {
-		return data, dataUnk, diags
+		return writeOnlyData{
+			value:              data,
+			planUnknowns:       dataUnk,
+			configuredUnknowns: unk,
+			supplied:           supplied,
+		}, diags
 	}
-	unk = ctypes.AppendUnknownMask(unk, mask.FieldPath{}, dataUnk)
-	return data, unk, diags
+	allUnknowns := ctypes.AppendUnknownMask(nil, mask.FieldPath{}, unk)
+	allUnknowns = ctypes.AppendUnknownMask(allUnknowns, mask.FieldPath{}, dataUnk)
+	return writeOnlyData{
+		value:              data,
+		planUnknowns:       allUnknowns,
+		configuredUnknowns: unk,
+		supplied:           supplied,
+	}, diags
 }

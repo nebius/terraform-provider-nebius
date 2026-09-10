@@ -36,17 +36,35 @@ func ParseWriteOnlyFields(
 	writeOnlyMask *mask.Mask,
 	pathPrefix mask.FieldPath,
 	tfPathPrefix path.Path,
-) (*types.Object, *mask.Mask, *mask.Mask, diag.Diagnostics) {
+) (*types.Object, *mask.Mask, *mask.Mask, *mask.Mask, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 	var unk *mask.Mask
 	var dataUnk *mask.Mask
+	var supplied *mask.Mask
 
 	if dataMirror.IsNull() {
-		return data, unk, dataUnk, diags
+		return data, unk, dataUnk, supplied, diags
 	}
 	if dataMirror.IsUnknown() {
-		unk = mask.New()
-		return data, unk, dataUnk, diags
+		writeOnlyFields, err := writeOnlyMask.GetSubMaskByPath(pathPrefix)
+		if err != nil {
+			diags.AddAttributeError(
+				pathToWOPath(tfPathPrefix),
+				"invalid write-only field mask",
+				err.Error(),
+			)
+			return data, unk, dataUnk, supplied, diags
+		}
+		unk, err = unknownWriteOnlyFields(data, writeOnlyFields)
+		if err != nil {
+			diags.AddAttributeError(
+				pathToWOPath(tfPathPrefix),
+				"invalid write-only field mask",
+				err.Error(),
+			)
+		}
+		supplied = unk
+		return data, unk, dataUnk, supplied, diags
 	}
 	stateAttributes := map[string]attr.Value{}
 	stateTypes := map[string]attr.Type{}
@@ -62,10 +80,6 @@ func ParseWriteOnlyFields(
 		attrPath := pathPrefix.Join(mask.FieldKey(key))
 		attrTfPath := tfPathPrefix.AtName(key)
 		if value.IsNull() {
-			continue
-		}
-		if value.IsUnknown() {
-			unk = ctypes.AppendUnknownPath(unk, mask.FieldPath{mask.FieldKey(key)})
 			continue
 		}
 		var innerAttr attr.Value = nil
@@ -91,6 +105,43 @@ func ParseWriteOnlyFields(
 			}
 		}
 		isWriteOnly := attrPath.MatchesResetMaskFinal(writeOnlyMask)
+		if value.IsUnknown() {
+			if isWriteOnly {
+				if innerAttr != nil && !innerAttr.IsNull() {
+					continue
+				}
+				unk = ctypes.AppendUnknownPath(unk, mask.FieldPath{mask.FieldKey(key)})
+				supplied = ctypes.AppendUnknownPath(supplied, mask.FieldPath{mask.FieldKey(key)})
+				continue
+			}
+			writeOnlyFields, err := writeOnlyMask.GetSubMaskByPath(attrPath)
+			if err != nil {
+				diags.AddAttributeError(
+					pathToWOPath(attrTfPath),
+					"invalid write-only field mask",
+					err.Error(),
+				)
+				continue
+			}
+			// Object fields have a fixed shape. Unknown lists and maps may add
+			// elements, so their write-only descendants must remain unknown.
+			var innerData *types.Object
+			if object, ok := innerAttr.(types.Object); ok {
+				innerData = &object
+			}
+			unknownFields, err := unknownWriteOnlyFields(innerData, writeOnlyFields)
+			if err != nil {
+				diags.AddAttributeError(
+					pathToWOPath(attrTfPath),
+					"invalid write-only field mask",
+					err.Error(),
+				)
+				continue
+			}
+			unk = ctypes.AppendUnknownMask(unk, mask.FieldPath{mask.FieldKey(key)}, unknownFields)
+			supplied = ctypes.AppendUnknownMask(supplied, mask.FieldPath{mask.FieldKey(key)}, unknownFields)
+			continue
+		}
 		if isWriteOnly {
 			if innerAttr != nil && !innerAttr.IsNull() {
 				// ignore write-only value if state value is set
@@ -112,6 +163,7 @@ func ParseWriteOnlyFields(
 				}
 			}
 			stateAttributes[key] = value
+			supplied = ctypes.AppendUnknownPath(supplied, mask.FieldPath{mask.FieldKey(key)})
 			continue
 		}
 		switch typed := value.(type) {
@@ -143,12 +195,13 @@ func ParseWriteOnlyFields(
 				}
 				innerData = &innerDataNP
 			}
-			innerData, innerUnk, innerDataUnk, innerDiags := ParseWriteOnlyFields(
+			innerData, innerUnk, innerDataUnk, innerSupplied, innerDiags := ParseWriteOnlyFields(
 				ctx, innerData, typed,
 				writeOnlyMask, attrPath, attrTfPath,
 			)
 			unk = ctypes.AppendUnknownMask(unk, mask.FieldPath{mask.FieldKey(key)}, innerUnk)
 			dataUnk = ctypes.AppendUnknownMask(dataUnk, mask.FieldPath{mask.FieldKey(key)}, innerDataUnk)
+			supplied = ctypes.AppendUnknownMask(supplied, mask.FieldPath{mask.FieldKey(key)}, innerSupplied)
 			diags.Append(innerDiags...)
 			if innerData != nil {
 				innerAttr = *innerData
@@ -277,7 +330,7 @@ func ParseWriteOnlyFields(
 					)
 					continue
 				}
-				dataElement, innerUnk, innerDataUnk, innerDiag := ParseWriteOnlyFields(
+				dataElement, innerUnk, innerDataUnk, innerSupplied, innerDiag := ParseWriteOnlyFields(
 					ctx, dataElement, obj,
 					writeOnlyMask, elementPath, elementTfPath,
 				)
@@ -290,6 +343,11 @@ func ParseWriteOnlyFields(
 					dataUnk,
 					mask.FieldPath{mask.FieldKey(key), mask.FieldKey(fmt.Sprintf("%d", i))},
 					innerDataUnk,
+				)
+				supplied = ctypes.AppendUnknownMask(
+					supplied,
+					mask.FieldPath{mask.FieldKey(key), mask.FieldKey(fmt.Sprintf("%d", i))},
+					innerSupplied,
 				)
 				diags.Append(innerDiag...)
 				if dataElement != nil {
@@ -424,7 +482,7 @@ func ParseWriteOnlyFields(
 					)
 					continue
 				}
-				dataElement, innerUnk, innerDataUnk, innerDiags := ParseWriteOnlyFields(
+				dataElement, innerUnk, innerDataUnk, innerSupplied, innerDiags := ParseWriteOnlyFields(
 					ctx, dataElement, obj,
 					writeOnlyMask, elementPath, elementTfPath,
 				)
@@ -437,6 +495,11 @@ func ParseWriteOnlyFields(
 					dataUnk,
 					mask.FieldPath{mask.FieldKey(key), mask.FieldKey(mapKey)},
 					innerDataUnk,
+				)
+				supplied = ctypes.AppendUnknownMask(
+					supplied,
+					mask.FieldPath{mask.FieldKey(key), mask.FieldKey(mapKey)},
+					innerSupplied,
 				)
 				diags.Append(innerDiags...)
 				if dataElement != nil {
@@ -489,10 +552,69 @@ func ParseWriteOnlyFields(
 					tfPathPrefix,
 				),
 			)
-			return data, unk, dataUnk, diags
+			return data, unk, dataUnk, supplied, diags
 		}
 		data = &newObj
 	}
 
-	return data, unk, dataUnk, diags
+	return data, unk, dataUnk, supplied, diags
+}
+
+// unknownWriteOnlyFields returns write-only fields that an unknown mirror may
+// still supply. A known main value takes precedence over its mirror value.
+func unknownWriteOnlyFields(
+	data *types.Object,
+	writeOnlyFields *mask.Mask,
+) (*mask.Mask, error) {
+	if writeOnlyFields == nil {
+		return nil, nil
+	}
+	unknown, err := writeOnlyFields.Copy()
+	if err != nil {
+		return nil, fmt.Errorf("copy write-only fields: %w", err)
+	}
+	if data == nil || data.IsNull() || data.IsUnknown() {
+		return unknown, nil
+	}
+
+	known := knownMainWriteOnlyFields(data, writeOnlyFields)
+	if !known.IsEmpty() {
+		if err := unknown.SubtractResetMask(known); err != nil {
+			return nil, fmt.Errorf("exclude known main fields: %w", err)
+		}
+	}
+	if unknown.IsEmpty() {
+		return nil, nil
+	}
+	return unknown, nil
+}
+
+func knownMainWriteOnlyFields(
+	data *types.Object,
+	writeOnlyFields *mask.Mask,
+) *mask.Mask {
+	known := mask.New()
+	attributes := data.Attributes()
+	for key, child := range writeOnlyFields.FieldParts {
+		if child == nil {
+			continue
+		}
+		value := attributes[string(key)]
+		if value == nil || value.IsNull() || value.IsUnknown() {
+			continue
+		}
+		if child.IsEmpty() {
+			known.FieldParts[key] = mask.New()
+			continue
+		}
+		object, ok := value.(types.Object)
+		if !ok {
+			continue
+		}
+		knownChild := knownMainWriteOnlyFields(&object, child)
+		if !knownChild.IsEmpty() {
+			known.FieldParts[key] = knownChild
+		}
+	}
+	return known
 }

@@ -24,6 +24,7 @@ import (
 	common "github.com/nebius/gosdk/proto/nebius/common/v1"
 	"github.com/nebius/gosdk/serviceerror"
 	"github.com/nebius/terraform-provider-nebius/conversion"
+	ctypes "github.com/nebius/terraform-provider-nebius/conversion/types"
 	"github.com/nebius/terraform-provider-nebius/provider"
 	"github.com/nebius/terraform-provider-nebius/service/requestcontext"
 )
@@ -172,12 +173,21 @@ func metadataUnwrappedFields(nameMap map[string]map[string]string) []protoreflec
 func metadataFromTF(
 	ctx context.Context, data types.Object, nameMap map[string]map[string]string,
 ) (*common.ResourceMetadata, diag.Diagnostics) {
+	metadata, _, diags := metadataFromTFWithUnknowns(ctx, data, nameMap)
+	return metadata, diags
+}
+
+func metadataFromTFWithUnknowns(
+	ctx context.Context, data types.Object, nameMap map[string]map[string]string,
+) (*common.ResourceMetadata, *mask.Mask, diag.Diagnostics) {
 	diags := diag.Diagnostics{}
 	metadata := &common.ResourceMetadata{}
-	_, innerDiag := conversion.MessageFromTFPath(ctx, data, metadata, path.Empty(), nameMap)
+	unknowns, innerDiag := conversion.MessageFromTFPath(
+		ctx, data, metadata, path.Empty(), nameMap,
+	)
 	diags.Append(innerDiag...)
 	if innerDiag.HasError() {
-		return nil, diags
+		return nil, nil, diags
 	}
 
 	metadataVal, ok := data.Attributes()[constants.FieldMetadata]
@@ -187,7 +197,7 @@ func metadataFromTF(
 			"metadata not found",
 			"metadata not found in the data object",
 		)
-		return nil, diags
+		return nil, nil, diags
 	}
 	mdObj, ok := metadataVal.(types.Object)
 	if !ok {
@@ -196,16 +206,34 @@ func metadataFromTF(
 			"metadata not an object",
 			"metadata has to be an object but is not",
 		)
-		return nil, diags
+		return nil, nil, diags
 	}
 	metadata2 := &common.ResourceMetadata{}
 	if isKnown(mdObj) {
-		_, innerDiag := conversion.MessageFromTFPath(
+		innerUnknowns, innerDiag := conversion.MessageFromTFPath(
 			ctx, mdObj, metadata2, path.Root(constants.FieldMetadata), nameMap,
 		)
+		unknowns = ctypes.AppendUnknownMask(unknowns, mask.FieldPath{}, innerUnknowns)
 		diags.Append(innerDiag...)
 		if innerDiag.HasError() {
-			return nil, diags
+			return nil, nil, diags
+		}
+	} else if mdObj.IsUnknown() {
+		metadataFields := metadata.ProtoReflect().Descriptor().Fields()
+		for tfName := range mdObj.AttributeTypes(ctx) {
+			protoName := protoreflect.Name(tfName)
+			if aliases := nameMap[constants.MetadataMessageFullName]; aliases != nil {
+				if alias, ok := aliases[tfName]; ok {
+					protoName = protoreflect.Name(alias)
+				}
+			}
+			if metadataFields.ByName(protoName) == nil {
+				continue
+			}
+			unknowns = ctypes.AppendUnknownPath(
+				unknowns,
+				mask.NewFieldPath(mask.FieldKey(protoName)),
+			)
 		}
 	}
 	for _, fieldName := range metadataUnwrappedFields(nameMap) {
@@ -242,7 +270,7 @@ func metadataFromTF(
 			continue
 		}
 	}
-	return metadata2, diags
+	return metadata2, unknowns, diags
 }
 
 func objectWithEffectiveLabels(
@@ -292,18 +320,41 @@ func requestMessagesFromTF(
 	spec proto.Message,
 	nameMap map[string]map[string]string,
 ) (*common.ResourceMetadata, diag.Diagnostics) {
+	metadata, _, diags := requestMessagesFromTFWithUnknowns(ctx, data, spec, nameMap)
+	return metadata, diags
+}
+
+func requestMessagesFromTFWithUnknowns(
+	ctx context.Context,
+	data types.Object,
+	spec proto.Message,
+	nameMap map[string]map[string]string,
+) (*common.ResourceMetadata, *mask.Mask, diag.Diagnostics) {
 	requestData, diags := objectWithEffectiveLabels(ctx, data)
 	if diags.HasError() {
-		return nil, diags
+		return nil, nil, diags
 	}
-	metadata, innerDiags := metadataFromTF(ctx, requestData, nameMap)
+	metadata, metadataUnknowns, innerDiags := metadataFromTFWithUnknowns(
+		ctx, requestData, nameMap,
+	)
 	diags.Append(innerDiags...)
 	if innerDiags.HasError() {
-		return nil, diags
+		return nil, nil, diags
 	}
-	_, innerDiags = conversion.MessageFromTF(ctx, requestData, spec, nameMap)
+	specUnknowns, innerDiags := conversion.MessageFromTF(ctx, requestData, spec, nameMap)
 	diags.Append(innerDiags...)
-	return metadata, diags
+
+	unknowns := ctypes.AppendUnknownMask(
+		nil,
+		mask.NewFieldPath(constants.FieldMetadata),
+		metadataUnknowns,
+	)
+	unknowns = ctypes.AppendUnknownMask(
+		unknowns,
+		mask.NewFieldPath(constants.FieldSpec),
+		specUnknowns,
+	)
+	return metadata, unknowns, diags
 }
 
 func convertToObject(

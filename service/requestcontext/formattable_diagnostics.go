@@ -96,7 +96,7 @@ func resolveFormattableDiagnostics(
 			continue
 		}
 		details := formatViolationDetails(formattable, schemaType, fieldNameMap)
-		attrPath, err := warningFieldPathToTFPath(
+		attrPath, err := FieldPathToTFPath(
 			formattable.fieldPath,
 			schemaType,
 			fieldNameMap,
@@ -125,7 +125,7 @@ func formatViolationDetails(
 	}
 	displayFields := make([]string, 0, len(fields))
 	for _, fieldPath := range fields {
-		attrPath, err := warningFieldPathToTFPath(fieldPath, schemaType, fieldNameMap)
+		attrPath, err := FieldPathToTFPath(fieldPath, schemaType, fieldNameMap)
 		if err != nil {
 			displayFields = append(displayFields, fieldPath)
 			continue

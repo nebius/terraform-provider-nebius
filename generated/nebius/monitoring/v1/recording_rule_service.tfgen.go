@@ -58,7 +58,7 @@ func (r *serviceRecordingRule) GetName() string {
 }
 
 func (r *serviceRecordingRule) ParentTypes() []string {
-	return []string{"*"}
+	return []string{"project"}
 }
 
 func (r *serviceRecordingRule) DataSourceSchema() schema.Schema {
@@ -71,15 +71,24 @@ func (r *serviceRecordingRule) DataSourceSchema() schema.Schema {
 			},
 			"id": schema.StringAttribute{
 				Validators:          []validator.String{},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
 			},
 			"name": schema.StringAttribute{
+				Validators: []validator.String{
+					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapRecordingRule),
+				},
 				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Human readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
 			},
 			"resource_version": schema.Int64Attribute{
@@ -124,7 +133,7 @@ func (r *serviceRecordingRule) DataSourceSchema() schema.Schema {
 				MarkdownDescription: ":\n\n   Current status of the recording rule.\n   \n   #### Inner value description\n   \n   Current status of a recording rule.\n",
 			},
 		},
-		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by only ID.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n\nA recording rule that writes the result of a MetricsQL expression evaluation.",
+		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n\n\nA recording rule that writes the result of a MetricsQL expression evaluation.",
 	}
 	return ret
 }
@@ -266,6 +275,20 @@ func (r *serviceRecordingRule) Read(ctx context.Context, id string) (*v1.Resourc
 	res, err := service.Get(ctx, req, reqCtx.MainRequestOptions()...)
 	if err != nil {
 		return nil, nil, nil, reqCtx, fmt.Errorf("service get: %w", err)
+	}
+	return res.Metadata, res.Spec, res.Status, reqCtx, nil
+}
+
+func (r *serviceRecordingRule) GetByName(ctx context.Context, name, parentID string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {
+	service := v12.NewRecordingRuleService(r.provider.SDK())
+	req := &v11.GetRecordingRuleByNameRequest{
+		Name:     name,
+		ParentId: parentID,
+	}
+	reqCtx := &requestcontext.Context{}
+	res, err := service.GetByName(ctx, req, reqCtx.MainRequestOptions()...)
+	if err != nil {
+		return nil, nil, nil, reqCtx, fmt.Errorf("service get by name: %w", err)
 	}
 	return res.Metadata, res.Spec, res.Status, reqCtx, nil
 }
