@@ -183,25 +183,46 @@ func (r *commonResource) ModifyPlan(
 	if req.Plan.Raw.IsNull() {
 		return
 	}
-	if !r.hasLabelsAll {
+	if r.hasLabelsAll {
+		var labels types.Map
+		resp.Diagnostics.Append(
+			req.Plan.GetAttribute(ctx, path.Root(constants.FieldLabels), &labels)...,
+		)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		labelsAll, diags := mergeDefaultLabels(r.provider.DefaultLabels(), labels)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		resp.Diagnostics.Append(
+			resp.Plan.SetAttribute(ctx, path.Root(constants.FieldLabelsAll), labelsAll)...,
+		)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+	if resp.Plan.Raw.Equal(req.State.Raw) {
 		return
 	}
 
-	var labels types.Map
-	resp.Diagnostics.Append(
-		req.Plan.GetAttribute(ctx, path.Root(constants.FieldLabels), &labels)...,
-	)
-	if resp.Diagnostics.HasError() {
+	preflight, ok := r.implementation.(PreflightCheckInterface)
+	if !ok {
 		return
 	}
-	labelsAll, diags := mergeDefaultLabels(r.provider.DefaultLabels(), labels)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
+	preflightReq := req
+	preflightReq.Plan = resp.Plan
+	reqCtx, preflightDiags := r.preflightPlan(ctx, preflightReq, resp, preflight)
+	if reqCtx != nil {
+		resp.Diagnostics = reqCtx.WrapDiagnostics(
+			resp.Diagnostics,
+			r.resourceSchema.Type(),
+			r.implementation.FieldNameMap(),
+		)
 	}
-	resp.Diagnostics.Append(
-		resp.Plan.SetAttribute(ctx, path.Root(constants.FieldLabelsAll), labelsAll)...,
-	)
+	// Preflight diagnostics describe the plan, not a failed API request.
+	resp.Diagnostics.Append(preflightDiags...)
 }
 
 func (r *commonResource) createRequest(
@@ -217,21 +238,21 @@ func (r *commonResource) createRequest(
 		return nil
 	}
 
-	dataPtr, _, innerDiag := r.addWriteOnlyFields(
+	writeOnly, innerDiag := r.addWriteOnlyFields(
 		ctx, req.Config, &data,
 	)
 	resp.Diagnostics.Append(innerDiag...)
 	if resp.Diagnostics.HasError() {
 		return nil
 	}
-	if dataPtr == nil {
+	if writeOnly.value == nil {
 		resp.Diagnostics.AddError(
 			"no data pointer",
 			"in create, addWriteOnlyFields returned a nil pointer when non-nil data was passed",
 		)
 		return nil
 	}
-	dataWithWriteOnly := *dataPtr
+	dataWithWriteOnly := *writeOnly.value
 
 	spec := r.implementation.SpecMessage()
 	metadata, diag := requestMessagesFromTF(
@@ -419,21 +440,21 @@ func (r *commonResource) updateRequest(
 		return nil
 	}
 
-	dataPtr, _, innerDiag := r.addWriteOnlyFields(
+	writeOnly, innerDiag := r.addWriteOnlyFields(
 		ctx, req.Config, &data,
 	)
 	resp.Diagnostics.Append(innerDiag...)
 	if resp.Diagnostics.HasError() {
 		return nil
 	}
-	if dataPtr == nil {
+	if writeOnly.value == nil {
 		resp.Diagnostics.AddError(
 			"no data pointer",
 			"in update, addWriteOnlyFields returned a nil pointer when non-nil data was passed",
 		)
 		return nil
 	}
-	dataWithWriteOnly := *dataPtr
+	dataWithWriteOnly := *writeOnly.value
 
 	spec := r.implementation.SpecMessage()
 	metadata, diag := requestMessagesFromTF(

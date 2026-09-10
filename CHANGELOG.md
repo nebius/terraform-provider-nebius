@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.55 (September 10, 2026)
+
+NOTES:
+
+* deps: Update `github.com/grpc-ecosystem/go-grpc-middleware/v2` from `v2.3.3` to `v2.3.4`.
+* provider: Update Nebius Go SDK to `v0.2.64`.
+
+IMPROVEMENTS:
+
+* Changed attributes for data source [nebius_monitoring_v1_recording_rule](./docs/data-sources/monitoring_v1_recording_rule.md):
+    * Became optional: `id`, `name`, `parent_id`
+    * Became computed: `id`
+
 ## 0.6.54 (September 8, 2026)
 
 NOTES:

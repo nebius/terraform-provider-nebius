@@ -59,7 +59,7 @@ func (r *serviceTransfer) GetName() string {
 }
 
 func (r *serviceTransfer) ParentTypes() []string {
-	return []string{"*"}
+	return []string{"project"}
 }
 
 func (r *serviceTransfer) DataSourceSchema() schema.Schema {
