@@ -152,10 +152,6 @@ func (r *serviceNetwork) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Current state of the network.\n   \n   #### Supported values\n   \n   Enumeration of possible states of the network.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - Default state, unspecified.\n   - `CREATING` - Network is being created.\n   - `READY` - Network is ready for use.\n   - `DELETING` - Network is being deleted.\n   \n",
 					},
-					"default": schema.BoolAttribute{
-						Computed:            true,
-						MarkdownDescription: "Indicates whether this is the project's default network.",
-					},
 					"default_route_table_id": schema.StringAttribute{
 						Computed:            true,
 						MarkdownDescription: "ID of the network's default route table.",
@@ -300,11 +296,6 @@ func (r *serviceNetwork) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Current state of the network.\n   \n   #### Supported values\n   \n   Enumeration of possible states of the network.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - Default state, unspecified.\n   - `CREATING` - Network is being created.\n   - `READY` - Network is ready for use.\n   - `DELETING` - Network is being deleted.\n   \n",
 						PlanModifiers:       []planmodifier.String{},
-					},
-					"default": schema1.BoolAttribute{
-						Computed:            true,
-						MarkdownDescription: "Indicates whether this is the project's default network.",
-						PlanModifiers:       []planmodifier.Bool{},
 					},
 					"default_route_table_id": schema1.StringAttribute{
 						Computed:            true,

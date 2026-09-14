@@ -215,7 +215,6 @@ Read-Only:
 
 Read-Only:
 
-- `default` (Boolean) Indicates whether this is the network's default subnet.
 - `ipv4_private_cidrs` (List of String, Deprecated) :
 
    CIDR blocks.

@@ -226,10 +226,6 @@ func (r *serviceSubnet) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Information about the route table associated with this subnet.\n   Can be either a custom route table or the network's default route table.\n",
 					},
-					"default": schema.BoolAttribute{
-						Computed:            true,
-						MarkdownDescription: "Indicates whether this is the network's default subnet.",
-					},
 					"ipv4_private_pools": schema.ListNestedAttribute{
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
@@ -523,11 +519,6 @@ func (r *serviceSubnet) ResourceSchema() schema1.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Information about the route table associated with this subnet.\n   Can be either a custom route table or the network's default route table.\n",
 						PlanModifiers:       []planmodifier.Object{},
-					},
-					"default": schema1.BoolAttribute{
-						Computed:            true,
-						MarkdownDescription: "Indicates whether this is the network's default subnet.",
-						PlanModifiers:       []planmodifier.Bool{},
 					},
 					"ipv4_private_pools": schema1.ListNestedAttribute{
 						NestedObject: schema1.NestedAttributeObject{

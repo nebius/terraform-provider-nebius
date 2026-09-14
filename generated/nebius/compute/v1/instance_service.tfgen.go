@@ -509,26 +509,6 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Local disks are meaningfully different from regular (remote) disks:\n   they are provided by the underlying host and are tied to a particular VM run.\n   Local disk data is not preserved across Stop-Start initiated via Compute API.\n   Local disks are not provided by default. To get them, explicitly request them via this field.\n   Availability depends on the selected platform, preset and region.\n   Changing this field will result in disks change and content loss, but only after stop and start the instance.\n",
 			},
-			"on_demand": schema.SingleNestedAttribute{
-				Attributes:          map[string]schema.Attribute{},
-				Computed:            true,
-				MarkdownDescription: ":\n\n   A regular, non-preemptible VM.\n   \n   *Cannot be set alongside follows_spot_price or spot_pricing_policy.*\n",
-			},
-			"follows_spot_price": schema.SingleNestedAttribute{
-				Attributes:          map[string]schema.Attribute{},
-				Computed:            true,
-				MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price.\n   \n   *Cannot be set alongside on_demand or spot_pricing_policy.*\n",
-			},
-			"spot_pricing_policy": schema.SingleNestedAttribute{
-				Attributes: map[string]schema.Attribute{
-					"id": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: "PricingPolicy ID used as the maximum agreed price for the preemptible VM.",
-					},
-				},
-				Computed:            true,
-				MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected\n   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.\n   \n   *Cannot be set alongside on_demand or follows_spot_price.*\n",
-			},
 			"status": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
@@ -1532,52 +1512,6 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 				},
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Local disks are meaningfully different from regular (remote) disks:\n   they are provided by the underlying host and are tied to a particular VM run.\n   Local disk data is not preserved across Stop-Start initiated via Compute API.\n   Local disks are not provided by default. To get them, explicitly request them via this field.\n   Availability depends on the selected platform, preset and region.\n   Changing this field will result in disks change and content loss, but only after stop and start the instance.\n",
-				PlanModifiers:       []planmodifier.Object{},
-			},
-			"on_demand": schema1.SingleNestedAttribute{
-				Attributes: map[string]schema1.Attribute{},
-				Validators: []validator.Object{
-					validators.OneofValidator([]string{
-						"on_demand",
-						"follows_spot_price",
-						"spot_pricing_policy",
-					}, fieldNameMapInstance),
-				},
-				Optional:            true,
-				MarkdownDescription: ":\n\n   A regular, non-preemptible VM.\n   \n   *Cannot be set alongside follows_spot_price or spot_pricing_policy.*\n",
-				PlanModifiers:       []planmodifier.Object{},
-			},
-			"follows_spot_price": schema1.SingleNestedAttribute{
-				Attributes: map[string]schema1.Attribute{},
-				Validators: []validator.Object{
-					validators.OneofValidator([]string{
-						"on_demand",
-						"follows_spot_price",
-						"spot_pricing_policy",
-					}, fieldNameMapInstance),
-				},
-				Optional:            true,
-				MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price.\n   \n   *Cannot be set alongside on_demand or spot_pricing_policy.*\n",
-				PlanModifiers:       []planmodifier.Object{},
-			},
-			"spot_pricing_policy": schema1.SingleNestedAttribute{
-				Attributes: map[string]schema1.Attribute{
-					"id": schema1.StringAttribute{
-						Validators:          []validator.String{},
-						Required:            true,
-						MarkdownDescription: "PricingPolicy ID used as the maximum agreed price for the preemptible VM.",
-						PlanModifiers:       []planmodifier.String{},
-					},
-				},
-				Validators: []validator.Object{
-					validators.OneofValidator([]string{
-						"on_demand",
-						"follows_spot_price",
-						"spot_pricing_policy",
-					}, fieldNameMapInstance),
-				},
-				Optional:            true,
-				MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected\n   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.\n   \n   *Cannot be set alongside on_demand or follows_spot_price.*\n",
 				PlanModifiers:       []planmodifier.Object{},
 			},
 			"status": schema1.SingleNestedAttribute{

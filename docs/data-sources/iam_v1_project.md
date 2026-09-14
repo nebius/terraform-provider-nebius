@@ -113,15 +113,6 @@ Read-Only:
    - `PARKING`
    - `PARKED`
    - `CREATING` - DRAFT = 1000;
-- `generation` (String) :
-
-   #### Supported values
-   
-   Possible values:
-   
-   - `CONTAINER_GENERATION_UNSPECIFIED`
-   - `SINGLE_REGION`
-   - `MULTI_REGION`
 - `region` (String)
 - `suspension_state` (String) :
 
