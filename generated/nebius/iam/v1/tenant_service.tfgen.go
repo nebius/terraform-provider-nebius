@@ -106,10 +106,6 @@ func (r *serviceTenant) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "",
 					},
-					"generation": schema.StringAttribute{
-						Computed:            true,
-						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `CONTAINER_GENERATION_UNSPECIFIED`\n   - `SINGLE_REGION`\n   - `MULTI_REGION`\n   \n",
-					},
 				},
 				Computed:            true,
 				MarkdownDescription: "",

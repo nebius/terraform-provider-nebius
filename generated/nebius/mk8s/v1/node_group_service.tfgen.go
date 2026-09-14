@@ -225,6 +225,10 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 								Computed:            true,
 								MarkdownDescription: ":\n\n   Identifier of the predefined set of drivers included in the ComputeImage deployed on ComputeInstances that are part of the NodeGroup.\n   Supported presets depend on the platform and Kubernetes version.\n   To get the up-to-date list of supported presets for a given Kubernetes version and platform, run:\n   nebius mk8s node-group get-compatibility-matrix --cluster-kubernetes-version VERSION --platform PLATFORM\n   Leave empty for GPU nodes that do not have preinstalled drivers, including DRA-enabled node groups.\n",
 							},
+							"dra": schema.BoolAttribute{
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Enables Dynamic Resource Allocation for this GPU node group.\n   For nodes whose image contains preinstalled NVIDIA drivers, disables the legacy NVIDIA device plugin.\n   For GPU nodes attached to a Compute GPU cluster, advertises RDMA capability through the managed DRANet DaemonSet.\n",
+							},
 						},
 						Computed:            true,
 						MarkdownDescription: ":\n\n   GPU-related settings.\n   \n   #### Inner value description\n   \n   GPU-related settings.\n",
@@ -307,6 +311,17 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   the Nebius service account whose credentials will be available on the nodes of the group.\n   With these credentials, it is possible to make `nebius` CLI or public API requests from the nodes\n   without the need for extra authentication.\n   This service account is also used to make requests to container registry.\n   \n   `resource.serviceaccount.issueAccessToken` permission is required to use this field.\n",
 					},
+					"instance_metadata": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"labels": schema.MapAttribute{
+								ElementType:         types.StringType,
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Labels propagated into Compute Instance metadata.\n   Provider-managed labels take precedence over user-provided instance labels.\n",
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: "Metadata propagated to the Compute Instances in the NodeGroup.",
+					},
 					"preemptible": schema.SingleNestedAttribute{
 						Attributes:          map[string]schema.Attribute{},
 						Computed:            true,
@@ -370,26 +385,6 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 					"max_pods": schema.Int64Attribute{
 						Computed:            true,
 						MarkdownDescription: ":\n\n   The maximum number of Pods per node for your cluster. If omitted, MK8S assigns the default value of 110. When you\n   configure the maximum number of Pods per node for the cluster, MK8S uses this value to allocate a CIDR range for every node\n   in group. The node CIDR prefix is calculated as `32 - ceil(log2(2 * max_pods))`, i.e. the smallest IPv4 subnet whose total address\n   count is at least `2 * max_pods`. Not all IPs are usable for workload Pods because some of them are consumed by system Pods.\n",
-					},
-					"on_demand": schema.SingleNestedAttribute{
-						Attributes:          map[string]schema.Attribute{},
-						Computed:            true,
-						MarkdownDescription: ":\n\n   A regular, non-preemptible VM.\n   \n   *Cannot be set alongside follows_spot_price or spot_pricing_policy.*\n",
-					},
-					"follows_spot_price": schema.SingleNestedAttribute{
-						Attributes:          map[string]schema.Attribute{},
-						Computed:            true,
-						MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price.\n   \n   *Cannot be set alongside on_demand or spot_pricing_policy.*\n",
-					},
-					"spot_pricing_policy": schema.SingleNestedAttribute{
-						Attributes: map[string]schema.Attribute{
-							"id": schema.StringAttribute{
-								Computed:            true,
-								MarkdownDescription: "PricingPolicy ID used as the maximum agreed price for the preemptible VM.",
-							},
-						},
-						Computed:            true,
-						MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected\n   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.\n   \n   *Cannot be set alongside on_demand or follows_spot_price.*\n",
 					},
 				},
 				Computed:            true,
@@ -886,8 +881,16 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 								MarkdownDescription: ":\n\n   Identifier of the predefined set of drivers included in the ComputeImage deployed on ComputeInstances that are part of the NodeGroup.\n   Supported presets depend on the platform and Kubernetes version.\n   To get the up-to-date list of supported presets for a given Kubernetes version and platform, run:\n   nebius mk8s node-group get-compatibility-matrix --cluster-kubernetes-version VERSION --platform PLATFORM\n   Leave empty for GPU nodes that do not have preinstalled drivers, including DRA-enabled node groups.\n",
 								PlanModifiers:       []planmodifier.String{},
 							},
+							"dra": schema1.BoolAttribute{
+								Validators:          []validator.Bool{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Enables Dynamic Resource Allocation for this GPU node group.\n   For nodes whose image contains preinstalled NVIDIA drivers, disables the legacy NVIDIA device plugin.\n   For GPU nodes attached to a Compute GPU cluster, advertises RDMA capability through the managed DRANet DaemonSet.\n",
+								PlanModifiers:       []planmodifier.Bool{},
+							},
 						},
 						Validators:          []validator.Object{},
+						Computed:            true,
 						Optional:            true,
 						MarkdownDescription: ":\n\n   GPU-related settings.\n   \n   #### Inner value description\n   \n   GPU-related settings.\n",
 						PlanModifiers:       []planmodifier.Object{},
@@ -1019,6 +1022,21 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						MarkdownDescription: ":\n\n   the Nebius service account whose credentials will be available on the nodes of the group.\n   With these credentials, it is possible to make `nebius` CLI or public API requests from the nodes\n   without the need for extra authentication.\n   This service account is also used to make requests to container registry.\n   \n   `resource.serviceaccount.issueAccessToken` permission is required to use this field.\n",
 						PlanModifiers:       []planmodifier.String{},
 					},
+					"instance_metadata": schema1.SingleNestedAttribute{
+						Attributes: map[string]schema1.Attribute{
+							"labels": schema1.MapAttribute{
+								ElementType:         types.StringType,
+								Validators:          []validator.Map{},
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Labels propagated into Compute Instance metadata.\n   Provider-managed labels take precedence over user-provided instance labels.\n",
+								PlanModifiers:       []planmodifier.Map{},
+							},
+						},
+						Validators:          []validator.Object{},
+						Optional:            true,
+						MarkdownDescription: "Metadata propagated to the Compute Instances in the NodeGroup.",
+						PlanModifiers:       []planmodifier.Object{},
+					},
 					"preemptible": schema1.SingleNestedAttribute{
 						Attributes:          map[string]schema1.Attribute{},
 						Validators:          []validator.Object{},
@@ -1138,54 +1156,6 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						Optional:            true,
 						MarkdownDescription: ":\n\n   The maximum number of Pods per node for your cluster. If omitted, MK8S assigns the default value of 110. When you\n   configure the maximum number of Pods per node for the cluster, MK8S uses this value to allocate a CIDR range for every node\n   in group. The node CIDR prefix is calculated as `32 - ceil(log2(2 * max_pods))`, i.e. the smallest IPv4 subnet whose total address\n   count is at least `2 * max_pods`. Not all IPs are usable for workload Pods because some of them are consumed by system Pods.\n",
 						PlanModifiers:       []planmodifier.Int64{},
-					},
-					"on_demand": schema1.SingleNestedAttribute{
-						Attributes: map[string]schema1.Attribute{},
-						Validators: []validator.Object{
-							validators.OneofValidator([]string{
-								"on_demand",
-								"follows_spot_price",
-								"spot_pricing_policy",
-							}, fieldNameMapNodeGroup),
-						},
-						Optional:            true,
-						MarkdownDescription: ":\n\n   A regular, non-preemptible VM.\n   \n   *Cannot be set alongside follows_spot_price or spot_pricing_policy.*\n",
-						PlanModifiers:       []planmodifier.Object{},
-					},
-					"follows_spot_price": schema1.SingleNestedAttribute{
-						Attributes: map[string]schema1.Attribute{},
-						Validators: []validator.Object{
-							validators.OneofValidator([]string{
-								"on_demand",
-								"follows_spot_price",
-								"spot_pricing_policy",
-							}, fieldNameMapNodeGroup),
-						},
-						Optional:            true,
-						MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price.\n   \n   *Cannot be set alongside on_demand or spot_pricing_policy.*\n",
-						PlanModifiers:       []planmodifier.Object{},
-					},
-					"spot_pricing_policy": schema1.SingleNestedAttribute{
-						Attributes: map[string]schema1.Attribute{
-							"id": schema1.StringAttribute{
-								Validators: []validator.String{
-									validators.NIDValidator(),
-								},
-								Required:            true,
-								MarkdownDescription: "PricingPolicy ID used as the maximum agreed price for the preemptible VM.",
-								PlanModifiers:       []planmodifier.String{},
-							},
-						},
-						Validators: []validator.Object{
-							validators.OneofValidator([]string{
-								"on_demand",
-								"follows_spot_price",
-								"spot_pricing_policy",
-							}, fieldNameMapNodeGroup),
-						},
-						Optional:            true,
-						MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected\n   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.\n   \n   *Cannot be set alongside on_demand or follows_spot_price.*\n",
-						PlanModifiers:       []planmodifier.Object{},
 					},
 				},
 				Validators:          []validator.Object{},

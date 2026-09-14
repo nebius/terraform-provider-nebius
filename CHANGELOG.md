@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.56 (September 14, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.65`.
+
+BREAKING CHANGES:
+
+* Changed attributes for resource [nebius_compute_v1_instance](./docs/resources/compute_v1_instance.md):
+    * Removed: `follows_spot_price`, `on_demand`, `spot_pricing_policy`
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group.md):
+    * Added: `template.gpu_settings.dra`, `template.instance_metadata`
+    * Removed: `template.follows_spot_price`, `template.on_demand`, `template.spot_pricing_policy`
+    * Became computed: `template.gpu_settings`
+* Changed attributes for resource [nebius_vpc_v1_network](./docs/resources/vpc_v1_network.md):
+    * Removed: `status.default`
+* Changed attributes for resource [nebius_vpc_v1_subnet](./docs/resources/vpc_v1_subnet.md):
+    * Removed: `status.default`
+* Changed attributes for data source [nebius_compute_v1_instance](./docs/data-sources/compute_v1_instance.md):
+    * Removed: `follows_spot_price`, `on_demand`, `spot_pricing_policy`
+* Changed attributes for data source [nebius_iam_v1_project](./docs/data-sources/iam_v1_project.md):
+    * Removed: `status.generation`
+* Changed attributes for data source [nebius_iam_v1_tenant](./docs/data-sources/iam_v1_tenant.md):
+    * Removed: `status.generation`
+* Changed attributes for data source [nebius_mk8s_v1_node_group](./docs/data-sources/mk8s_v1_node_group.md):
+    * Added: `template.gpu_settings.dra`, `template.instance_metadata`
+    * Removed: `template.follows_spot_price`, `template.on_demand`, `template.spot_pricing_policy`
+* Changed attributes for data source [nebius_vpc_v1_network](./docs/data-sources/vpc_v1_network.md):
+    * Removed: `status.default`
+* Changed attributes for data source [nebius_vpc_v1_subnet](./docs/data-sources/vpc_v1_subnet.md):
+    * Removed: `status.default`
+
 ## 0.6.55 (September 10, 2026)
 
 NOTES:

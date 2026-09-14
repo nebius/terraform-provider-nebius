@@ -146,7 +146,6 @@ Read-Only:
 
 Read-Only:
 
-- `default` (Boolean) Indicates whether this is the project's default network.
 - `default_route_table_id` (String) ID of the network's default route table.
 - `state` (String) :
 
