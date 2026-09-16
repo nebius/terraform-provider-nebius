@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.57 (September 16, 2026)
+
+NOTES:
+
+* deps: Update `buf.build/go/protovalidate` from `v1.3.0` to `v1.4.0`.
+* provider: Update Nebius Go SDK to `v0.2.66`.
+* deps: Update `google.golang.org/genproto/googleapis/rpc` from `v0.0.0-20260526163538-3dc84a4a5aaa` to `v0.0.0-20260819154853-08b0e4226688`.
+
 ## 0.6.56 (September 14, 2026)
 
 NOTES:
