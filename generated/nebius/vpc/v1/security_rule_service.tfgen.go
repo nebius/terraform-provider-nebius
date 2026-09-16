@@ -318,7 +318,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Priority of the rule. Valid range: 0-1000.\n   Optional. If not specified or set to 0, defaults to 500.\n   Rules are evaluated in priority order (lower numbers first) using a first-match algorithm:\n   only the first matching rule takes effect (ALLOW or DENY), and subsequent rules are skipped.\n   \n   When multiple rules share the same priority, DENY rules are evaluated before ALLOW rules.\n   The final evaluation order is reflected in 'effective_priority' (see SecurityRuleStatus).\n",
 				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.RequiresReplace(),
+					int64planmodifier.RequiresReplaceIfConfigured(),
 				},
 			},
 			"protocol": schema1.StringAttribute{
@@ -435,7 +435,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 				Optional:            true,
 				MarkdownDescription: ":\n\n   Type of the rule (STATEFUL or STATELESS)\n   Default value is STATEFUL\n   \n   #### Supported values\n   \n   RuleType specifies whether the security rule is stateful or stateless.\n   Possible values:\n   \n   - `RULE_TYPE_UNSPECIFIED`\n   - `STATEFUL`\n   - `STATELESS`\n   \n",
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
+					stringplanmodifier.RequiresReplaceIfConfigured(),
 				},
 			},
 			"status": schema1.SingleNestedAttribute{

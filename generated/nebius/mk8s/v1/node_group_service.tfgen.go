@@ -14,6 +14,7 @@ import (
 	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	types "github.com/hashicorp/terraform-plugin-framework/types"
 	basetypes "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	grpcheader "github.com/nebius/gosdk/proto/fieldmask/grpcheader"
 	mask "github.com/nebius/gosdk/proto/fieldmask/mask"
 	v1 "github.com/nebius/gosdk/proto/nebius/common/v1"
 	v11 "github.com/nebius/gosdk/proto/nebius/mk8s/v1"
@@ -1453,6 +1454,10 @@ func (r *serviceNodeGroup) WriteOnlyFields() (*mask.Mask, error) {
 	return nil, nil
 }
 
+func (r *serviceNodeGroup) RecreateOnChangeFields() (*mask.Mask, error) {
+	return mask.Parse("metadata.parent_id,spec.template.nvlink.nvl_instance_group_id")
+}
+
 func (r *serviceNodeGroup) StatusMessage() proto.Message {
 	return &v11.NodeGroupStatus{}
 }
@@ -1469,6 +1474,40 @@ func (r *serviceNodeGroup) SpecMessage() proto.Message {
 
 func (r *serviceNodeGroup) GetAdditionalGetters() map[string]service.AdditionalGetter {
 	return map[string]service.AdditionalGetter{}
+}
+
+func (r *serviceNodeGroup) PreflightCheck(ctx context.Context, preflightContext *v1.PreflightCheckContext, metadata *v1.ResourceMetadata, spec proto.Message) (*v1.PreflightCheckResult, *requestcontext.Context, error) {
+	service := v12.NewNodeGroupService(r.provider.SDK())
+	reqCtx := &requestcontext.Context{}
+	specTyped, ok := spec.(*v11.NodeGroupSpec)
+	if !ok {
+		return nil, reqCtx, fmt.Errorf("wrong spec message type %q, expecting nebius.mk8s.v1.NodeGroupSpec", spec.ProtoReflect().Descriptor().FullName())
+	}
+	if preflightContext.GetAction() == v1.PreflightCheckContext_UPDATE {
+		updateReq := &v11.UpdateNodeGroupRequest{
+			Spec:     specTyped,
+			Metadata: metadata,
+		}
+		var err error
+		ctx, err = grpcheader.EnsureMessageResetMaskInOutgoingContext(ctx, updateReq)
+		if err != nil {
+			return nil, reqCtx, fmt.Errorf("add update reset mask: %w", err)
+		}
+	}
+	req := &v11.PreflightCheckNodeGroupRequest{
+		Context:  preflightContext,
+		Metadata: metadata,
+		Spec:     specTyped,
+	}
+	response, err := service.PreflightCheck(ctx, req, reqCtx.MainRequestOptions()...)
+	if err != nil {
+		return nil, reqCtx, fmt.Errorf("service preflight check: %w", err)
+	}
+	return &v1.PreflightCheckResult{
+		Diagnostics:          response.GetDiagnostics(),
+		PathsRequireRecreate: response.GetPathsRequireRecreate(),
+		RequiresUserApproval: response.GetRequiresUserApproval(),
+	}, reqCtx, nil
 }
 
 func (r *serviceNodeGroup) Read(ctx context.Context, id string) (*v1.ResourceMetadata, proto.Message, proto.Message, *requestcontext.Context, error) {

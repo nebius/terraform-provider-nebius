@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.31.0
 	github.com/hashicorp/terraform-plugin-log v0.11.0
 	github.com/hashicorp/terraform-plugin-testing v1.16.0
-	github.com/nebius/gosdk v0.2.65
+	github.com/nebius/gosdk v0.2.66
 	github.com/osteele/liquid v1.9.2
 	github.com/stretchr/testify v1.12.1
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260819154853-08b0e4226688
