@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.58 (September 16, 2026)
+
+BUG FIXES:
+
+* Revert the provider code changes from v0.6.57 and restore Nebius Go SDK v0.2.65.
+
 ## 0.6.57 (September 16, 2026)
 
 NOTES:

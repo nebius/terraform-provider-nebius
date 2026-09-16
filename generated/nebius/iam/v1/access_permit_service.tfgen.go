@@ -133,7 +133,7 @@ func (r *serviceAccessPermit) ResourceSchema() schema1.Schema {
 				Optional:            true,
 				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n",
 				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplaceIfConfigured(),
+					objectplanmodifier.RequiresReplace(),
 				},
 			},
 			"id": schema1.StringAttribute{
@@ -168,7 +168,7 @@ func (r *serviceAccessPermit) ResourceSchema() schema1.Schema {
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n",
 				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.RequiresReplaceIfConfigured(),
+					int64planmodifier.RequiresReplace(),
 				},
 			},
 			"created_at": schema1.StringAttribute{
@@ -176,7 +176,7 @@ func (r *serviceAccessPermit) ResourceSchema() schema1.Schema {
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Timestamp indicating when the resource was created.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplaceIfConfigured(),
+					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"updated_at": schema1.StringAttribute{
@@ -184,7 +184,7 @@ func (r *serviceAccessPermit) ResourceSchema() schema1.Schema {
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Timestamp indicating when the resource was last updated.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplaceIfConfigured(),
+					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"labels": schema1.MapAttribute{
