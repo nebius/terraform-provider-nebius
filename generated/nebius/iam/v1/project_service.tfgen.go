@@ -121,6 +121,7 @@ func (r *serviceProject) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "",
 			},
 		},
+		DeprecationMessage:  "Supported until 2026-12-16. Project service v1 API is deprecated. Please use the v2 API instead. All projects remain accessible through the v2 API.",
 		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n",
 	}
 	return ret

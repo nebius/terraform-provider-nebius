@@ -111,6 +111,7 @@ func (r *serviceTenant) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "",
 			},
 		},
+		DeprecationMessage:  "Supported until 2026-12-16. Tenant service v1 API is deprecated. Please use the v2 API instead. All tenants remain accessible through the v2 API.",
 		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by only ID.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n",
 	}
 	return ret
