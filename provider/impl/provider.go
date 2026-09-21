@@ -68,10 +68,11 @@ func New() func() provider.Provider {
 }
 
 type internalProvider struct {
-	sdk                 *gosdk.SDK
-	versionedEphemerals map[string]attr.Value
-	defaultLabels       types.Map
-	parentID            types.String
+	disablePreflightChecks bool
+	sdk                    *gosdk.SDK
+	versionedEphemerals    map[string]attr.Value
+	defaultLabels          types.Map
+	parentID               types.String
 }
 
 var _ provider.ProviderWithEphemeralResources = (*internalProvider)(nil)
@@ -106,30 +107,35 @@ type addressOptions struct {
 	NoTLSVerify types.Bool `tfsdk:"no_tls_verify"`
 }
 type config struct {
-	AddressOptions      types.Map         `tfsdk:"address_options"`
-	Token               types.String      `tfsdk:"token"`
-	NoCredentials       types.Bool        `tfsdk:"no_credentials"`
-	Resolvers           types.Map         `tfsdk:"resolvers"`
-	ResolversEnv        types.String      `tfsdk:"resolvers_env"`
-	Domain              types.String      `tfsdk:"domain"`
-	DomainEnv           types.String      `tfsdk:"domain_env"`
-	AddressTemplate     types.Object      `tfsdk:"address_template"`
-	AddressTemplateEnv  types.String      `tfsdk:"address_template_env"`
-	Impersonate         types.String      `tfsdk:"impersonate_service_account_id"`
-	ServiceAccount      types.Object      `tfsdk:"service_account"`
-	ModuleName          types.String      `tfsdk:"module_name"`
-	VersionedEphemerals types.Dynamic     `tfsdk:"versioned_ephemeral_values"`
-	DefaultLabels       types.Map         `tfsdk:"default_labels"`
-	ParentID            types.String      `tfsdk:"parent_id"`
-	Profile             types.Object      `tfsdk:"profile"`
-	Timeout             duration.Duration `tfsdk:"timeout"`
-	AuthTimeout         duration.Duration `tfsdk:"auth_timeout"`
-	PerRetryTimeout     duration.Duration `tfsdk:"per_retry_timeout"`
-	Retries             types.Int64       `tfsdk:"retries"`
+	DisablePreflightChecks types.Bool        `tfsdk:"disable_preflight_checks"`
+	AddressOptions         types.Map         `tfsdk:"address_options"`
+	Token                  types.String      `tfsdk:"token"`
+	NoCredentials          types.Bool        `tfsdk:"no_credentials"`
+	Resolvers              types.Map         `tfsdk:"resolvers"`
+	ResolversEnv           types.String      `tfsdk:"resolvers_env"`
+	Domain                 types.String      `tfsdk:"domain"`
+	DomainEnv              types.String      `tfsdk:"domain_env"`
+	AddressTemplate        types.Object      `tfsdk:"address_template"`
+	AddressTemplateEnv     types.String      `tfsdk:"address_template_env"`
+	Impersonate            types.String      `tfsdk:"impersonate_service_account_id"`
+	ServiceAccount         types.Object      `tfsdk:"service_account"`
+	ModuleName             types.String      `tfsdk:"module_name"`
+	VersionedEphemerals    types.Dynamic     `tfsdk:"versioned_ephemeral_values"`
+	DefaultLabels          types.Map         `tfsdk:"default_labels"`
+	ParentID               types.String      `tfsdk:"parent_id"`
+	Profile                types.Object      `tfsdk:"profile"`
+	Timeout                duration.Duration `tfsdk:"timeout"`
+	AuthTimeout            duration.Duration `tfsdk:"auth_timeout"`
+	PerRetryTimeout        duration.Duration `tfsdk:"per_retry_timeout"`
+	Retries                types.Int64       `tfsdk:"retries"`
 }
 
 func (p *internalProvider) SDK() *gosdk.SDK {
 	return p.sdk
+}
+
+func (p *internalProvider) PreflightChecksDisabled() bool {
+	return p.disablePreflightChecks
 }
 
 func (p *internalProvider) DefaultLabels() types.Map {
@@ -169,6 +175,11 @@ func (p *internalProvider) Schema(
 			"token": schema.StringAttribute{
 				Optional:    true,
 				Description: "authenticate using this IAM token",
+			},
+			"disable_preflight_checks": schema.BoolAttribute{
+				Optional: true,
+				Description: "Disable server-side preflight checks for both plan and apply. Defaults to false. " +
+					"API requests during apply can still fail validation.",
 			},
 			"no_credentials": schema.BoolAttribute{
 				Optional:    true,
@@ -652,6 +663,14 @@ func (p *internalProvider) Configure(
 ) {
 	var data config
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	p.disablePreflightChecks = data.DisablePreflightChecks.ValueBool()
+	if p.disablePreflightChecks {
+		tflog.Warn(ctx, "Preflight checks are disabled")
+		resp.Diagnostics.AddWarning(
+			"Preflight checks are disabled",
+			"The provider will skip server-side preflight checks for both plan and apply. API requests during apply can still fail validation.",
+		)
+	}
 	p.defaultLabels = data.DefaultLabels
 	p.parentID = types.StringNull()
 

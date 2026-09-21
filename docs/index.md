@@ -53,6 +53,7 @@ provider "nebius" {
 - `address_template_env` (String) env variable name to obtain address template in form of `FIND=REPLACE`
 - `auth_timeout` (String) timeout for each Nebius SDK request including authentication, default 15m0s, as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`
 - `default_labels` (Map of String) Labels to apply by default to managed resources that support labels. Resource labels override matching provider labels.
+- `disable_preflight_checks` (Boolean) Disable server-side preflight checks for both plan and apply. Defaults to false. API requests during apply can still fail validation.
 - `domain` (String) custom domain name (overrides domain_env)
 - `domain_env` (String) env variable name to obtain custom domain name
 - `impersonate_service_account_id` (String) Service account ID to impersonate.

@@ -1,4 +1,4 @@
-package monitoring
+package billing
 
 import (
 	datasource "github.com/hashicorp/terraform-plugin-framework/datasource"

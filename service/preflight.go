@@ -12,6 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
@@ -135,6 +137,9 @@ func (r *commonResource) preflightPlan(
 			}
 		}
 	}
+	if r.provider.PreflightChecksDisabled() {
+		return nil, nil
+	}
 	checkContext := &common.PreflightCheckContext{
 		Action:               action,
 		Tool:                 "terraform",
@@ -143,6 +148,9 @@ func (r *commonResource) preflightPlan(
 	}
 
 	result, reqCtx, err := preflight.PreflightCheck(ctx, checkContext, metadata, spec)
+	if status.Code(err) == codes.Unimplemented {
+		return reqCtx, nil
+	}
 	if err != nil {
 		resp.Diagnostics = ErrorToDiag(
 			resp.Diagnostics, err, "resource preflight check failed",
@@ -179,6 +187,9 @@ func (r *commonResource) preflightPlan(
 		ctx, recreateContext, metadata, spec,
 	)
 	reqCtx = requestcontext.MergeContexts(recreateReqCtx, reqCtx)
+	if status.Code(err) == codes.Unimplemented {
+		return reqCtx, nil
+	}
 	if err != nil {
 		resp.Diagnostics = ErrorToDiag(
 			resp.Diagnostics, err, "resource recreate preflight check failed",

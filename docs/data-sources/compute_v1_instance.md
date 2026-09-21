@@ -70,6 +70,11 @@ data ... {
    
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `filesystems` (Attributes List) List of Shared Filesystems attached to the instance. (see [below for nested schema](#nestedatt--filesystems))
+- `follows_spot_price` (Attributes) :
+
+   The preemptible VM accepts the current spot price.
+   
+   *Cannot be set alongside on_demand or spot_pricing_policy.* (see [below for nested schema](#nestedatt--follows_spot_price))
 - `gpu_cluster` (Attributes) :
 
    If you want to interconnect several instances in a GPU cluster via NVIDIA InfiniBand,
@@ -102,6 +107,11 @@ data ... {
    
    Describes the specification of a network interface. (see [below for nested schema](#nestedatt--network_interfaces))
 - `nvl_instance_group_id` (String) NVLink Instance Group ID associated with the VM
+- `on_demand` (Attributes) :
+
+   A regular, non-preemptible VM.
+   
+   *Cannot be set alongside follows_spot_price or spot_pricing_policy.* (see [below for nested schema](#nestedatt--on_demand))
 - `preemptible` (Attributes) :
 
    Set this field to create a preemptible VM, or omit it to create a regular VM.
@@ -142,6 +152,12 @@ data ... {
 
    Unique identifier of the service account associated with this instance.
    For details, see https://docs.nebius.com/iam/service-accounts/manage
+- `spot_pricing_policy` (Attributes) :
+
+   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected
+   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.
+   
+   *Cannot be set alongside on_demand or follows_spot_price.* (see [below for nested schema](#nestedatt--spot_pricing_policy))
 - `status` (Attributes) (see [below for nested schema](#nestedatt--status))
 - `stopped` (Boolean) Indicates whether the instance should be stopped.
 - `updated_at` (String) :
@@ -334,6 +350,10 @@ Read-Only:
 
 
 
+<a id="nestedatt--follows_spot_price"></a>
+### Nested Schema for `follows_spot_price`
+
+
 <a id="nestedatt--gpu_cluster"></a>
 ### Nested Schema for `gpu_cluster`
 
@@ -445,6 +465,10 @@ Read-Only:
 
 - `id` (String) Security group identifier
 
+
+
+<a id="nestedatt--on_demand"></a>
+### Nested Schema for `on_demand`
 
 
 <a id="nestedatt--preemptible"></a>
@@ -659,6 +683,14 @@ Read-Only:
 
 
 
+
+
+<a id="nestedatt--spot_pricing_policy"></a>
+### Nested Schema for `spot_pricing_policy`
+
+Read-Only:
+
+- `id` (String) PricingPolicy ID used as the maximum agreed price for the preemptible VM.
 
 
 <a id="nestedatt--status"></a>

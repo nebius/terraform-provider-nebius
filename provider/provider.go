@@ -11,4 +11,5 @@ type Provider interface {
 	DefaultLabels() types.Map
 	DefaultParentID() types.String
 	WriteOnlyFieldsSupported() bool
+	PreflightChecksDisabled() bool
 }

@@ -1,7 +1,7 @@
-package nebius
+package billing
 
 import (
-	child "github.com/nebius/terraform-provider-nebius/generated/nebius/monitoring"
+	child "github.com/nebius/terraform-provider-nebius/generated/nebius/billing/v1"
 )
 
 func init() { //nolint: gochecknoinits // registry dynamic registration

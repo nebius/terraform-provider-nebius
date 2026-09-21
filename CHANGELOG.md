@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.59 (September 21, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.67`.
+
+FEATURES:
+
+* Added new resources and data sources: [nebius_billing_v1_pricing_policy](./docs/resources/billing_v1_pricing_policy.md).
+
+IMPROVEMENTS:
+
+* Deprecated data sources: [nebius_iam_v1_project](./docs/data-sources/iam_v1_project.md), [nebius_iam_v1_tenant](./docs/data-sources/iam_v1_tenant.md).
+* Changed [provider](docs/index.md) attributes:
+    * Added: `disable_preflight_checks`
+* Changed attributes for resource [nebius_compute_v1_instance](./docs/resources/compute_v1_instance.md):
+    * Added: `follows_spot_price`, `on_demand`, `spot_pricing_policy`
+* Changed attributes for data source [nebius_compute_v1_instance](./docs/data-sources/compute_v1_instance.md):
+    * Added: `follows_spot_price`, `on_demand`, `spot_pricing_policy`
+
+BREAKING CHANGES:
+
+* Removed resources and data sources: `nebius_monitoring_v1_recording_rule`.
+
 ## 0.6.58 (September 16, 2026)
 
 BUG FIXES:
