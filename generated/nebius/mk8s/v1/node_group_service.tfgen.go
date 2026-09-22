@@ -387,6 +387,26 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   The maximum number of Pods per node for your cluster. If omitted, MK8S assigns the default value of 110. When you\n   configure the maximum number of Pods per node for the cluster, MK8S uses this value to allocate a CIDR range for every node\n   in group. The node CIDR prefix is calculated as `32 - ceil(log2(2 * max_pods))`, i.e. the smallest IPv4 subnet whose total address\n   count is at least `2 * max_pods`. Not all IPs are usable for workload Pods because some of them are consumed by system Pods.\n",
 					},
+					"on_demand": schema.SingleNestedAttribute{
+						Attributes:          map[string]schema.Attribute{},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   A regular, non-preemptible VM.\n   \n   *Cannot be set alongside follows_spot_price or spot_pricing_policy.*\n",
+					},
+					"follows_spot_price": schema.SingleNestedAttribute{
+						Attributes:          map[string]schema.Attribute{},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price.\n   \n   *Cannot be set alongside on_demand or spot_pricing_policy.*\n",
+					},
+					"spot_pricing_policy": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"id": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: "PricingPolicy ID used as the maximum agreed price for the preemptible VM.",
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected\n   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.\n   \n   *Cannot be set alongside on_demand or follows_spot_price.*\n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Parameters for Kubernetes Node object and Nebius Compute Instance\n   If not written opposite a NodeTemplate field update will cause NodeGroup roll-out according NodeGroupDeploymentStrategy.\n",
@@ -1157,6 +1177,54 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						Optional:            true,
 						MarkdownDescription: ":\n\n   The maximum number of Pods per node for your cluster. If omitted, MK8S assigns the default value of 110. When you\n   configure the maximum number of Pods per node for the cluster, MK8S uses this value to allocate a CIDR range for every node\n   in group. The node CIDR prefix is calculated as `32 - ceil(log2(2 * max_pods))`, i.e. the smallest IPv4 subnet whose total address\n   count is at least `2 * max_pods`. Not all IPs are usable for workload Pods because some of them are consumed by system Pods.\n",
 						PlanModifiers:       []planmodifier.Int64{},
+					},
+					"on_demand": schema1.SingleNestedAttribute{
+						Attributes: map[string]schema1.Attribute{},
+						Validators: []validator.Object{
+							validators.OneofValidator([]string{
+								"on_demand",
+								"follows_spot_price",
+								"spot_pricing_policy",
+							}, fieldNameMapNodeGroup),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   A regular, non-preemptible VM.\n   \n   *Cannot be set alongside follows_spot_price or spot_pricing_policy.*\n",
+						PlanModifiers:       []planmodifier.Object{},
+					},
+					"follows_spot_price": schema1.SingleNestedAttribute{
+						Attributes: map[string]schema1.Attribute{},
+						Validators: []validator.Object{
+							validators.OneofValidator([]string{
+								"on_demand",
+								"follows_spot_price",
+								"spot_pricing_policy",
+							}, fieldNameMapNodeGroup),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price.\n   \n   *Cannot be set alongside on_demand or spot_pricing_policy.*\n",
+						PlanModifiers:       []planmodifier.Object{},
+					},
+					"spot_pricing_policy": schema1.SingleNestedAttribute{
+						Attributes: map[string]schema1.Attribute{
+							"id": schema1.StringAttribute{
+								Validators: []validator.String{
+									validators.NIDValidator(),
+								},
+								Required:            true,
+								MarkdownDescription: "PricingPolicy ID used as the maximum agreed price for the preemptible VM.",
+								PlanModifiers:       []planmodifier.String{},
+							},
+						},
+						Validators: []validator.Object{
+							validators.OneofValidator([]string{
+								"on_demand",
+								"follows_spot_price",
+								"spot_pricing_policy",
+							}, fieldNameMapNodeGroup),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected\n   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.\n   \n   *Cannot be set alongside on_demand or follows_spot_price.*\n",
+						PlanModifiers:       []planmodifier.Object{},
 					},
 				},
 				Validators:          []validator.Object{},
