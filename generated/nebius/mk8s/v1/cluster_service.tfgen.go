@@ -128,7 +128,7 @@ func (r *serviceCluster) DataSourceSchema() schema.Schema {
 									"allowed_cidrs": schema.ListAttribute{
 										ElementType:         types.StringType,
 										Computed:            true,
-										MarkdownDescription: ":\n\n   List of CIDR blocks from which access to public endpoint is allowed.\n   If field is not set, or list is empty, it means that access is not restricted at all.\n",
+										MarkdownDescription: ":\n\n   List of CIDR blocks from which access to public endpoint is allowed.\n   If field is not set, or list is empty, it means that access is not restricted at all.\n   You can specify a maximum of 8 CIDRs.\n",
 									},
 								},
 								Computed:            true,
@@ -363,7 +363,7 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 											validators.ProtoFieldValidator(&v11.PublicEndpointSpec{}, "allowed_cidrs", "allowed_cidrs", fieldNameMapCluster),
 										},
 										Optional:            true,
-										MarkdownDescription: ":\n\n   List of CIDR blocks from which access to public endpoint is allowed.\n   If field is not set, or list is empty, it means that access is not restricted at all.\n",
+										MarkdownDescription: ":\n\n   List of CIDR blocks from which access to public endpoint is allowed.\n   If field is not set, or list is empty, it means that access is not restricted at all.\n   You can specify a maximum of 8 CIDRs.\n",
 										PlanModifiers:       []planmodifier.List{},
 									},
 								},
