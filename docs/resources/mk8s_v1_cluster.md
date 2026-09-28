@@ -126,6 +126,7 @@ Optional:
 
    List of CIDR blocks from which access to public endpoint is allowed.
    If field is not set, or list is empty, it means that access is not restricted at all.
+   You can specify a maximum of 8 CIDRs.
 
 
 
