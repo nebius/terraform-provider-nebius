@@ -16,7 +16,7 @@ require (
 	github.com/osteele/liquid v1.9.2
 	github.com/stretchr/testify v1.12.1
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260819154853-08b0e4226688
-	google.golang.org/grpc v1.83.2
+	google.golang.org/grpc v1.84.0
 	google.golang.org/protobuf v1.36.12
 )
 
