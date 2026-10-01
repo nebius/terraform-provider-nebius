@@ -145,8 +145,8 @@ Read-Only:
    - `SCHEDULING_STATE_UNSPECIFIED`
    - `SCHEDULING_STATE_ALLOWED` - New VMs may start.
    - `SCHEDULING_STATE_BLOCKED`:
-      The max_price limit is below the current market price; VM creation succeeds once
-      the price falls to it.
+      The max_price limit is below the market price in force or below a market price
+      that is being applied; VM creation succeeds once the price falls to it.
 - `sku_id` (String) SKU resolved from the spec.
 - `state` (String) :
 
@@ -155,7 +155,12 @@ Read-Only:
    Possible values:
    
    - `STATE_UNSPECIFIED`
-   - `STATE_CREATING` - Not ready yet; a VM referencing the policy gets a retryable error.
+   - `STATE_CREATING`:
+      Not ready yet; a VM referencing the policy gets a retryable error.
+      The state can last while a market price change is applied to the segment.
+   
    - `STATE_ACTIVE` - Ready; whether VMs may start is `scheduling_state`.
    - `STATE_DELETING` - Being deleted; does not accept new VMs.
-   - `STATE_UPDATING` - The bid is being changed; scheduling is blocked until the change lands.
+   - `STATE_UPDATING`:
+      The bid is being changed; scheduling is blocked until the change lands.
+      The state can last while a market price change is applied to the segment.
