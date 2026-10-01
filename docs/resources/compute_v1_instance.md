@@ -186,7 +186,10 @@ Required:
 
 Optional:
 
-- `device_id` (String) Specifies the user-defined identifier, allowing to use '/dev/disk/by-id/virtio-{device_id}' as a device path in mount command.
+- `device_id` (String) :
+
+   Specifies the user-defined device identifier.
+   Use `/dev/disk/by-id/virtio-{device_id}` as the device path in a mount command.
 - `existing_disk` (Attributes) :
 
    Attach an existing disk.
@@ -571,7 +574,10 @@ Required:
 
 Optional:
 
-- `device_id` (String) Specifies the user-defined identifier, allowing to use '/dev/disk/by-id/virtio-{device_id}' as a device path in mount command.
+- `device_id` (String) :
+
+   Specifies the user-defined device identifier.
+   Use `/dev/disk/by-id/virtio-{device_id}` as the device path in a mount command.
 - `existing_disk` (Attributes) :
 
    Attach an existing disk.

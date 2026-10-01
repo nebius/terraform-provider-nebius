@@ -275,6 +275,7 @@
     "generated/nebius/monitoring/v1/alert_rule_service.tfgen.go",
     "generated/nebius/monitoring/v1/recording_rule_service.tfgen.go",
     "generated/nebius/monitoring/v1/registry.tfgenx.go",
+    "generated/nebius/monitoring/v1/scrape_config_service.tfgen.go",
     "generated/nebius/msp.tfgen.go",
     "generated/nebius/msp/airflow.tfgen.go",
     "generated/nebius/msp/airflow/registry.tfgenx.go",

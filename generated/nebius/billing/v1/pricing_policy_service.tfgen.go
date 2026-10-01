@@ -147,7 +147,7 @@ func (r *servicePricingPolicy) DataSourceSchema() schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STATE_UNSPECIFIED`\n   - `STATE_CREATING` - Not ready yet; a VM referencing the policy gets a retryable error.\n   - `STATE_ACTIVE` - Ready; whether VMs may start is `scheduling_state`.\n   - `STATE_DELETING` - Being deleted; does not accept new VMs.\n   - `STATE_UPDATING` - The bid is being changed; scheduling is blocked until the change lands.\n   \n",
+						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STATE_UNSPECIFIED`\n   - `STATE_CREATING`:\n      Not ready yet; a VM referencing the policy gets a retryable error.\n      The state can last while a market price change is applied to the segment.\n   \n   - `STATE_ACTIVE` - Ready; whether VMs may start is `scheduling_state`.\n   - `STATE_DELETING` - Being deleted; does not accept new VMs.\n   - `STATE_UPDATING`:\n      The bid is being changed; scheduling is blocked until the change lands.\n      The state can last while a market price change is applied to the segment.\n   \n   \n",
 					},
 					"sku_id": schema.StringAttribute{
 						Computed:            true,
@@ -155,7 +155,7 @@ func (r *servicePricingPolicy) DataSourceSchema() schema.Schema {
 					},
 					"scheduling_state": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Whether new VMs may currently start under this policy.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `SCHEDULING_STATE_UNSPECIFIED`\n   - `SCHEDULING_STATE_ALLOWED` - New VMs may start.\n   - `SCHEDULING_STATE_BLOCKED`:\n      The max_price limit is below the current market price; VM creation succeeds once\n      the price falls to it.\n   \n   \n",
+						MarkdownDescription: ":\n\n   Whether new VMs may currently start under this policy.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `SCHEDULING_STATE_UNSPECIFIED`\n   - `SCHEDULING_STATE_ALLOWED` - New VMs may start.\n   - `SCHEDULING_STATE_BLOCKED`:\n      The max_price limit is below the market price in force or below a market price\n      that is being applied; VM creation succeeds once the price falls to it.\n   \n   \n",
 					},
 					"running_vm_count": schema.Int64Attribute{
 						Computed:            true,
@@ -295,7 +295,7 @@ func (r *servicePricingPolicy) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"state": schema1.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STATE_UNSPECIFIED`\n   - `STATE_CREATING` - Not ready yet; a VM referencing the policy gets a retryable error.\n   - `STATE_ACTIVE` - Ready; whether VMs may start is `scheduling_state`.\n   - `STATE_DELETING` - Being deleted; does not accept new VMs.\n   - `STATE_UPDATING` - The bid is being changed; scheduling is blocked until the change lands.\n   \n",
+						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STATE_UNSPECIFIED`\n   - `STATE_CREATING`:\n      Not ready yet; a VM referencing the policy gets a retryable error.\n      The state can last while a market price change is applied to the segment.\n   \n   - `STATE_ACTIVE` - Ready; whether VMs may start is `scheduling_state`.\n   - `STATE_DELETING` - Being deleted; does not accept new VMs.\n   - `STATE_UPDATING`:\n      The bid is being changed; scheduling is blocked until the change lands.\n      The state can last while a market price change is applied to the segment.\n   \n   \n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"sku_id": schema1.StringAttribute{
@@ -305,7 +305,7 @@ func (r *servicePricingPolicy) ResourceSchema() schema1.Schema {
 					},
 					"scheduling_state": schema1.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Whether new VMs may currently start under this policy.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `SCHEDULING_STATE_UNSPECIFIED`\n   - `SCHEDULING_STATE_ALLOWED` - New VMs may start.\n   - `SCHEDULING_STATE_BLOCKED`:\n      The max_price limit is below the current market price; VM creation succeeds once\n      the price falls to it.\n   \n   \n",
+						MarkdownDescription: ":\n\n   Whether new VMs may currently start under this policy.\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `SCHEDULING_STATE_UNSPECIFIED`\n   - `SCHEDULING_STATE_ALLOWED` - New VMs may start.\n   - `SCHEDULING_STATE_BLOCKED`:\n      The max_price limit is below the market price in force or below a market price\n      that is being applied; VM creation succeeds once the price falls to it.\n   \n   \n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"running_vm_count": schema1.Int64Attribute{
