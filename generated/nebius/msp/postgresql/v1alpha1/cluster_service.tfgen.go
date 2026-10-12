@@ -60,6 +60,10 @@ func (r *serviceCluster) GetName() string {
 }
 
 func (r *serviceCluster) ParentTypes() []string {
+	return []string{"project"}
+}
+
+func (r *serviceCluster) GetByNameParentTypes() []string {
 	return []string{"*"}
 }
 

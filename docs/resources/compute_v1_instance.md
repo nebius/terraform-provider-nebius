@@ -359,7 +359,6 @@ Required:
    Interface name
    Value of this field configures the name of the network interface inside VM's OS.
    Longer values will persist in the specification but will be truncated to 15 symbols before being passed to VM configuration.
-- `subnet_id` (String) Subnet ID
 
 Optional:
 
@@ -376,6 +375,7 @@ Optional:
    Security groups associated with the network interface.
    If an empty list is provided, the default security group for the network will be used.
    Effective security groups can be seen in the status. (see [below for nested schema](#nestedatt--network_interfaces--security_groups))
+- `subnet_id` (String) Subnet ID
 
 <a id="nestedatt--network_interfaces--ip_address"></a>
 ### Nested Schema for `network_interfaces.ip_address`
