@@ -466,6 +466,7 @@
     "generated/nebius/storage/v1/registry.tfgenx.go",
     "generated/nebius/storage/v1/transfer_service.tfgen.go",
     "generated/nebius/storage/v1alpha1.tfgen.go",
+    "generated/nebius/storage/v1alpha1/cache_service.tfgen.go",
     "generated/nebius/storage/v1alpha1/registry.tfgenx.go",
     "generated/nebius/storage/v1alpha1/transfer_service.tfgen.go",
     "generated/nebius/tunnel.tfgen.go",

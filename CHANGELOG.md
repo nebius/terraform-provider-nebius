@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.68 (October 12, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.76`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_compute_v1_instance](./docs/resources/compute_v1_instance.md):
+    * Became optional: `network_interfaces.subnet_id`
+
 ## 0.6.67 (October 7, 2026)
 
 NOTES:

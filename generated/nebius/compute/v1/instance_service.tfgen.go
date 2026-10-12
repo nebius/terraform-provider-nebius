@@ -792,7 +792,7 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 							Validators: []validator.String{
 								validators.NIDValidator(),
 							},
-							Required:            true,
+							Optional:            true,
 							MarkdownDescription: "Subnet ID",
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.RequiresReplace(),
