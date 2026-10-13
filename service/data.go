@@ -276,6 +276,7 @@ func metadataFromTFWithUnknowns(
 func objectWithEffectiveLabels(
 	ctx context.Context,
 	data types.Object,
+	requireKnown bool,
 ) (types.Object, diag.Diagnostics) {
 	attrs := data.Attributes()
 	labelsAll, hasLabelsAll := attrs[constants.FieldLabelsAll]
@@ -298,7 +299,7 @@ func objectWithEffectiveLabels(
 	diags := provider.ValidateLabels(
 		labelsAllMap,
 		path.Root(constants.FieldLabelsAll),
-		true,
+		requireKnown,
 	)
 	if diags.HasError() {
 		return data, diags
@@ -320,6 +321,10 @@ func requestMessagesFromTF(
 	spec proto.Message,
 	nameMap map[string]map[string]string,
 ) (*common.ResourceMetadata, diag.Diagnostics) {
+	data, diags := objectWithEffectiveLabels(ctx, data, true)
+	if diags.HasError() {
+		return nil, diags
+	}
 	metadata, _, diags := requestMessagesFromTFWithUnknowns(ctx, data, spec, nameMap)
 	return metadata, diags
 }
@@ -330,7 +335,7 @@ func requestMessagesFromTFWithUnknowns(
 	spec proto.Message,
 	nameMap map[string]map[string]string,
 ) (*common.ResourceMetadata, *mask.Mask, diag.Diagnostics) {
-	requestData, diags := objectWithEffectiveLabels(ctx, data)
+	requestData, diags := objectWithEffectiveLabels(ctx, data, false)
 	if diags.HasError() {
 		return nil, nil, diags
 	}

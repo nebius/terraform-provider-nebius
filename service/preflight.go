@@ -218,6 +218,18 @@ func (r *commonResource) unknownsFromConfig(
 	if data.IsUnknown() {
 		return mask.New(), diags
 	}
+	if labels, ok := data.Attributes()[constants.FieldLabels].(types.Map); ok {
+		effectiveLabels, innerDiags := mergeDefaultLabels(r.provider.DefaultLabels(), labels)
+		diags.Append(innerDiags...)
+		if innerDiags.HasError() {
+			return nil, diags
+		}
+		data, innerDiags = objectWithResourceLabels(ctx, data, effectiveLabels)
+		diags.Append(innerDiags...)
+		if innerDiags.HasError() {
+			return nil, diags
+		}
+	}
 
 	nameMap := r.implementation.FieldNameMap()
 	_, metadataUnknowns, innerDiags := metadataFromTFWithUnknowns(ctx, data, nameMap)
