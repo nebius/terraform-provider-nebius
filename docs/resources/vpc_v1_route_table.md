@@ -81,6 +81,10 @@ Read-Only:
    
    - `STATE_UNSPECIFIED` - The state is unknown or not yet set.
    - `READY` - The route table is configured and operational.
+   - `CREATING` - The route table is being created.
+   - `RECONCILING` - The route table is reconciling changes after it has been created.
+   - `DELETING` - The route table is being deleted.
+   - `FAILED` - Reconciliation stopped because of an error.
 
 <a id="nestedatt--status--assignment"></a>
 ### Nested Schema for `status.assignment`
