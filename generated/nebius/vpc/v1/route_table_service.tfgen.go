@@ -118,7 +118,7 @@ func (r *serviceRouteTable) DataSourceSchema() schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Current state of the route table.\n   \n   #### Supported values\n   \n   State indicates the current operational state of the route table.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - The state is unknown or not yet set.\n   - `READY` - The route table is configured and operational.\n   \n",
+						MarkdownDescription: ":\n\n   Current state of the route table.\n   \n   #### Supported values\n   \n   State indicates the current operational state of the route table.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - The state is unknown or not yet set.\n   - `READY` - The route table is configured and operational.\n   - `CREATING` - The route table is being created.\n   - `RECONCILING` - The route table is reconciling changes after it has been created.\n   - `DELETING` - The route table is being deleted.\n   - `FAILED` - Reconciliation stopped because of an error.\n   \n",
 					},
 					"default": schema.BoolAttribute{
 						Computed:            true,
@@ -225,7 +225,7 @@ func (r *serviceRouteTable) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"state": schema1.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Current state of the route table.\n   \n   #### Supported values\n   \n   State indicates the current operational state of the route table.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - The state is unknown or not yet set.\n   - `READY` - The route table is configured and operational.\n   \n",
+						MarkdownDescription: ":\n\n   Current state of the route table.\n   \n   #### Supported values\n   \n   State indicates the current operational state of the route table.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - The state is unknown or not yet set.\n   - `READY` - The route table is configured and operational.\n   - `CREATING` - The route table is being created.\n   - `RECONCILING` - The route table is reconciling changes after it has been created.\n   - `DELETING` - The route table is being deleted.\n   - `FAILED` - Reconciliation stopped because of an error.\n   \n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"default": schema1.BoolAttribute{

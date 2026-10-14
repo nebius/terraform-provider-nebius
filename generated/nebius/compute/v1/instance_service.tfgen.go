@@ -72,7 +72,9 @@ func (r *serviceInstance) DataSourceSchema() schema.Schema {
 				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n",
 			},
 			"id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
@@ -1498,8 +1500,10 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"reservation_ids": schema1.ListAttribute{
-						ElementType:         types.StringType,
-						Validators:          []validator.List{},
+						ElementType: types.StringType,
+						Validators: []validator.List{
+							validators.ListNIDValidator(),
+						},
 						Optional:            true,
 						MarkdownDescription: "Capacity block groups, order matters",
 						PlanModifiers:       []planmodifier.List{},
@@ -1563,7 +1567,9 @@ func (r *serviceInstance) ResourceSchema() schema1.Schema {
 			"spot_pricing_policy": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{
 					"id": schema1.StringAttribute{
-						Validators:          []validator.String{},
+						Validators: []validator.String{
+							validators.NIDValidator(),
+						},
 						Required:            true,
 						MarkdownDescription: "PricingPolicy ID used as the maximum agreed price for the preemptible VM.",
 						PlanModifiers:       []planmodifier.String{},

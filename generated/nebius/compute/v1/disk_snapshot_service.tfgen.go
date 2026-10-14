@@ -70,7 +70,9 @@ func (r *serviceDiskSnapshot) DataSourceSchema() schema.Schema {
 				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Common resource metadata.\n",
 			},
 			"id": schema.StringAttribute{
-				Validators:          []validator.String{},
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
 				Computed:            true,
 				Optional:            true,
 				MarkdownDescription: "Identifier for the resource, unique for its resource type.",
