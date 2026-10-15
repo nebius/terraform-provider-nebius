@@ -122,7 +122,7 @@ func (r *serviceAsymmetricKey) DataSourceSchema() schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   State (ACTIVE, SCHEDULED_FOR_DELETION)\n   \n   #### Supported values\n   \n   Key state\n   Possible values:\n   \n   - `KEY_STATE_UNSPECIFIED`\n   - `ACTIVE` - Key is active, ready for use\n   - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.\n   \n",
+						MarkdownDescription: ":\n\n   State (ACTIVE, SCHEDULED_FOR_DELETION).\n   \n   #### Supported values\n   \n   Key state\n   Possible values:\n   \n   - `KEY_STATE_UNSPECIFIED`\n   - `ACTIVE` - Key is active, ready for use\n   - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.\n   - `PENDING_IMPORT`\n   \n",
 					},
 					"deleted_at": schema.StringAttribute{
 						CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
@@ -139,7 +139,7 @@ func (r *serviceAsymmetricKey) DataSourceSchema() schema.Schema {
 				MarkdownDescription: "The current status of the asymmetric key.",
 			},
 		},
-		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n\n\nAn asymmetric KMS key that may contain several versions of the cryptographic material.",
+		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n\n\nAn asymmetric KMS key that contains at most one key pair.",
 	}
 	return ret
 }
@@ -233,7 +233,7 @@ func (r *serviceAsymmetricKey) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"state": schema1.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   State (ACTIVE, SCHEDULED_FOR_DELETION)\n   \n   #### Supported values\n   \n   Key state\n   Possible values:\n   \n   - `KEY_STATE_UNSPECIFIED`\n   - `ACTIVE` - Key is active, ready for use\n   - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.\n   \n",
+						MarkdownDescription: ":\n\n   State (ACTIVE, SCHEDULED_FOR_DELETION).\n   \n   #### Supported values\n   \n   Key state\n   Possible values:\n   \n   - `KEY_STATE_UNSPECIFIED`\n   - `ACTIVE` - Key is active, ready for use\n   - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.\n   - `PENDING_IMPORT`\n   \n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"deleted_at": schema1.StringAttribute{
@@ -254,7 +254,7 @@ func (r *serviceAsymmetricKey) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.Object{},
 			},
 		},
-		MarkdownDescription: "An asymmetric KMS key that may contain several versions of the cryptographic material.",
+		MarkdownDescription: "An asymmetric KMS key that contains at most one key pair.",
 	}
 	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
 	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())

@@ -127,7 +127,7 @@ func (r *serviceSymmetricKey) DataSourceSchema() schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   State (ACTIVE, SCHEDULED_FOR_DELETION).\n   \n   #### Supported values\n   \n   Key state\n   Possible values:\n   \n   - `KEY_STATE_UNSPECIFIED`\n   - `ACTIVE` - Key is active, ready for use\n   - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.\n   \n",
+						MarkdownDescription: ":\n\n   State (ACTIVE, SCHEDULED_FOR_DELETION).\n   \n   #### Supported values\n   \n   Key state\n   Possible values:\n   \n   - `KEY_STATE_UNSPECIFIED`\n   - `ACTIVE` - Key is active, ready for use\n   - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.\n   - `PENDING_IMPORT`\n   \n",
 					},
 					"deleted_at": schema.StringAttribute{
 						CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
@@ -248,7 +248,7 @@ func (r *serviceSymmetricKey) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"state": schema1.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   State (ACTIVE, SCHEDULED_FOR_DELETION).\n   \n   #### Supported values\n   \n   Key state\n   Possible values:\n   \n   - `KEY_STATE_UNSPECIFIED`\n   - `ACTIVE` - Key is active, ready for use\n   - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.\n   \n",
+						MarkdownDescription: ":\n\n   State (ACTIVE, SCHEDULED_FOR_DELETION).\n   \n   #### Supported values\n   \n   Key state\n   Possible values:\n   \n   - `KEY_STATE_UNSPECIFIED`\n   - `ACTIVE` - Key is active, ready for use\n   - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.\n   - `PENDING_IMPORT`\n   \n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"deleted_at": schema1.StringAttribute{

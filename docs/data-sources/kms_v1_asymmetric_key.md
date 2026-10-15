@@ -18,7 +18,7 @@ description: |-
       parent_id = "data-source-parent-id"
   }
   
-  An asymmetric KMS key that may contain several versions of the cryptographic material.
+  An asymmetric KMS key that contains at most one key pair.
 ---
 
 # nebius_kms_v1_asymmetric_key Data Source
@@ -49,7 +49,7 @@ data ... {
 ```
 
 
-An asymmetric KMS key that may contain several versions of the cryptographic material.
+An asymmetric KMS key that contains at most one key pair.
 
 
 
@@ -124,7 +124,7 @@ Read-Only:
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `state` (String) :
 
-   State (ACTIVE, SCHEDULED_FOR_DELETION)
+   State (ACTIVE, SCHEDULED_FOR_DELETION).
    
    #### Supported values
    
@@ -134,3 +134,4 @@ Read-Only:
    - `KEY_STATE_UNSPECIFIED`
    - `ACTIVE` - Key is active, ready for use
    - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.
+   - `PENDING_IMPORT`
