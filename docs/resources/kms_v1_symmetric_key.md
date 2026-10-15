@@ -102,3 +102,4 @@ Read-Only:
    - `KEY_STATE_UNSPECIFIED`
    - `ACTIVE` - Key is active, ready for use
    - `SCHEDULED_FOR_DELETION` - Key is scheduled for deletion.
+   - `PENDING_IMPORT`

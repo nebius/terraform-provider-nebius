@@ -18,7 +18,7 @@ description: |-
       parent_id = "data-source-parent-id"
   }
   
-  How preemptible VMs are priced: a standing per-GPU bid for one (region, platform).
+  How preemptible VMs are priced: a per-GPU maximum price for one (region, platform).
   One policy backs any number of VMs, referenced by id from the preemptible spec.
   A VM without a policy is a price-taker and pays the market price.
 ---
@@ -51,7 +51,7 @@ data ... {
 ```
 
 
-How preemptible VMs are priced: a standing per-GPU bid for one (region, platform).
+How preemptible VMs are priced: a per-GPU maximum price for one (region, platform).
 One policy backs any number of VMs, referenced by id from the preemptible spec.
 A VM without a policy is a price-taker and pays the market price.
 
@@ -140,12 +140,12 @@ Read-Only:
 
 - `max_price_v1` (Attributes) :
 
-   Auction bid: the per-GPU `max_price` ranks the policy's VMs for
-   scheduling and preemption.
+   Maximum price: the per-GPU `max_price` sets the priority of the policy's
+   VMs for scheduling and preemption.
    
    #### Inner value description
    
-   Auction-bid pricing. (see [below for nested schema](#nestedatt--pricing--max_price_v1))
+   Pricing with a per-GPU maximum price. (see [below for nested schema](#nestedatt--pricing--max_price_v1))
 
 <a id="nestedatt--pricing--max_price_v1"></a>
 ### Nested Schema for `pricing.max_price_v1`
@@ -201,5 +201,6 @@ Read-Only:
    - `STATE_ACTIVE` - Ready; whether VMs may start is `scheduling_state`.
    - `STATE_DELETING` - Being deleted; does not accept new VMs.
    - `STATE_UPDATING`:
-      The bid is being changed; scheduling is blocked until the change lands.
+      The max_price is being changed; scheduling is blocked until the change
+      is applied.
       The state can last while a market price change is applied to the segment.

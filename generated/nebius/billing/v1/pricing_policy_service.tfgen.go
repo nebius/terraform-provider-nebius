@@ -137,7 +137,7 @@ func (r *servicePricingPolicy) DataSourceSchema() schema.Schema {
 							},
 						},
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Auction bid: the per-GPU `max_price` ranks the policy's VMs for\n   scheduling and preemption.\n   \n   #### Inner value description\n   \n   Auction-bid pricing.\n",
+						MarkdownDescription: ":\n\n   Maximum price: the per-GPU `max_price` sets the priority of the policy's\n   VMs for scheduling and preemption.\n   \n   #### Inner value description\n   \n   Pricing with a per-GPU maximum price.\n",
 					},
 				},
 				Computed:            true,
@@ -147,7 +147,7 @@ func (r *servicePricingPolicy) DataSourceSchema() schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STATE_UNSPECIFIED`\n   - `STATE_CREATING`:\n      Not ready yet; a VM referencing the policy gets a retryable error.\n      The state can last while a market price change is applied to the segment.\n   \n   - `STATE_ACTIVE` - Ready; whether VMs may start is `scheduling_state`.\n   - `STATE_DELETING` - Being deleted; does not accept new VMs.\n   - `STATE_UPDATING`:\n      The bid is being changed; scheduling is blocked until the change lands.\n      The state can last while a market price change is applied to the segment.\n   \n   \n",
+						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STATE_UNSPECIFIED`\n   - `STATE_CREATING`:\n      Not ready yet; a VM referencing the policy gets a retryable error.\n      The state can last while a market price change is applied to the segment.\n   \n   - `STATE_ACTIVE` - Ready; whether VMs may start is `scheduling_state`.\n   - `STATE_DELETING` - Being deleted; does not accept new VMs.\n   - `STATE_UPDATING`:\n      The max_price is being changed; scheduling is blocked until the change\n      is applied.\n      The state can last while a market price change is applied to the segment.\n   \n   \n",
 					},
 					"sku_id": schema.StringAttribute{
 						Computed:            true,
@@ -170,7 +170,7 @@ func (r *servicePricingPolicy) DataSourceSchema() schema.Schema {
 				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Observed state of a pricing policy.\n",
 			},
 		},
-		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n\n\nHow preemptible VMs are priced: a standing per-GPU bid for one (region, platform).\nOne policy backs any number of VMs, referenced by id from the preemptible spec.\nA VM without a policy is a price-taker and pays the market price.",
+		MarkdownDescription: "#### Retrieving the Data Source\n\nThis data source can be retrieved by one of ID or name.\n\n##### Retrieve by ID\n\nTo retrieve by ID, fill in only the `id` field:\n\n```hcl\ndata ... {\n    id = \"your-ID\"\n}\n```\n\n##### Retrieve by Name\n\nTo retrieve by name, fill in only the `name` and `parent_id` fields:\n\n```hcl\ndata ... {\n    name      = \"your name\"\n    parent_id = \"data-source-parent-id\"\n}\n```\n\n\nHow preemptible VMs are priced: a per-GPU maximum price for one (region, platform).\nOne policy backs any number of VMs, referenced by id from the preemptible spec.\nA VM without a policy is a price-taker and pays the market price.",
 	}
 	return ret
 }
@@ -282,7 +282,7 @@ func (r *servicePricingPolicy) ResourceSchema() schema1.Schema {
 						},
 						Validators:          []validator.Object{},
 						Optional:            true,
-						MarkdownDescription: ":\n\n   Auction bid: the per-GPU `max_price` ranks the policy's VMs for\n   scheduling and preemption.\n   \n   #### Inner value description\n   \n   Auction-bid pricing.\n",
+						MarkdownDescription: ":\n\n   Maximum price: the per-GPU `max_price` sets the priority of the policy's\n   VMs for scheduling and preemption.\n   \n   #### Inner value description\n   \n   Pricing with a per-GPU maximum price.\n",
 						PlanModifiers:       []planmodifier.Object{},
 					},
 				},
@@ -295,7 +295,7 @@ func (r *servicePricingPolicy) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"state": schema1.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STATE_UNSPECIFIED`\n   - `STATE_CREATING`:\n      Not ready yet; a VM referencing the policy gets a retryable error.\n      The state can last while a market price change is applied to the segment.\n   \n   - `STATE_ACTIVE` - Ready; whether VMs may start is `scheduling_state`.\n   - `STATE_DELETING` - Being deleted; does not accept new VMs.\n   - `STATE_UPDATING`:\n      The bid is being changed; scheduling is blocked until the change lands.\n      The state can last while a market price change is applied to the segment.\n   \n   \n",
+						MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `STATE_UNSPECIFIED`\n   - `STATE_CREATING`:\n      Not ready yet; a VM referencing the policy gets a retryable error.\n      The state can last while a market price change is applied to the segment.\n   \n   - `STATE_ACTIVE` - Ready; whether VMs may start is `scheduling_state`.\n   - `STATE_DELETING` - Being deleted; does not accept new VMs.\n   - `STATE_UPDATING`:\n      The max_price is being changed; scheduling is blocked until the change\n      is applied.\n      The state can last while a market price change is applied to the segment.\n   \n   \n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"sku_id": schema1.StringAttribute{
@@ -324,7 +324,7 @@ func (r *servicePricingPolicy) ResourceSchema() schema1.Schema {
 				PlanModifiers:       []planmodifier.Object{},
 			},
 		},
-		MarkdownDescription: "How preemptible VMs are priced: a standing per-GPU bid for one (region, platform).\nOne policy backs any number of VMs, referenced by id from the preemptible spec.\nA VM without a policy is a price-taker and pays the market price.",
+		MarkdownDescription: "How preemptible VMs are priced: a per-GPU maximum price for one (region, platform).\nOne policy backs any number of VMs, referenced by id from the preemptible spec.\nA VM without a policy is a price-taker and pays the market price.",
 	}
 	parentIDAttribute := ret.Attributes["parent_id"].(schema1.StringAttribute)
 	parentIDAttribute.Default = service.NewDefaultParent(r.provider, r.ParentTypes())
