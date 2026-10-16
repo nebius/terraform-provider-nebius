@@ -74,6 +74,15 @@ jobs:
         with:
           terraform_wrapper: false
 
+      - name: Test docs validator installation
+        run: bash .github/scripts/install-docs-validator-test.sh
+
+      - name: Install docs validator
+        run: |
+          cd tools
+          bash ../.github/scripts/install-docs-validator.sh "$RUNNER_TEMP/docs-tools"
+          echo "TFPLUGINDOCS=$RUNNER_TEMP/docs-tools/tfplugindocs" >> "$GITHUB_ENV"
+
       - name: Validate generated docs
         run: make docs-validate
 
@@ -205,6 +214,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Post text to a Slack channel
+        if: ${{ !env.ACT }}
         uses: slackapi/slack-github-action@v3.0.3
         with:
           method: chat.postMessage

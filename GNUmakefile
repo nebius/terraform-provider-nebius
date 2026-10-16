@@ -23,7 +23,11 @@ generate-check: generate
 	git diff --exit-code
 
 docs-validate:
-	cd tools && go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest validate --provider-dir .. --provider-name nebius
+	cd tools && if [ -n "$(TFPLUGINDOCS)" ]; then \
+	  "$(TFPLUGINDOCS)" validate --provider-dir .. --provider-name nebius; \
+	else \
+	  go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@latest validate --provider-dir .. --provider-name nebius; \
+	fi
 
 release-snapshot:
 	goreleaser release --clean --snapshot
