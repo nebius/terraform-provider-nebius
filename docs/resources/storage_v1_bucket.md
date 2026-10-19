@@ -56,6 +56,15 @@ resource "nebius_storage_v1_bucket" "state" {
 - `filesystem_bucket` (Attributes) Bucket that uses the existing client's compute filesystem. (see [below for nested schema](#nestedatt--filesystem_bucket))
 - `force_storage_class` (Boolean) Flag to force usage of default_storage_class, ignoring `x-amz-storage-class` header.
 - `labels` (Map of String) Labels associated with the resource.
+- `last_access` (Attributes) :
+
+   Specifies which requests are included in Last Access tracking, if Last Access tracking is enabled.
+   It does not itself enable Last Access tracking.
+   A non-empty `last_access` overrides `lifecycle_configuration.last_access_filter`.
+   
+   #### Inner value description
+   
+   Specifies which requests are included in Last Access tracking. (see [below for nested schema](#nestedatt--last_access))
 - `lifecycle_configuration` (Attributes) :
 
    #### Inner value description
@@ -228,6 +237,71 @@ Optional:
 
    UID that will be used for write operations to the filesystem.
    By default, root user (UID=0, GID=0) is used.
+
+
+<a id="nestedatt--last_access"></a>
+### Nested Schema for `last_access`
+
+Optional:
+
+- `conditions` (Attributes List) :
+
+   A request is included in Last Access tracking if:
+   - The first condition matching the request has `INCLUDE` type.
+   OR
+   - The request doesn't match any conditions
+   
+   #### Inner value description
+   
+   Specifies conditions to include or exclude request from Last Access tracking. (see [below for nested schema](#nestedatt--last_access--conditions))
+
+<a id="nestedatt--last_access--conditions"></a>
+### Nested Schema for `last_access.conditions`
+
+Required:
+
+- `type` (String) :
+
+   #### Supported values
+   
+   Possible values:
+   
+   - `TYPE_UNSPECIFIED`
+   - `INCLUDE`:
+      If an include type condition is the first condition that the request match, the request will be included in
+      `days_since_last_access` calculation.
+   
+   - `EXCLUDE`:
+      If an exclude type condition is the first condition that the request match, the request will be ignored in `days_since_last_access`
+      calculation.
+
+Optional:
+
+- `methods` (List of String) :
+
+   The s3 methods to match.
+   An empty list matches all methods
+   
+   #### Supported values
+   
+   Possible values:
+   
+   - `METHOD_UNSPECIFIED`
+   - `GET_OBJECT`
+   - `HEAD_OBJECT`
+   - `GET_OBJECT_TAGGING`
+   - `COPY_OBJECT`:
+      Copy object method reads the source object.
+      We account for those operations as source object accesses when calculating `days_since_last_access` for source object.
+   
+   - `UPLOAD_PART_COPY`:
+      Upload part copy method reads the source object.
+      We account for those operations as source object accesses when calculating `days_since_last_access` for source object.
+- `user_agents` (List of String) :
+
+   User agents to match. Condition is satisfied if the request's user agent contains any of these substrings.
+   An empty list matches all user agents.
+
 
 
 <a id="nestedatt--lifecycle_configuration"></a>
