@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.72 (October 19, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.80`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_storage_v1_bucket](./docs/resources/storage_v1_bucket.md):
+    * Added: `last_access`
+* Changed attributes for data source [nebius_storage_v1_bucket](./docs/data-sources/storage_v1_bucket.md):
+    * Added: `last_access`
+
 ## 0.6.71 (October 15, 2026)
 
 NOTES:

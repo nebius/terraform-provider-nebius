@@ -404,6 +404,34 @@ func (r *serviceBucket) DataSourceSchema() schema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Bucket that uses the existing client's compute filesystem.",
 			},
+			"last_access": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"conditions": schema.ListNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"type": schema.StringAttribute{
+									Computed:            true,
+									MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `TYPE_UNSPECIFIED`\n   - `INCLUDE`:\n      If an include type condition is the first condition that the request match, the request will be included in\n      `days_since_last_access` calculation.\n   \n   - `EXCLUDE`:\n      If an exclude type condition is the first condition that the request match, the request will be ignored in `days_since_last_access`\n      calculation.\n   \n   \n",
+								},
+								"methods": schema.ListAttribute{
+									ElementType:         types.StringType,
+									Computed:            true,
+									MarkdownDescription: ":\n\n   The s3 methods to match.\n   An empty list matches all methods\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `METHOD_UNSPECIFIED`\n   - `GET_OBJECT`\n   - `HEAD_OBJECT`\n   - `GET_OBJECT_TAGGING`\n   - `COPY_OBJECT`:\n      Copy object method reads the source object.\n      We account for those operations as source object accesses when calculating `days_since_last_access` for source object.\n   \n   - `UPLOAD_PART_COPY`:\n      Upload part copy method reads the source object.\n      We account for those operations as source object accesses when calculating `days_since_last_access` for source object.\n   \n   \n",
+								},
+								"user_agents": schema.ListAttribute{
+									ElementType:         types.StringType,
+									Computed:            true,
+									MarkdownDescription: ":\n\n   User agents to match. Condition is satisfied if the request's user agent contains any of these substrings.\n   An empty list matches all user agents.\n",
+								},
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   A request is included in Last Access tracking if:\n   - The first condition matching the request has `INCLUDE` type.\n   OR\n   - The request doesn't match any conditions\n   \n   #### Inner value description\n   \n   Specifies conditions to include or exclude request from Last Access tracking.\n",
+					},
+				},
+				Computed:            true,
+				MarkdownDescription: ":\n\n   Specifies which requests are included in Last Access tracking, if Last Access tracking is enabled.\n   It does not itself enable Last Access tracking.\n   A non-empty `last_access` overrides `lifecycle_configuration.last_access_filter`.\n   \n   #### Inner value description\n   \n   Specifies which requests are included in Last Access tracking.\n",
+			},
 			"status": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
 					"counters": schema.ListNestedAttribute{
@@ -1123,6 +1151,53 @@ func (r *serviceBucket) ResourceSchema() schema1.Schema {
 				Validators:          []validator.Object{},
 				Optional:            true,
 				MarkdownDescription: "Bucket that uses the existing client's compute filesystem.",
+				PlanModifiers:       []planmodifier.Object{},
+			},
+			"last_access": schema1.SingleNestedAttribute{
+				Attributes: map[string]schema1.Attribute{
+					"conditions": schema1.ListNestedAttribute{
+						NestedObject: schema1.NestedAttributeObject{
+							Attributes: map[string]schema1.Attribute{
+								"type": schema1.StringAttribute{
+									Validators: []validator.String{
+										validators.EnumValidator(v11.LastAccessConfiguration_Condition_Type_value),
+									},
+									Required:            true,
+									MarkdownDescription: ":\n\n   #### Supported values\n   \n   Possible values:\n   \n   - `TYPE_UNSPECIFIED`\n   - `INCLUDE`:\n      If an include type condition is the first condition that the request match, the request will be included in\n      `days_since_last_access` calculation.\n   \n   - `EXCLUDE`:\n      If an exclude type condition is the first condition that the request match, the request will be ignored in `days_since_last_access`\n      calculation.\n   \n   \n",
+									PlanModifiers:       []planmodifier.String{},
+								},
+								"methods": schema1.ListAttribute{
+									ElementType: types.StringType,
+									Validators: []validator.List{
+										validators.ListEnumValidator(v11.LastAccessConfiguration_Condition_Method_value),
+										validators.ProtoFieldValidator(&v11.LastAccessConfiguration_Condition{}, "methods", "methods", fieldNameMapBucket),
+									},
+									Optional:            true,
+									MarkdownDescription: ":\n\n   The s3 methods to match.\n   An empty list matches all methods\n   \n   #### Supported values\n   \n   Possible values:\n   \n   - `METHOD_UNSPECIFIED`\n   - `GET_OBJECT`\n   - `HEAD_OBJECT`\n   - `GET_OBJECT_TAGGING`\n   - `COPY_OBJECT`:\n      Copy object method reads the source object.\n      We account for those operations as source object accesses when calculating `days_since_last_access` for source object.\n   \n   - `UPLOAD_PART_COPY`:\n      Upload part copy method reads the source object.\n      We account for those operations as source object accesses when calculating `days_since_last_access` for source object.\n   \n   \n",
+									PlanModifiers:       []planmodifier.List{},
+								},
+								"user_agents": schema1.ListAttribute{
+									ElementType: types.StringType,
+									Validators: []validator.List{
+										validators.ProtoFieldValidator(&v11.LastAccessConfiguration_Condition{}, "user_agents", "user_agents", fieldNameMapBucket),
+									},
+									Optional:            true,
+									MarkdownDescription: ":\n\n   User agents to match. Condition is satisfied if the request's user agent contains any of these substrings.\n   An empty list matches all user agents.\n",
+									PlanModifiers:       []planmodifier.List{},
+								},
+							},
+						},
+						Validators: []validator.List{
+							validators.ProtoFieldValidator(&v11.LastAccessConfiguration{}, "conditions", "conditions", fieldNameMapBucket),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   A request is included in Last Access tracking if:\n   - The first condition matching the request has `INCLUDE` type.\n   OR\n   - The request doesn't match any conditions\n   \n   #### Inner value description\n   \n   Specifies conditions to include or exclude request from Last Access tracking.\n",
+						PlanModifiers:       []planmodifier.List{},
+					},
+				},
+				Validators:          []validator.Object{},
+				Optional:            true,
+				MarkdownDescription: ":\n\n   Specifies which requests are included in Last Access tracking, if Last Access tracking is enabled.\n   It does not itself enable Last Access tracking.\n   A non-empty `last_access` overrides `lifecycle_configuration.last_access_filter`.\n   \n   #### Inner value description\n   \n   Specifies which requests are included in Last Access tracking.\n",
 				PlanModifiers:       []planmodifier.Object{},
 			},
 			"status": schema1.SingleNestedAttribute{
