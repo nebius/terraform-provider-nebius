@@ -167,8 +167,8 @@ Read-Only:
 
    CIDR blocks as the destination.
    Optional. Empty list means any address.
-   Must be a valid IPv4.
-   Maximum of 8 CIDRs can be specified.
+   Each value must be a valid IPv4 CIDR.
+   Specify at most 8 CIDRs.
 - `destination_ports` (List of Number) :
 
    List of ports to which the rule applies.
@@ -193,8 +193,8 @@ Read-Only:
 
    CIDR blocks as the source.
    Optional. Empty list means any address.
-   Must be a valid IPv4
-   Maximum of 8 CIDRs can be specified.
+   Each value must be a valid IPv4 CIDR.
+   Specify at most 8 CIDRs.
 - `source_security_group_id` (String) ID of the referenced Security Group as the source.
 
 

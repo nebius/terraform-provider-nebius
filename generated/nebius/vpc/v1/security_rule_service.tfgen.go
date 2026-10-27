@@ -134,7 +134,7 @@ func (r *serviceSecurityRule) DataSourceSchema() schema.Schema {
 					"source_cidrs": schema.ListAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						MarkdownDescription: ":\n\n   CIDR blocks as the source.\n   Optional. Empty list means any address.\n   Must be a valid IPv4\n   Maximum of 8 CIDRs can be specified.\n",
+						MarkdownDescription: ":\n\n   CIDR blocks as the source.\n   Optional. Empty list means any address.\n   Each value must be a valid IPv4 CIDR.\n   Specify at most 8 CIDRs.\n",
 					},
 					"destination_ports": schema.ListAttribute{
 						ElementType:         types.Int64Type,
@@ -154,7 +154,7 @@ func (r *serviceSecurityRule) DataSourceSchema() schema.Schema {
 					"destination_cidrs": schema.ListAttribute{
 						ElementType:         types.StringType,
 						Computed:            true,
-						MarkdownDescription: ":\n\n   CIDR blocks as the destination.\n   Optional. Empty list means any address.\n   Must be a valid IPv4.\n   Maximum of 8 CIDRs can be specified.\n",
+						MarkdownDescription: ":\n\n   CIDR blocks as the destination.\n   Optional. Empty list means any address.\n   Each value must be a valid IPv4 CIDR.\n   Specify at most 8 CIDRs.\n",
 					},
 					"destination_ports": schema.ListAttribute{
 						ElementType:         types.Int64Type,
@@ -349,7 +349,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 							validators.ProtoFieldValidator(&v11.RuleIngress{}, "source_cidrs", "source_cidrs", fieldNameMapSecurityRule),
 						},
 						Optional:            true,
-						MarkdownDescription: ":\n\n   CIDR blocks as the source.\n   Optional. Empty list means any address.\n   Must be a valid IPv4\n   Maximum of 8 CIDRs can be specified.\n",
+						MarkdownDescription: ":\n\n   CIDR blocks as the source.\n   Optional. Empty list means any address.\n   Each value must be a valid IPv4 CIDR.\n   Specify at most 8 CIDRs.\n",
 						PlanModifiers: []planmodifier.List{
 							listplanmodifier.RequiresReplace(),
 						},
@@ -397,7 +397,7 @@ func (r *serviceSecurityRule) ResourceSchema() schema1.Schema {
 							validators.ProtoFieldValidator(&v11.RuleEgress{}, "destination_cidrs", "destination_cidrs", fieldNameMapSecurityRule),
 						},
 						Optional:            true,
-						MarkdownDescription: ":\n\n   CIDR blocks as the destination.\n   Optional. Empty list means any address.\n   Must be a valid IPv4.\n   Maximum of 8 CIDRs can be specified.\n",
+						MarkdownDescription: ":\n\n   CIDR blocks as the destination.\n   Optional. Empty list means any address.\n   Each value must be a valid IPv4 CIDR.\n   Specify at most 8 CIDRs.\n",
 						PlanModifiers: []planmodifier.List{
 							listplanmodifier.RequiresReplace(),
 						},
