@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.77 (October 29, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.86`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_mk8s_v1_cluster](./docs/resources/mk8s_v1_cluster.md):
+    * Became optional: `control_plane.subnet_id`
+    * Became computed: `control_plane.subnet_id`
+
 ## 0.6.76 (October 28, 2026)
 
 NOTES:

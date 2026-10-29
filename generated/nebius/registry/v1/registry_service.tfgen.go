@@ -116,7 +116,7 @@ func (r *serviceRegistry) DataSourceSchema() schema.Schema {
 			},
 			"images_count": schema.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: "Registry.Type type = 2;",
+				MarkdownDescription: "",
 			},
 			"status": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
@@ -216,7 +216,7 @@ func (r *serviceRegistry) ResourceSchema() schema1.Schema {
 			},
 			"images_count": schema1.Int64Attribute{
 				Computed:            true,
-				MarkdownDescription: "Registry.Type type = 2;",
+				MarkdownDescription: "",
 				PlanModifiers:       []planmodifier.Int64{},
 			},
 			"status": schema1.SingleNestedAttribute{
