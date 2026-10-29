@@ -70,13 +70,6 @@ resource "nebius_mk8s_v1_cluster" "cluster" {
 <a id="nestedatt--control_plane"></a>
 ### Nested Schema for `control_plane`
 
-Required:
-
-- `subnet_id` (String) :
-
-   Nebius VPC Subnet ID where control plane instances will be located.
-   Also will be default NodeGroup subnet.
-
 Optional:
 
 - `audit_logs` (Attributes) :
@@ -99,6 +92,11 @@ Optional:
    Please note that there is no feature parity between Karpenter node pools and
    public node groups.
    By default cluster will be created without it. (see [below for nested schema](#nestedatt--control_plane--karpenter))
+- `subnet_id` (String) :
+
+   Nebius VPC Subnet ID where control plane instances will be located.
+   If it isn't specified default network of the parent container will be used.
+   Also will be default NodeGroup subnet.
 - `version` (String) :
 
    Desired Kubernetes version of the cluster. May be lower than the actual cluster version

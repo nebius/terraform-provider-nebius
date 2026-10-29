@@ -119,7 +119,7 @@ func (r *serviceCluster) DataSourceSchema() schema.Schema {
 					},
 					"subnet_id": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Nebius VPC Subnet ID where control plane instances will be located.\n   Also will be default NodeGroup subnet.\n",
+						MarkdownDescription: ":\n\n   Nebius VPC Subnet ID where control plane instances will be located.\n   If it isn't specified default network of the parent container will be used.\n   Also will be default NodeGroup subnet.\n",
 					},
 					"endpoints": schema.SingleNestedAttribute{
 						Attributes: map[string]schema.Attribute{
@@ -347,10 +347,11 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 						Validators: []validator.String{
 							validators.NIDValidator(),
 						},
-						Required:            true,
-						MarkdownDescription: ":\n\n   Nebius VPC Subnet ID where control plane instances will be located.\n   Also will be default NodeGroup subnet.\n",
+						Computed:            true,
+						Optional:            true,
+						MarkdownDescription: ":\n\n   Nebius VPC Subnet ID where control plane instances will be located.\n   If it isn't specified default network of the parent container will be used.\n   Also will be default NodeGroup subnet.\n",
 						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.RequiresReplace(),
+							stringplanmodifier.RequiresReplaceIfConfigured(),
 						},
 					},
 					"endpoints": schema1.SingleNestedAttribute{

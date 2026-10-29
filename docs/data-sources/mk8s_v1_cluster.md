@@ -113,6 +113,7 @@ Read-Only:
 - `subnet_id` (String) :
 
    Nebius VPC Subnet ID where control plane instances will be located.
+   If it isn't specified default network of the parent container will be used.
    Also will be default NodeGroup subnet.
 - `version` (String) :
 
