@@ -407,6 +407,16 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected\n   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.\n   \n   *Cannot be set alongside on_demand or follows_spot_price.*\n",
 					},
+					"container_runtime": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"soci_pull_mode": schema.StringAttribute{
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Uses SOCI Snapshotter to pull images.\n   \n   #### Supported values\n   \n   Image pull modes for SOCI Snapshotter\n   Possible values:\n   \n   - `SOCI_PULL_MODE_UNSPECIFIED` - Uses the default containerd pull.\n   - `LAZY` - Uses SOCI Snapshotter to fetch image layers on demand.\n   - `PARALLEL` - Uses SOCI Snapshotter to download and unpack image layers in parallel.\n   \n",
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Configures container runtime for the node group.\n   \n   #### Inner value description\n   \n   Configures container runtime for the node group.\n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Parameters for Kubernetes Node object and Nebius Compute Instance\n   If not written opposite a NodeTemplate field update will cause NodeGroup roll-out according NodeGroupDeploymentStrategy.\n",
@@ -1224,6 +1234,22 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   The preemptible VM accepts the current spot price unless it exceeds the maximum price specified by the selected\n   pricing policy. When the spot price exceeds that maximum price, the VM is preempted.\n   \n   *Cannot be set alongside on_demand or follows_spot_price.*\n",
+						PlanModifiers:       []planmodifier.Object{},
+					},
+					"container_runtime": schema1.SingleNestedAttribute{
+						Attributes: map[string]schema1.Attribute{
+							"soci_pull_mode": schema1.StringAttribute{
+								Validators: []validator.String{
+									validators.EnumValidator(v11.ContainerRuntime_SOCIPullMode_value),
+								},
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Uses SOCI Snapshotter to pull images.\n   \n   #### Supported values\n   \n   Image pull modes for SOCI Snapshotter\n   Possible values:\n   \n   - `SOCI_PULL_MODE_UNSPECIFIED` - Uses the default containerd pull.\n   - `LAZY` - Uses SOCI Snapshotter to fetch image layers on demand.\n   - `PARALLEL` - Uses SOCI Snapshotter to download and unpack image layers in parallel.\n   \n",
+								PlanModifiers:       []planmodifier.String{},
+							},
+						},
+						Validators:          []validator.Object{},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   Configures container runtime for the node group.\n   \n   #### Inner value description\n   \n   Configures container runtime for the node group.\n",
 						PlanModifiers:       []planmodifier.Object{},
 					},
 				},
