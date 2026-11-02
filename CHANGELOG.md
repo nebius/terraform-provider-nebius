@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.78 (November 2, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.87`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group.md):
+    * Added: `template.container_runtime`
+* Changed attributes for data source [nebius_mk8s_v1_node_group](./docs/data-sources/mk8s_v1_node_group.md):
+    * Added: `template.container_runtime`
+
 ## 0.6.77 (October 29, 2026)
 
 NOTES:

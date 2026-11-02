@@ -119,6 +119,13 @@ Optional:
 
    cloud-init user-data
    Should contain at least one SSH key.
+- `container_runtime` (Attributes) :
+
+   Configures container runtime for the node group.
+   
+   #### Inner value description
+   
+   Configures container runtime for the node group. (see [below for nested schema](#nestedatt--template--container_runtime))
 - `filesystems` (Attributes List) :
 
    Static attachments of Compute Filesystem.
@@ -247,6 +254,25 @@ Optional:
    - `DISK_ENCRYPTION_UNSPECIFIED`
    - `DISK_ENCRYPTION_MANAGED`
 
+
+
+<a id="nestedatt--template--container_runtime"></a>
+### Nested Schema for `template.container_runtime`
+
+Optional:
+
+- `soci_pull_mode` (String) :
+
+   Uses SOCI Snapshotter to pull images.
+   
+   #### Supported values
+   
+   Image pull modes for SOCI Snapshotter
+   Possible values:
+   
+   - `SOCI_PULL_MODE_UNSPECIFIED` - Uses the default containerd pull.
+   - `LAZY` - Uses SOCI Snapshotter to fetch image layers on demand.
+   - `PARALLEL` - Uses SOCI Snapshotter to download and unpack image layers in parallel.
 
 
 <a id="nestedatt--template--filesystems"></a>
