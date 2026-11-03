@@ -113,6 +113,7 @@ Read-Only:
 
 Read-Only:
 
+- `default` (Boolean) Indicates whether this is the project's default network.
 - `scope_id` (String) Scope ID of all pools
 - `state` (String) :
 

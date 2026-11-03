@@ -120,6 +120,10 @@ func (r *serviceNetwork) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "Scope ID of all pools",
 					},
+					"default": schema.BoolAttribute{
+						Computed:            true,
+						MarkdownDescription: "Indicates whether this is the project's default network.",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: "Status of the network.",

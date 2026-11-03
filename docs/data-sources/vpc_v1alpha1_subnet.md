@@ -154,6 +154,7 @@ Read-Only:
 
 Read-Only:
 
+- `default` (Boolean) Indicates whether this is the network's default subnet.
 - `ipv4_cidrs` (List of String) CIDR blocks.
 - `state` (String) :
 

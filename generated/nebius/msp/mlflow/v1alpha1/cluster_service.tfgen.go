@@ -408,6 +408,7 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 				"version": schema1.StringAttribute{
 					MarkdownDescription: "The version of the write-only fields combined. You can use a hash here, some number, or a version of the secret from which you pull the value, or you can concatenate all of that together. This field is not sent to the server, but it is stored in the state, so don't store raw secrets here. Changing this field will trigger an update of the resource even if no other fields are changed. Use of this field is not required, but if you do not use it, changes in write-only fields will not trigger updates of the resource by themselves and therefore might not be reflected.",
 					Optional:            true,
+					PlanModifiers:       []planmodifier.String{stringplanmodifier.RequiresReplace()},
 				},
 				"admin_password": schema1.StringAttribute{
 					Validators:          []validator.String{},

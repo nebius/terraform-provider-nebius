@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.79 (November 3, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.88`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_vpc_v1_network](./docs/resources/vpc_v1_network.md):
+    * Added: `status.default`
+* Changed attributes for resource [nebius_vpc_v1_subnet](./docs/resources/vpc_v1_subnet.md):
+    * Added: `status.default`
+* Changed attributes for data source [nebius_iam_v1_auth_public_key](./docs/data-sources/iam_v1_auth_public_key.md):
+    * Became optional: `id`, `name`, `parent_id`
+    * Became computed: `id`
+* Changed attributes for data source [nebius_iam_v2_access_key](./docs/data-sources/iam_v2_access_key.md):
+    * Became optional: `id`, `name`, `parent_id`
+    * Became computed: `id`
+* Changed attributes for data source [nebius_vpc_v1_network](./docs/data-sources/vpc_v1_network.md):
+    * Added: `status.default`
+* Changed attributes for data source [nebius_vpc_v1_subnet](./docs/data-sources/vpc_v1_subnet.md):
+    * Added: `status.default`
+* Changed attributes for data source [nebius_vpc_v1alpha1_network](./docs/data-sources/vpc_v1alpha1_network.md):
+    * Added: `status.default`
+* Changed attributes for data source [nebius_vpc_v1alpha1_subnet](./docs/data-sources/vpc_v1alpha1_subnet.md):
+    * Added: `status.default`
+
 ## 0.6.78 (November 2, 2026)
 
 NOTES:
