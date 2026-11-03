@@ -159,6 +159,10 @@ func (r *serviceSubnet) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "CIDR blocks.",
 					},
+					"default": schema.BoolAttribute{
+						Computed:            true,
+						MarkdownDescription: "Indicates whether this is the network's default subnet.",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: "Status of the subnet.",
