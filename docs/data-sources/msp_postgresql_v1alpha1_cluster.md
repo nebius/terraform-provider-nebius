@@ -74,7 +74,10 @@ data ... {
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `network_id` (String) Network ID in which the cluster is created.
+- `network_id` (String) :
+
+   Network ID in which the cluster is created.
+   If omitted through the public API, the project's default network is used or created.
 - `resource_version` (Number) :
 
    Version of the resource for safe concurrent modifications and consistent reads.

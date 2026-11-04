@@ -122,7 +122,7 @@ func (r *serviceCluster) DataSourceSchema() schema.Schema {
 			},
 			"network_id": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Network ID in which the cluster is created.",
+				MarkdownDescription: ":\n\n   Network ID in which the cluster is created.\n   If omitted through the public API, the project's default network is used or created.\n",
 			},
 			"config": schema.SingleNestedAttribute{
 				Attributes: map[string]schema.Attribute{
@@ -416,10 +416,11 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 			},
 			"network_id": schema1.StringAttribute{
 				Validators:          []validator.String{},
-				Required:            true,
-				MarkdownDescription: "Network ID in which the cluster is created.",
+				Computed:            true,
+				Optional:            true,
+				MarkdownDescription: ":\n\n   Network ID in which the cluster is created.\n   If omitted through the public API, the project's default network is used or created.\n",
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
+					stringplanmodifier.RequiresReplaceIfConfigured(),
 				},
 			},
 			"config": schema1.SingleNestedAttribute{

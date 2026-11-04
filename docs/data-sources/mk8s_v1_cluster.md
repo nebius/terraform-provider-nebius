@@ -94,6 +94,7 @@ Read-Only:
 
    Specify configuration of the pushing k8s audit logs into service logs and show it in the UI.
    By default cluster will be created without it. (see [below for nested schema](#nestedatt--control_plane--audit_logs))
+- `authentication` (Attributes) Configures customer JWT authentication. Requires Kubernetes 1.34 and a compatible control-plane infra version. (see [below for nested schema](#nestedatt--control_plane--authentication))
 - `endpoints` (Attributes) Specification of endpoints of cluster control plane. (see [below for nested schema](#nestedatt--control_plane--endpoints))
 - `etcd_cluster_size` (Number) :
 
@@ -124,6 +125,86 @@ Read-Only:
 
 <a id="nestedatt--control_plane--audit_logs"></a>
 ### Nested Schema for `control_plane.audit_logs`
+
+
+<a id="nestedatt--control_plane--authentication"></a>
+### Nested Schema for `control_plane.authentication`
+
+Read-Only:
+
+- `oidc` (Attributes List) Configures OIDC providers for Kubernetes user authentication. (see [below for nested schema](#nestedatt--control_plane--authentication--oidc))
+
+<a id="nestedatt--control_plane--authentication--oidc"></a>
+### Nested Schema for `control_plane.authentication.oidc`
+
+Read-Only:
+
+- `claim_mappings` (Attributes) Maps token claims to Kubernetes user attributes. (see [below for nested schema](#nestedatt--control_plane--authentication--oidc--claim_mappings))
+- `claim_validation_rules` (Attributes List) Validates token claims before Kubernetes authenticates the user. (see [below for nested schema](#nestedatt--control_plane--authentication--oidc--claim_validation_rules))
+- `issuer` (Attributes) Defines the issuer for accepted tokens. (see [below for nested schema](#nestedatt--control_plane--authentication--oidc--issuer))
+- `name` (String) Identifies this provider within the cluster configuration.
+- `user_validation_rules` (Attributes List) Validates the mapped Kubernetes user information. (see [below for nested schema](#nestedatt--control_plane--authentication--oidc--user_validation_rules))
+
+<a id="nestedatt--control_plane--authentication--oidc--claim_mappings"></a>
+### Nested Schema for `control_plane.authentication.oidc.claim_mappings`
+
+Read-Only:
+
+- `groups` (Attributes) Maps token claims to Kubernetes groups. Omission disables group mapping. (see [below for nested schema](#nestedatt--control_plane--authentication--oidc--claim_mappings--groups))
+- `username` (Attributes) Maps token claims to the Kubernetes username. (see [below for nested schema](#nestedatt--control_plane--authentication--oidc--claim_mappings--username))
+
+<a id="nestedatt--control_plane--authentication--oidc--claim_mappings--groups"></a>
+### Nested Schema for `control_plane.authentication.oidc.claim_mappings.groups`
+
+Read-Only:
+
+- `claim` (String) Names the token claim to map.
+- `expression` (String) Maps token claims with a CEL expression.
+- `prefix` (String) Omission and an empty value disable prefixing for claims. Expressions require omission, including for an empty value.
+
+
+<a id="nestedatt--control_plane--authentication--oidc--claim_mappings--username"></a>
+### Nested Schema for `control_plane.authentication.oidc.claim_mappings.username`
+
+Read-Only:
+
+- `claim` (String) Names the token claim to map.
+- `expression` (String) Maps token claims with a CEL expression.
+- `prefix` (String) Omission and an empty value disable prefixing for claims. Expressions require omission, including for an empty value.
+
+
+
+<a id="nestedatt--control_plane--authentication--oidc--claim_validation_rules"></a>
+### Nested Schema for `control_plane.authentication.oidc.claim_validation_rules`
+
+Read-Only:
+
+- `claim` (String) Names the token claim that must match required_value exactly.
+- `expression` (String) Validates token claims with CEL. The expression must evaluate to true.
+- `message` (String) Describes a failed CEL validation.
+- `required_value` (String) An omitted value matches an empty string, following upstream behavior.
+
+
+<a id="nestedatt--control_plane--authentication--oidc--issuer"></a>
+### Nested Schema for `control_plane.authentication.oidc.issuer`
+
+Read-Only:
+
+- `audiences` (List of String) Lists the token audiences that this issuer accepts, for example, `["kubernetes", "dashboard"]`.
+- `certificate_authority` (String) PEM CA bundle for discovery and JWKS. Omission uses system trust.
+- `discovery_url` (String) Overrides the OpenID discovery URL. An empty value uses the issuer's standard discovery URL.
+- `url` (String) Identifies the issuer and must match the token `iss` claim.
+
+
+<a id="nestedatt--control_plane--authentication--oidc--user_validation_rules"></a>
+### Nested Schema for `control_plane.authentication.oidc.user_validation_rules`
+
+Read-Only:
+
+- `expression` (String) Validates the mapped Kubernetes user information with CEL.
+- `message` (String) Describes a failed CEL validation.
+
+
 
 
 <a id="nestedatt--control_plane--endpoints"></a>

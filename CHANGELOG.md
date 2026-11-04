@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.80 (November 4, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.89`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_mk8s_v1_cluster](./docs/resources/mk8s_v1_cluster.md):
+    * Added: `control_plane.authentication`
+* Changed attributes for resource [nebius_msp_postgresql_v1alpha1_cluster](./docs/resources/msp_postgresql_v1alpha1_cluster.md):
+    * Became optional: `network_id`
+    * Became computed: `network_id`
+* Changed attributes for data source [nebius_mk8s_v1_cluster](./docs/data-sources/mk8s_v1_cluster.md):
+    * Added: `control_plane.authentication`
+
 ## 0.6.79 (November 3, 2026)
 
 NOTES:
