@@ -60,7 +60,6 @@ resource "nebius_msp_postgresql_v1alpha1_cluster" "postgres" {
 
 - `bootstrap` (Attributes) (see [below for nested schema](#nestedatt--bootstrap))
 - `config` (Attributes) (see [below for nested schema](#nestedatt--config))
-- `network_id` (String) Network ID in which the cluster is created.
 
 ### Optional
 
@@ -73,6 +72,10 @@ resource "nebius_msp_postgresql_v1alpha1_cluster" "postgres" {
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
 - `name` (String) Human readable name for the resource.
+- `network_id` (String) :
+
+   Network ID in which the cluster is created.
+   If omitted through the public API, the project's default network is used or created.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `sensitive` (Attributes, Sensitive) This object mirrors the structure of the resource, providing view on the resource's [write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral/write-only) fields. It is a preferred way to define such fields as they are not stored in the state file. To use any field in write-only mode, do not set it in the main resource, instead set it in the `sensitive` object. Setting the field in the main resource will overwrite the field in the `sensitive` object at merging. (see [below for nested schema](#nestedatt--sensitive))
 

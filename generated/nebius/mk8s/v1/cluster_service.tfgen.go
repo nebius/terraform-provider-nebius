@@ -152,6 +152,129 @@ func (r *serviceCluster) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: ":\n\n   Enables installation of the Karpenter inside a cluster.\n   Karpenter will be installed as a helm chart inside cluster\n   so it requires creation of at least one CPU public node group.\n   \n   Please note that there is no feature parity between Karpenter node pools and\n   public node groups.\n   By default cluster will be created without it.\n",
 					},
+					"authentication": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"oidc": schema.ListNestedAttribute{
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"name": schema.StringAttribute{
+											Computed:            true,
+											MarkdownDescription: "Identifies this provider within the cluster configuration.",
+										},
+										"issuer": schema.SingleNestedAttribute{
+											Attributes: map[string]schema.Attribute{
+												"url": schema.StringAttribute{
+													Computed:            true,
+													MarkdownDescription: "Identifies the issuer and must match the token `iss` claim.",
+												},
+												"audiences": schema.ListAttribute{
+													ElementType:         types.StringType,
+													Computed:            true,
+													MarkdownDescription: "Lists the token audiences that this issuer accepts, for example, `[\"kubernetes\", \"dashboard\"]`.",
+												},
+												"discovery_url": schema.StringAttribute{
+													Computed:            true,
+													MarkdownDescription: "Overrides the OpenID discovery URL. An empty value uses the issuer's standard discovery URL.",
+												},
+												"certificate_authority": schema.StringAttribute{
+													Computed:            true,
+													MarkdownDescription: "PEM CA bundle for discovery and JWKS. Omission uses system trust.",
+												},
+											},
+											Computed:            true,
+											MarkdownDescription: "Defines the issuer for accepted tokens.",
+										},
+										"claim_mappings": schema.SingleNestedAttribute{
+											Attributes: map[string]schema.Attribute{
+												"username": schema.SingleNestedAttribute{
+													Attributes: map[string]schema.Attribute{
+														"claim": schema.StringAttribute{
+															Computed:            true,
+															MarkdownDescription: "Names the token claim to map.",
+														},
+														"prefix": schema.StringAttribute{
+															Computed:            true,
+															MarkdownDescription: "Omission and an empty value disable prefixing for claims. Expressions require omission, including for an empty value.",
+														},
+														"expression": schema.StringAttribute{
+															Computed:            true,
+															MarkdownDescription: "Maps token claims with a CEL expression.",
+														},
+													},
+													Computed:            true,
+													MarkdownDescription: "Maps token claims to the Kubernetes username.",
+												},
+												"groups": schema.SingleNestedAttribute{
+													Attributes: map[string]schema.Attribute{
+														"claim": schema.StringAttribute{
+															Computed:            true,
+															MarkdownDescription: "Names the token claim to map.",
+														},
+														"prefix": schema.StringAttribute{
+															Computed:            true,
+															MarkdownDescription: "Omission and an empty value disable prefixing for claims. Expressions require omission, including for an empty value.",
+														},
+														"expression": schema.StringAttribute{
+															Computed:            true,
+															MarkdownDescription: "Maps token claims with a CEL expression.",
+														},
+													},
+													Computed:            true,
+													MarkdownDescription: "Maps token claims to Kubernetes groups. Omission disables group mapping.",
+												},
+											},
+											Computed:            true,
+											MarkdownDescription: "Maps token claims to Kubernetes user attributes.",
+										},
+										"claim_validation_rules": schema.ListNestedAttribute{
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"claim": schema.StringAttribute{
+														Computed:            true,
+														MarkdownDescription: "Names the token claim that must match required_value exactly.",
+													},
+													"required_value": schema.StringAttribute{
+														Computed:            true,
+														MarkdownDescription: "An omitted value matches an empty string, following upstream behavior.",
+													},
+													"expression": schema.StringAttribute{
+														Computed:            true,
+														MarkdownDescription: "Validates token claims with CEL. The expression must evaluate to true.",
+													},
+													"message": schema.StringAttribute{
+														Computed:            true,
+														MarkdownDescription: "Describes a failed CEL validation.",
+													},
+												},
+											},
+											Computed:            true,
+											MarkdownDescription: "Validates token claims before Kubernetes authenticates the user.",
+										},
+										"user_validation_rules": schema.ListNestedAttribute{
+											NestedObject: schema.NestedAttributeObject{
+												Attributes: map[string]schema.Attribute{
+													"expression": schema.StringAttribute{
+														Computed:            true,
+														MarkdownDescription: "Validates the mapped Kubernetes user information with CEL.",
+													},
+													"message": schema.StringAttribute{
+														Computed:            true,
+														MarkdownDescription: "Describes a failed CEL validation.",
+													},
+												},
+											},
+											Computed:            true,
+											MarkdownDescription: "Validates the mapped Kubernetes user information.",
+										},
+									},
+								},
+								Computed:            true,
+								MarkdownDescription: "Configures OIDC providers for Kubernetes user authentication.",
+							},
+						},
+						Computed:            true,
+						MarkdownDescription: "Configures customer JWT authentication. Requires Kubernetes 1.34 and a compatible control-plane infra version.",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: "",
@@ -399,6 +522,191 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 						Validators:          []validator.Object{},
 						Optional:            true,
 						MarkdownDescription: ":\n\n   Enables installation of the Karpenter inside a cluster.\n   Karpenter will be installed as a helm chart inside cluster\n   so it requires creation of at least one CPU public node group.\n   \n   Please note that there is no feature parity between Karpenter node pools and\n   public node groups.\n   By default cluster will be created without it.\n",
+						PlanModifiers:       []planmodifier.Object{},
+					},
+					"authentication": schema1.SingleNestedAttribute{
+						Attributes: map[string]schema1.Attribute{
+							"oidc": schema1.ListNestedAttribute{
+								NestedObject: schema1.NestedAttributeObject{
+									Attributes: map[string]schema1.Attribute{
+										"name": schema1.StringAttribute{
+											Validators: []validator.String{
+												validators.ProtoFieldValidator(&v11.OIDCProvider{}, "name", "name", fieldNameMapCluster),
+											},
+											Optional:            true,
+											MarkdownDescription: "Identifies this provider within the cluster configuration.",
+											PlanModifiers:       []planmodifier.String{},
+										},
+										"issuer": schema1.SingleNestedAttribute{
+											Attributes: map[string]schema1.Attribute{
+												"url": schema1.StringAttribute{
+													Validators: []validator.String{
+														validators.ProtoFieldValidator(&v11.OIDCIssuer{}, "url", "url", fieldNameMapCluster),
+													},
+													Optional:            true,
+													MarkdownDescription: "Identifies the issuer and must match the token `iss` claim.",
+													PlanModifiers:       []planmodifier.String{},
+												},
+												"audiences": schema1.ListAttribute{
+													ElementType: types.StringType,
+													Validators: []validator.List{
+														validators.ProtoFieldValidator(&v11.OIDCIssuer{}, "audiences", "audiences", fieldNameMapCluster),
+													},
+													Optional:            true,
+													MarkdownDescription: "Lists the token audiences that this issuer accepts, for example, `[\"kubernetes\", \"dashboard\"]`.",
+													PlanModifiers:       []planmodifier.List{},
+												},
+												"discovery_url": schema1.StringAttribute{
+													Validators:          []validator.String{},
+													Optional:            true,
+													MarkdownDescription: "Overrides the OpenID discovery URL. An empty value uses the issuer's standard discovery URL.",
+													PlanModifiers:       []planmodifier.String{},
+												},
+												"certificate_authority": schema1.StringAttribute{
+													Validators:          []validator.String{},
+													Optional:            true,
+													MarkdownDescription: "PEM CA bundle for discovery and JWKS. Omission uses system trust.",
+													PlanModifiers:       []planmodifier.String{},
+												},
+											},
+											Validators:          []validator.Object{},
+											Required:            true,
+											MarkdownDescription: "Defines the issuer for accepted tokens.",
+											PlanModifiers:       []planmodifier.Object{},
+										},
+										"claim_mappings": schema1.SingleNestedAttribute{
+											Attributes: map[string]schema1.Attribute{
+												"username": schema1.SingleNestedAttribute{
+													Attributes: map[string]schema1.Attribute{
+														"claim": schema1.StringAttribute{
+															Validators:          []validator.String{},
+															Optional:            true,
+															MarkdownDescription: "Names the token claim to map.",
+															PlanModifiers:       []planmodifier.String{},
+														},
+														"prefix": schema1.StringAttribute{
+															Validators:          []validator.String{},
+															Optional:            true,
+															MarkdownDescription: "Omission and an empty value disable prefixing for claims. Expressions require omission, including for an empty value.",
+															PlanModifiers:       []planmodifier.String{},
+														},
+														"expression": schema1.StringAttribute{
+															Validators:          []validator.String{},
+															Optional:            true,
+															MarkdownDescription: "Maps token claims with a CEL expression.",
+															PlanModifiers:       []planmodifier.String{},
+														},
+													},
+													Validators:          []validator.Object{},
+													Required:            true,
+													MarkdownDescription: "Maps token claims to the Kubernetes username.",
+													PlanModifiers:       []planmodifier.Object{},
+												},
+												"groups": schema1.SingleNestedAttribute{
+													Attributes: map[string]schema1.Attribute{
+														"claim": schema1.StringAttribute{
+															Validators:          []validator.String{},
+															Optional:            true,
+															MarkdownDescription: "Names the token claim to map.",
+															PlanModifiers:       []planmodifier.String{},
+														},
+														"prefix": schema1.StringAttribute{
+															Validators:          []validator.String{},
+															Optional:            true,
+															MarkdownDescription: "Omission and an empty value disable prefixing for claims. Expressions require omission, including for an empty value.",
+															PlanModifiers:       []planmodifier.String{},
+														},
+														"expression": schema1.StringAttribute{
+															Validators:          []validator.String{},
+															Optional:            true,
+															MarkdownDescription: "Maps token claims with a CEL expression.",
+															PlanModifiers:       []planmodifier.String{},
+														},
+													},
+													Validators: []validator.Object{
+														validators.ProtoFieldValidator(&v11.ClaimMappings{}, "groups", "groups", fieldNameMapCluster),
+													},
+													Optional:            true,
+													MarkdownDescription: "Maps token claims to Kubernetes groups. Omission disables group mapping.",
+													PlanModifiers:       []planmodifier.Object{},
+												},
+											},
+											Validators:          []validator.Object{},
+											Required:            true,
+											MarkdownDescription: "Maps token claims to Kubernetes user attributes.",
+											PlanModifiers:       []planmodifier.Object{},
+										},
+										"claim_validation_rules": schema1.ListNestedAttribute{
+											NestedObject: schema1.NestedAttributeObject{
+												Attributes: map[string]schema1.Attribute{
+													"claim": schema1.StringAttribute{
+														Validators:          []validator.String{},
+														Optional:            true,
+														MarkdownDescription: "Names the token claim that must match required_value exactly.",
+														PlanModifiers:       []planmodifier.String{},
+													},
+													"required_value": schema1.StringAttribute{
+														Validators:          []validator.String{},
+														Optional:            true,
+														MarkdownDescription: "An omitted value matches an empty string, following upstream behavior.",
+														PlanModifiers:       []planmodifier.String{},
+													},
+													"expression": schema1.StringAttribute{
+														Validators:          []validator.String{},
+														Optional:            true,
+														MarkdownDescription: "Validates token claims with CEL. The expression must evaluate to true.",
+														PlanModifiers:       []planmodifier.String{},
+													},
+													"message": schema1.StringAttribute{
+														Validators:          []validator.String{},
+														Optional:            true,
+														MarkdownDescription: "Describes a failed CEL validation.",
+														PlanModifiers:       []planmodifier.String{},
+													},
+												},
+											},
+											Validators:          []validator.List{},
+											Optional:            true,
+											MarkdownDescription: "Validates token claims before Kubernetes authenticates the user.",
+											PlanModifiers:       []planmodifier.List{},
+										},
+										"user_validation_rules": schema1.ListNestedAttribute{
+											NestedObject: schema1.NestedAttributeObject{
+												Attributes: map[string]schema1.Attribute{
+													"expression": schema1.StringAttribute{
+														Validators: []validator.String{
+															validators.ProtoFieldValidator(&v11.CELValidationRule{}, "expression", "expression", fieldNameMapCluster),
+														},
+														Optional:            true,
+														MarkdownDescription: "Validates the mapped Kubernetes user information with CEL.",
+														PlanModifiers:       []planmodifier.String{},
+													},
+													"message": schema1.StringAttribute{
+														Validators:          []validator.String{},
+														Optional:            true,
+														MarkdownDescription: "Describes a failed CEL validation.",
+														PlanModifiers:       []planmodifier.String{},
+													},
+												},
+											},
+											Validators:          []validator.List{},
+											Optional:            true,
+											MarkdownDescription: "Validates the mapped Kubernetes user information.",
+											PlanModifiers:       []planmodifier.List{},
+										},
+									},
+								},
+								Validators: []validator.List{
+									validators.ProtoFieldValidator(&v11.AuthenticationSpec{}, "oidc", "oidc", fieldNameMapCluster),
+								},
+								Optional:            true,
+								MarkdownDescription: "Configures OIDC providers for Kubernetes user authentication.",
+								PlanModifiers:       []planmodifier.List{},
+							},
+						},
+						Validators:          []validator.Object{},
+						Optional:            true,
+						MarkdownDescription: "Configures customer JWT authentication. Requires Kubernetes 1.34 and a compatible control-plane infra version.",
 						PlanModifiers:       []planmodifier.Object{},
 					},
 				},
