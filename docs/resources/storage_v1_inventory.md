@@ -49,7 +49,7 @@ Inventory configures periodic generation of an object listing for a bucket.
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `noncurrent_versions` (Boolean) Include noncurrent versions in inventory if set to true.
 - `optional_fields` (List of String) :
 

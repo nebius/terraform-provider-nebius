@@ -60,7 +60,7 @@ resource "nebius_compute_v1_disk" "boot" {
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `size_bytes` (Number) *Cannot be set alongside size_kibibytes, size_mebibytes or size_gibibytes.*
 - `size_gibibytes` (Number) *Cannot be set alongside size_bytes, size_kibibytes or size_mebibytes.*

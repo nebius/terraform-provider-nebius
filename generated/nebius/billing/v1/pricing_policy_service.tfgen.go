@@ -82,7 +82,7 @@ func (r *servicePricingPolicy) DataSourceSchema() schema.Schema {
 				},
 				Computed:            true,
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
 				Validators: []validator.String{
@@ -133,7 +133,7 @@ func (r *servicePricingPolicy) DataSourceSchema() schema.Schema {
 						Attributes: map[string]schema.Attribute{
 							"max_price": schema.StringAttribute{
 								Computed:            true,
-								MarkdownDescription: ":\n\n   Per-GPU hourly limit in USD, decimal string 3 digits precision. Example: \"3.515\".\n   Must be within the allowed price range (OUT_OF_RANGE otherwise);\n   a value below the current market price is accepted but blocks scheduling.\n   Mutable only while `status.running_vm_count` is 0\n   (FAILED_PRECONDITION otherwise); the policy reports STATE_UPDATING and\n   blocks scheduling while the change is applied.\n",
+								MarkdownDescription: ":\n\n   Per-GPU hourly limit in USD, as a string with three decimal places. Example: \"3.515\".\n   Must be within the allowed price range (OUT_OF_RANGE otherwise);\n   a value below the current market price is accepted but blocks scheduling.\n   Mutable only while `status.running_vm_count` is 0\n   (FAILED_PRECONDITION otherwise); the policy reports STATE_UPDATING and\n   blocks scheduling while the change is applied.\n",
 							},
 						},
 						Computed:            true,
@@ -198,7 +198,7 @@ func (r *servicePricingPolicy) ResourceSchema() schema1.Schema {
 					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapPricingPolicy),
 				},
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{
@@ -276,7 +276,7 @@ func (r *servicePricingPolicy) ResourceSchema() schema1.Schema {
 							"max_price": schema1.StringAttribute{
 								Validators:          []validator.String{},
 								Required:            true,
-								MarkdownDescription: ":\n\n   Per-GPU hourly limit in USD, decimal string 3 digits precision. Example: \"3.515\".\n   Must be within the allowed price range (OUT_OF_RANGE otherwise);\n   a value below the current market price is accepted but blocks scheduling.\n   Mutable only while `status.running_vm_count` is 0\n   (FAILED_PRECONDITION otherwise); the policy reports STATE_UPDATING and\n   blocks scheduling while the change is applied.\n",
+								MarkdownDescription: ":\n\n   Per-GPU hourly limit in USD, as a string with three decimal places. Example: \"3.515\".\n   Must be within the allowed price range (OUT_OF_RANGE otherwise);\n   a value below the current market price is accepted but blocks scheduling.\n   Mutable only while `status.running_vm_count` is 0\n   (FAILED_PRECONDITION otherwise); the policy reports STATE_UPDATING and\n   blocks scheduling while the change is applied.\n",
 								PlanModifiers:       []planmodifier.String{},
 							},
 						},

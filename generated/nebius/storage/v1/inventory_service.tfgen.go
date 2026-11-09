@@ -81,7 +81,7 @@ func (r *serviceInventory) DataSourceSchema() schema.Schema {
 				},
 				Computed:            true,
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
 				Validators: []validator.String{
@@ -187,7 +187,7 @@ func (r *serviceInventory) ResourceSchema() schema1.Schema {
 					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapInventory),
 				},
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

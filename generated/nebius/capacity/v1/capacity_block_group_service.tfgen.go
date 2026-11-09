@@ -65,7 +65,7 @@ func (r *serviceCapacityBlockGroup) DataSourceSchema() schema.Schema {
 			},
 			"name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
 				Computed:            true,

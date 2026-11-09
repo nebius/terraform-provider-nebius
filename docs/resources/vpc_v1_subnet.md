@@ -55,7 +55,7 @@ resource "nebius_vpc_v1_subnet" "default" {
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `route_table_id` (String) :
 

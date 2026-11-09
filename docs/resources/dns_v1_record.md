@@ -72,7 +72,7 @@ DNS zones are represented in this API by the `Zone` API Resource which is manage
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `ttl` (Number) Record TTL. If absent or negative, will be assumed to be the default value (`600`)
 

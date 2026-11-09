@@ -71,7 +71,7 @@ resource "nebius_msp_postgresql_v1alpha1_cluster" "postgres" {
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `network_id` (String) :
 
    Network ID in which the cluster is created.

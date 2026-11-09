@@ -39,7 +39,7 @@ resource "nebius_vpc_v1_security_group" "web" {
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 
 ### Read-Only

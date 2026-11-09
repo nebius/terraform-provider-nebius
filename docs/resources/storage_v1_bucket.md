@@ -91,7 +91,7 @@ resource "nebius_storage_v1_bucket" "state" {
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `object_audit_logging` (String) :
 
    Object audit logging specifies which requests must be logged - none, all or mutational only.

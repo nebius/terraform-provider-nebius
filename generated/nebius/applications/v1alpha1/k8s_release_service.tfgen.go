@@ -76,7 +76,7 @@ func (r *serviceK8SRelease) DataSourceSchema() schema.Schema {
 			},
 			"name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
 				Computed:            true,
@@ -160,7 +160,7 @@ func (r *serviceK8SRelease) ResourceSchema() schema1.Schema {
 					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapK8SRelease),
 				},
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{

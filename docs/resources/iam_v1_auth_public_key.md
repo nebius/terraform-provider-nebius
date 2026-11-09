@@ -45,7 +45,7 @@ resource "nebius_iam_v1_auth_public_key" "terraform" {
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 
 ### Read-Only

@@ -101,7 +101,7 @@ resource "nebius_compute_v1_instance" "vm" {
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `nvl_instance_group_id` (String) NVLink Instance Group ID associated with the VM
 - `on_demand` (Attributes) :
 
