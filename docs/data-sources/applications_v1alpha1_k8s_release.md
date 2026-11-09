@@ -51,7 +51,7 @@ data ... {
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `namespace` (String)
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `product_slug` (String)

@@ -81,7 +81,7 @@ func (r *serviceRecord) DataSourceSchema() schema.Schema {
 				},
 				Computed:            true,
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
 				Validators: []validator.String{
@@ -177,7 +177,7 @@ func (r *serviceRecord) ResourceSchema() schema1.Schema {
 					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapRecord),
 				},
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"parent_id": schema1.StringAttribute{

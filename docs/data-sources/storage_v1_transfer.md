@@ -71,7 +71,7 @@ it will wait for the defined inter-iteration interval before starting the next i
 ### Optional
 
 - `id` (String) Identifier for the resource, unique for its resource type.
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 
 ### Read-Only

@@ -86,7 +86,7 @@ func (r *serviceNVLInstanceGroup) DataSourceSchema() schema.Schema {
 				},
 				Computed:            true,
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
 				Validators: []validator.String{
@@ -176,7 +176,7 @@ func (r *serviceNVLInstanceGroup) ResourceSchema() schema1.Schema {
 					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapNVLInstanceGroup),
 				},
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

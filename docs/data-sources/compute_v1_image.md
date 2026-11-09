@@ -54,7 +54,7 @@ data ... {
 ### Optional
 
 - `id` (String) Identifier for the resource, unique for its resource type.
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 
 ### Read-Only
@@ -77,7 +77,7 @@ data ... {
    A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`
 - `description` (String)
 - `image_family` (String)
-- `image_family_human_readable` (String) human readable name for image family
+- `image_family_human_readable` (String) human-readable name for image family
 - `labels` (Map of String) Labels associated with the resource.
 - `metadata` (Attributes) :
 

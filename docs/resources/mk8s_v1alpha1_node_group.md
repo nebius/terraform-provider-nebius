@@ -30,7 +30,7 @@ NodeGroup represents Kubernetes node pool
    Common resource metadata.
    
    the parent_id is an ID of Cluster (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `strategy` (Attributes) (see [below for nested schema](#nestedatt--strategy))
 - `version` (String) :

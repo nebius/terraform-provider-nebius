@@ -30,7 +30,7 @@ resource "nebius_mysterybox_v1_secret" "app" {
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `primary_version_id` (String) Specifies the primary version of the secret to update its payload. This parameter should only be provided during update operations.
 - `secret_version` (Attributes) :

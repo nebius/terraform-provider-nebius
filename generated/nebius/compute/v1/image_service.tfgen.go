@@ -71,7 +71,7 @@ func (r *serviceImage) DataSourceSchema() schema.Schema {
 				},
 				Computed:            true,
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
 				Validators: []validator.String{
@@ -140,7 +140,7 @@ func (r *serviceImage) DataSourceSchema() schema.Schema {
 			},
 			"image_family_human_readable": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "human readable name for image family",
+				MarkdownDescription: "human-readable name for image family",
 			},
 			"recommended_platforms": schema.ListAttribute{
 				ElementType:         types.StringType,

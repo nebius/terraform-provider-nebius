@@ -31,7 +31,7 @@ description: |-
    #### Inner value description
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `oidc_provider` (Attributes) :
 
    #### Inner value description

@@ -81,7 +81,7 @@ func (r *serviceSecretVersion) DataSourceSchema() schema.Schema {
 			},
 			"name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
 				Computed:            true,
@@ -161,7 +161,7 @@ func (r *serviceSecretVersion) ResourceSchema() schema1.Schema {
 					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapSecretVersion),
 				},
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.82 (November 9, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.91`.
+* deps: Update `google.golang.org/grpc` from `v1.84.0` to `v1.85.0`.
+
 ## 0.6.81 (November 5, 2026)
 
 NOTES:

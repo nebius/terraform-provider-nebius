@@ -79,7 +79,7 @@ func (r *serviceGroupMembership) DataSourceSchema() schema.Schema {
 			},
 			"name": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 			},
 			"parent_id": schema.StringAttribute{
 				Computed:            true,
@@ -154,7 +154,7 @@ func (r *serviceGroupMembership) DataSourceSchema() schema.Schema {
 							},
 							"name": schema.StringAttribute{
 								Computed:            true,
-								MarkdownDescription: "Human readable name for the resource.",
+								MarkdownDescription: "Human-readable name for the resource.",
 							},
 							"resource_version": schema.Int64Attribute{
 								Computed:            true,
@@ -214,7 +214,7 @@ func (r *serviceGroupMembership) ResourceSchema() schema1.Schema {
 					validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapGroupMembership),
 				},
 				Optional:            true,
-				MarkdownDescription: "Human readable name for the resource.",
+				MarkdownDescription: "Human-readable name for the resource.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
@@ -330,7 +330,7 @@ func (r *serviceGroupMembership) ResourceSchema() schema1.Schema {
 							},
 							"name": schema1.StringAttribute{
 								Computed:            true,
-								MarkdownDescription: "Human readable name for the resource.",
+								MarkdownDescription: "Human-readable name for the resource.",
 								PlanModifiers:       []planmodifier.String{},
 							},
 							"resource_version": schema1.Int64Attribute{

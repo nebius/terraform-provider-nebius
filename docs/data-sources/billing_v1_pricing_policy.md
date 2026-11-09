@@ -63,7 +63,7 @@ A VM without a policy is a price-taker and pays the market price.
 ### Optional
 
 - `id` (String) Identifier for the resource, unique for its resource type.
-- `name` (String) Human readable name for the resource.
+- `name` (String) Human-readable name for the resource.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 
 ### Read-Only
@@ -154,7 +154,7 @@ Read-Only:
 
 - `max_price` (String) :
 
-   Per-GPU hourly limit in USD, decimal string 3 digits precision. Example: "3.515".
+   Per-GPU hourly limit in USD, as a string with three decimal places. Example: "3.515".
    Must be within the allowed price range (OUT_OF_RANGE otherwise);
    a value below the current market price is accepted but blocks scheduling.
    Mutable only while `status.running_vm_count` is 0
