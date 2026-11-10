@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.83 (November 10, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.92`.
+
+FEATURES:
+
+* Added new data sources: [nebius_vpc_v1_default_network](./docs/data-sources/vpc_v1_default_network.md).
+
 ## 0.6.82 (November 9, 2026)
 
 NOTES:
