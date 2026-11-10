@@ -438,3 +438,529 @@ func (r *serviceNetwork) Delete(ctx context.Context, id string) (*requestcontext
 	}
 	return reqCtx, nil
 }
+
+func init() {
+	DatasourceFactories = append(
+		DatasourceFactories, newDataSourceDefaultNetwork,
+	)
+}
+
+func newDataSourceDefaultNetwork(provider provider.Provider) datasource.DataSource {
+	return service.NewSimpleDataSource(&simpleDataSourceDefaultNetwork{
+		provider: provider,
+	})
+}
+
+type simpleDataSourceDefaultNetwork struct {
+	provider provider.Provider
+}
+
+func (r *simpleDataSourceDefaultNetwork) GetName() string {
+	return "vpc_v1_default_network"
+}
+
+func (r *simpleDataSourceDefaultNetwork) DataSourceSchema() schema.Schema {
+	return schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"parent_id": schema.StringAttribute{
+				Validators: []validator.String{
+					validators.NIDValidator(),
+				},
+				Required:            true,
+				MarkdownDescription: "ID of the parent project.",
+			},
+			"network": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"metadata": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"id": schema.StringAttribute{
+								Validators:          []validator.String{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Identifier for the resource, unique for its resource type.",
+							},
+							"parent_id": schema.StringAttribute{
+								Validators: []validator.String{
+									validators.NIDValidator(),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
+							},
+							"name": schema.StringAttribute{
+								Validators: []validator.String{
+									validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapDataSourceDefaultNetwork),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Human-readable name for the resource.",
+							},
+							"resource_version": schema.Int64Attribute{
+								Validators: []validator.Int64{
+									validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "resource_version", "resource_version", fieldNameMapDataSourceDefaultNetwork),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n",
+							},
+							"created_at": schema.StringAttribute{
+								CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Timestamp indicating when the resource was created.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+							},
+							"updated_at": schema.StringAttribute{
+								CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Timestamp indicating when the resource was last updated.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+							},
+							"labels": schema.MapAttribute{
+								ElementType:         types.StringType,
+								Validators:          []validator.Map{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Labels associated with the resource.",
+							},
+						},
+						Validators:          []validator.Object{},
+						Computed:            true,
+						Optional:            true,
+						MarkdownDescription: ":\n\n   Metadata for the network resource.\n   `metadata.parent_id` represents IAM container\n   \n   #### Inner value description\n   \n   Common resource metadata.\n",
+					},
+					"spec": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"ipv4_private_pools": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"pools": schema.ListNestedAttribute{
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"id": schema.StringAttribute{
+													Validators: []validator.String{
+														validators.NIDValidator(),
+													},
+													Computed:            true,
+													Optional:            true,
+													MarkdownDescription: "ID of the pool.",
+												},
+											},
+										},
+										Validators:          []validator.List{},
+										Computed:            true,
+										Optional:            true,
+										MarkdownDescription: "",
+									},
+								},
+								Validators:          []validator.Object{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Pools for private IPv4 addresses.\n   Default private pools will be created if not specified.\n   Default private pools are referred here\n   https://docs.nebius.com/vpc/addressing/available-addresses\n",
+							},
+							"ipv4_public_pools": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"pools": schema.ListNestedAttribute{
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"id": schema.StringAttribute{
+													Validators: []validator.String{
+														validators.NIDValidator(),
+													},
+													Computed:            true,
+													Optional:            true,
+													MarkdownDescription: "ID of the pool.",
+												},
+											},
+										},
+										Validators:          []validator.List{},
+										Computed:            true,
+										Optional:            true,
+										MarkdownDescription: "",
+									},
+								},
+								Validators:          []validator.Object{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Pools for public IPv4 addresses.\n   Default public pool will be used if not specified.\n",
+							},
+						},
+						Validators:          []validator.Object{},
+						Computed:            true,
+						Optional:            true,
+						MarkdownDescription: "Specification of the network.",
+					},
+					"status": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"state": schema.StringAttribute{
+								Validators: []validator.String{
+									validators.EnumValidator(v11.NetworkStatus_State_value),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Current state of the network.\n   \n   #### Supported values\n   \n   Enumeration of possible states of the network.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - Default state, unspecified.\n   - `CREATING` - Network is being created.\n   - `READY` - Network is ready for use.\n   - `DELETING` - Network is being deleted.\n   \n",
+							},
+							"default": schema.BoolAttribute{
+								Validators:          []validator.Bool{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Indicates whether this is the project's default network.",
+							},
+							"default_route_table_id": schema.StringAttribute{
+								Validators: []validator.String{
+									validators.NIDValidator(),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "ID of the network's default route table.",
+							},
+						},
+						Validators:          []validator.Object{},
+						Computed:            true,
+						Optional:            true,
+						MarkdownDescription: "Status of the network.",
+					},
+				},
+				Validators:          []validator.Object{},
+				Computed:            true,
+				Optional:            true,
+				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Defines a Network, which serves as a virtual representation of a traditional LAN\n   within a cloud environment.\n   Networks facilitate communication between subnets.\n",
+			},
+			"subnet": schema.SingleNestedAttribute{
+				Attributes: map[string]schema.Attribute{
+					"metadata": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"id": schema.StringAttribute{
+								Validators:          []validator.String{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Identifier for the resource, unique for its resource type.",
+							},
+							"parent_id": schema.StringAttribute{
+								Validators: []validator.String{
+									validators.NIDValidator(),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Identifier of the parent resource to which the resource belongs.",
+							},
+							"name": schema.StringAttribute{
+								Validators: []validator.String{
+									validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "name", "name", fieldNameMapDataSourceDefaultNetwork),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Human-readable name for the resource.",
+							},
+							"resource_version": schema.Int64Attribute{
+								Validators: []validator.Int64{
+									validators.ProtoFieldValidator(&v1.ResourceMetadata{}, "resource_version", "resource_version", fieldNameMapDataSourceDefaultNetwork),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Version of the resource for safe concurrent modifications and consistent reads.\n   Positive and monotonically increases on each resource spec change (but *not* on each change of the\n   resource's container(s) or status).\n   Service allows zero value or current.\n",
+							},
+							"created_at": schema.StringAttribute{
+								CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Timestamp indicating when the resource was created.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+							},
+							"updated_at": schema.StringAttribute{
+								CustomType:          wellknown.WellKnownByName("google.protobuf.Timestamp").Type().(basetypes.StringTypable),
+								Computed:            true,
+								MarkdownDescription: ":\n\n   Timestamp indicating when the resource was last updated.\n   \n   A string representing a timestamp in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format: `YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS.SSS±HH:MM`\n",
+							},
+							"labels": schema.MapAttribute{
+								ElementType:         types.StringType,
+								Validators:          []validator.Map{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Labels associated with the resource.",
+							},
+						},
+						Validators:          []validator.Object{},
+						Computed:            true,
+						Optional:            true,
+						MarkdownDescription: ":\n\n   Metadata for the subnet resource.\n   `metadata.parent_id` represents IAM container\n   \n   #### Inner value description\n   \n   Common resource metadata.\n",
+					},
+					"spec": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"network_id": schema.StringAttribute{
+								Validators: []validator.String{
+									validators.NIDValidator(),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "ID of the network this subnet belongs to.",
+							},
+							"ipv4_private_pools": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"pools": schema.ListNestedAttribute{
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"cidrs": schema.ListNestedAttribute{
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"cidr": schema.StringAttribute{
+																Validators: []validator.String{
+																	validators.ProtoFieldValidator(&v11.SubnetCidr{}, "cidr", "cidr", fieldNameMapDataSourceDefaultNetwork),
+																},
+																Computed:            true,
+																Optional:            true,
+																MarkdownDescription: ":\n\n   A CIDR block (e.g., \"10.1.2.0/24\") or a prefix length (e.g., \"/24\").\n   If prefix length is specified, the CIDR block will be auto-allocated\n   from the network's available space.\n",
+															},
+															"state": schema.StringAttribute{
+																Validators: []validator.String{
+																	validators.EnumValidator(v11.AddressBlockState_value),
+																},
+																Computed:            true,
+																Optional:            true,
+																MarkdownDescription: ":\n\n   Controls provisioning of IP addresses from the CIDR block. Defaults to AVAILABLE.\n   \n   #### Supported values\n   \n   Controls provisioning of IP addresses from this pool to other pools\n   or allocations. Defaults to AVAILABLE.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - Not used, mandated by the protocol.\n   - `AVAILABLE` - Default state. Provision of the IP addresses from this CIDR block is allowed.\n   - `DISABLED` - Provision of the IP addresses from this CIDR block is denied.\n   \n",
+															},
+															"max_mask_length": schema.Int64Attribute{
+																Validators: []validator.Int64{
+																	validators.ProtoFieldValidator(&v11.SubnetCidr{}, "max_mask_length", "max_mask_length", fieldNameMapDataSourceDefaultNetwork),
+																},
+																Computed:            true,
+																Optional:            true,
+																MarkdownDescription: "Maximum mask length for an allocation from this block. Defaults to /32 for IPv4.",
+															},
+														},
+													},
+													Validators:          []validator.List{},
+													Computed:            true,
+													Optional:            true,
+													MarkdownDescription: "",
+												},
+											},
+										},
+										Validators:          []validator.List{},
+										Computed:            true,
+										Optional:            true,
+										MarkdownDescription: ":\n\n   List of private IPv4 CIDR blocks for this subnet.\n   Must not overlap with other resources in the network\n   Must be empty if `use_network_pools` is true.\n",
+									},
+									"use_network_pools": schema.BoolAttribute{
+										Validators:          []validator.Bool{},
+										Computed:            true,
+										Optional:            true,
+										MarkdownDescription: ":\n\n   If true, inherit private IPv4 pools from the network. Defaults to true.\n   Must be false if `pools` is specified.\n",
+									},
+								},
+								Validators:          []validator.Object{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Private IPv4 address pools for this subnet.\n   If unspecified, pools from the associated network are used.\n",
+							},
+							"ipv4_public_pools": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"pools": schema.ListNestedAttribute{
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
+												"cidrs": schema.ListNestedAttribute{
+													NestedObject: schema.NestedAttributeObject{
+														Attributes: map[string]schema.Attribute{
+															"cidr": schema.StringAttribute{
+																Validators: []validator.String{
+																	validators.ProtoFieldValidator(&v11.SubnetCidr{}, "cidr", "cidr", fieldNameMapDataSourceDefaultNetwork),
+																},
+																Computed:            true,
+																Optional:            true,
+																MarkdownDescription: ":\n\n   A CIDR block (e.g., \"10.1.2.0/24\") or a prefix length (e.g., \"/24\").\n   If prefix length is specified, the CIDR block will be auto-allocated\n   from the network's available space.\n",
+															},
+															"state": schema.StringAttribute{
+																Validators: []validator.String{
+																	validators.EnumValidator(v11.AddressBlockState_value),
+																},
+																Computed:            true,
+																Optional:            true,
+																MarkdownDescription: ":\n\n   Controls provisioning of IP addresses from the CIDR block. Defaults to AVAILABLE.\n   \n   #### Supported values\n   \n   Controls provisioning of IP addresses from this pool to other pools\n   or allocations. Defaults to AVAILABLE.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - Not used, mandated by the protocol.\n   - `AVAILABLE` - Default state. Provision of the IP addresses from this CIDR block is allowed.\n   - `DISABLED` - Provision of the IP addresses from this CIDR block is denied.\n   \n",
+															},
+															"max_mask_length": schema.Int64Attribute{
+																Validators: []validator.Int64{
+																	validators.ProtoFieldValidator(&v11.SubnetCidr{}, "max_mask_length", "max_mask_length", fieldNameMapDataSourceDefaultNetwork),
+																},
+																Computed:            true,
+																Optional:            true,
+																MarkdownDescription: "Maximum mask length for an allocation from this block. Defaults to /32 for IPv4.",
+															},
+														},
+													},
+													Validators:          []validator.List{},
+													Computed:            true,
+													Optional:            true,
+													MarkdownDescription: "",
+												},
+											},
+										},
+										Validators:          []validator.List{},
+										Computed:            true,
+										Optional:            true,
+										MarkdownDescription: ":\n\n   List of public IPv4 CIDR blocks for this subnet.\n   Must not overlap with other resources in the network.\n   Must be empty if `use_network_pools` is true.\n",
+									},
+									"use_network_pools": schema.BoolAttribute{
+										Validators:          []validator.Bool{},
+										Computed:            true,
+										Optional:            true,
+										MarkdownDescription: ":\n\n   If true, inherit public IPv4 pools from the network.\n   Must be false if `pools` is specified.\n",
+									},
+								},
+								Validators:          []validator.Object{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Public IPv4 address pools for this subnet.\n   If unspecified, pools from the associated network are used.\n",
+							},
+							"route_table_id": schema.StringAttribute{
+								Validators: []validator.String{
+									validators.NIDValidator(),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   ID of the route table to associate with the subnet.\n   If unspecified, the network's default route table is used.\n",
+							},
+						},
+						Validators:          []validator.Object{},
+						Computed:            true,
+						Optional:            true,
+						MarkdownDescription: "Specification of the subnet.",
+					},
+					"status": schema.SingleNestedAttribute{
+						Attributes: map[string]schema.Attribute{
+							"state": schema.StringAttribute{
+								Validators: []validator.String{
+									validators.EnumValidator(v11.SubnetStatus_State_value),
+								},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Current state of the subnet.\n   \n   #### Supported values\n   \n   Enumeration of possible states of the subnet.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - Default state, unspecified.\n   - `CREATING` - Subnet is being created.\n   - `READY` - Subnet is ready for use.\n   - `DELETING` - Subnet is being deleted.\n   \n",
+							},
+							"ipv4_private_cidrs": schema.ListAttribute{
+								ElementType:         types.StringType,
+								Validators:          []validator.List{},
+								Computed:            true,
+								Optional:            true,
+								DeprecationMessage:  "Supported until 2027-02-01. Use `ipv4_private_pools.cidrs` instead.",
+								MarkdownDescription: ":\n\n   CIDR blocks.\n   Deprecated: Use `ipv4_private_pools.cidrs` instead.\n",
+							},
+							"ipv4_public_cidrs": schema.ListAttribute{
+								ElementType:         types.StringType,
+								Validators:          []validator.List{},
+								Computed:            true,
+								Optional:            true,
+								DeprecationMessage:  "Supported until 2027-02-01. Use `ipv4_public_pools.cidrs` instead.",
+								MarkdownDescription: ":\n\n   CIDR blocks.\n   Deprecated: Use `ipv4_public_pools.cidrs` instead.\n",
+							},
+							"route_table": schema.SingleNestedAttribute{
+								Attributes: map[string]schema.Attribute{
+									"id": schema.StringAttribute{
+										Validators: []validator.String{
+											validators.NIDValidator(),
+										},
+										Computed:            true,
+										Optional:            true,
+										MarkdownDescription: "ID of the route table.",
+									},
+									"default": schema.BoolAttribute{
+										Validators:          []validator.Bool{},
+										Computed:            true,
+										Optional:            true,
+										MarkdownDescription: ":\n\n   Indicates whether this is the network's default route table.\n   If true, this is the default route table inherited from the network.\n   If false, this is a custom route table explicitly associated with the subnet via spec.\n",
+									},
+								},
+								Validators:          []validator.Object{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: ":\n\n   Information about the route table associated with this subnet.\n   Can be either a custom route table or the network's default route table.\n",
+							},
+							"default": schema.BoolAttribute{
+								Validators:          []validator.Bool{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Indicates whether this is the network's default subnet.",
+							},
+							"ipv4_private_pools": schema.ListNestedAttribute{
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"pool_id": schema.StringAttribute{
+											Validators: []validator.String{
+												validators.NIDValidator(),
+											},
+											Computed:            true,
+											Optional:            true,
+											MarkdownDescription: "ID of the pool available for allocations in this subnet.",
+										},
+										"cidrs": schema.ListAttribute{
+											ElementType:         types.StringType,
+											Validators:          []validator.List{},
+											Computed:            true,
+											Optional:            true,
+											MarkdownDescription: "CIDR blocks sourced from this pool.",
+										},
+									},
+								},
+								Validators:          []validator.List{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Private IPv4 pools available for allocations in this subnet.",
+							},
+							"ipv4_public_pools": schema.ListNestedAttribute{
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"pool_id": schema.StringAttribute{
+											Validators: []validator.String{
+												validators.NIDValidator(),
+											},
+											Computed:            true,
+											Optional:            true,
+											MarkdownDescription: "ID of the pool available for allocations in this subnet.",
+										},
+										"cidrs": schema.ListAttribute{
+											ElementType:         types.StringType,
+											Validators:          []validator.List{},
+											Computed:            true,
+											Optional:            true,
+											MarkdownDescription: "CIDR blocks sourced from this pool.",
+										},
+									},
+								},
+								Validators:          []validator.List{},
+								Computed:            true,
+								Optional:            true,
+								MarkdownDescription: "Public IPv4 pools available for allocations in this subnet.",
+							},
+						},
+						Validators:          []validator.Object{},
+						Computed:            true,
+						Optional:            true,
+						MarkdownDescription: "Status of the subnet.",
+					},
+				},
+				Validators:          []validator.Object{},
+				Computed:            true,
+				Optional:            true,
+				MarkdownDescription: ":\n\n   #### Inner value description\n   \n   Defines a Subnet, a segment of a network used for more granular control and management.\n   Subnet uses pools to organize address space.\n",
+			},
+		},
+		Description:         "Retrieves the default network and its default subnet for a specified project.",
+		MarkdownDescription: "Retrieves the default network and its default subnet for a specified project.",
+	}
+}
+
+var fieldNameMapDataSourceDefaultNetwork = map[string]map[string]string{}
+
+func (r *simpleDataSourceDefaultNetwork) FieldNameMap() map[string]map[string]string {
+	return fieldNameMapDataSourceDefaultNetwork
+}
+
+func (r *simpleDataSourceDefaultNetwork) ReadRequestMessage() proto.Message {
+	return &v11.GetDefaultNetworkRequest{}
+}
+
+func (r *simpleDataSourceDefaultNetwork) Read(ctx context.Context, input proto.Message) (proto.Message, *requestcontext.Context, error) {
+	service := v12.NewNetworkService(r.provider.SDK())
+	reqCtx := &requestcontext.Context{}
+	req, ok := input.(*v11.GetDefaultNetworkRequest)
+	if !ok {
+		return nil, reqCtx, fmt.Errorf("wrong request type: %q, expecting nebius.vpc.v1.GetDefaultNetworkRequest", input.ProtoReflect().Descriptor().FullName())
+	}
+	res, err := service.GetDefault(ctx, req, reqCtx.MainRequestOptions()...)
+	if err != nil {
+		return nil, reqCtx, fmt.Errorf("call sdk: %w", err)
+	}
+	return res, reqCtx, nil
+}
