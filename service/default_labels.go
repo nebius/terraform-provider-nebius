@@ -2,13 +2,16 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"maps"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 
 	"github.com/nebius/gosdk/constants"
 	"github.com/nebius/terraform-provider-nebius/provider"
@@ -30,6 +33,51 @@ func mergeDefaultLabels(
 		maps.Copy(elements, resourceLabels.Elements())
 	}
 	return types.MapValue(types.StringType, elements)
+}
+
+// Default labels can change after the framework marks computed fields as unknown.
+// Invalidate mutable outputs when the effective labels change during an update.
+func (r *commonResource) invalidateLabelUpdateOutputs(
+	ctx context.Context,
+	state tfsdk.State,
+	plan *tfsdk.Plan,
+	labelsAll types.Map,
+) diag.Diagnostics {
+	if state.Raw.IsNull() {
+		return nil
+	}
+	var previousLabels types.Map
+	diags := state.GetAttribute(ctx, path.Root(constants.FieldLabelsAll), &previousLabels)
+	if diags.HasError() || labelsAll.Equal(previousLabels) {
+		return diags
+	}
+	for _, name := range []string{
+		constants.FieldResourceVersion,
+		constants.FieldUpdatedAt,
+		constants.FieldStatus,
+	} {
+		attribute, ok := r.resourceSchema.Attributes[name]
+		if !ok || !attribute.IsComputed() || attribute.IsOptional() {
+			continue
+		}
+		attributeType := attribute.GetType()
+		unknown, err := attributeType.ValueFromTerraform(
+			ctx, tftypes.NewValue(attributeType.TerraformType(ctx), tftypes.UnknownValue),
+		)
+		if err != nil {
+			diags.AddAttributeError(
+				path.Root(name),
+				"Cannot plan computed attribute",
+				fmt.Sprintf("Cannot create an unknown value for this computed attribute: %s.", err),
+			)
+			return diags
+		}
+		diags.Append(plan.SetAttribute(ctx, path.Root(name), unknown)...)
+		if diags.HasError() {
+			return diags
+		}
+	}
+	return diags
 }
 
 func inferImportedResourceLabels(
