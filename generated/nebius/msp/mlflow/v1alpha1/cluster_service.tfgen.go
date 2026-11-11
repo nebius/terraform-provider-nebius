@@ -327,10 +327,11 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 				Validators: []validator.String{
 					validators.NIDValidator(),
 				},
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				MarkdownDescription: "ID of the vpc network.",
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
+					stringplanmodifier.RequiresReplaceIfConfigured(),
 				},
 			},
 			"size": schema1.StringAttribute{

@@ -202,6 +202,10 @@ func (r *commonResource) ModifyPlan(
 		if resp.Diagnostics.HasError() {
 			return
 		}
+		resp.Diagnostics.Append(r.invalidateLabelUpdateOutputs(ctx, req.State, &resp.Plan, labelsAll)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 	if resp.Plan.Raw.Equal(req.State.Raw) {
 		return

@@ -43,7 +43,6 @@ resource "nebius_msp_mlflow_v1alpha1_cluster" "mlflow" {
 ### Required
 
 - `admin_username` (String) MLflow admin username.
-- `network_id` (String) ID of the vpc network.
 - `service_account_id` (String) Id of the service account that will be used to access S3 bucket (and create one if not provided).
 
 ### Optional
@@ -57,6 +56,7 @@ resource "nebius_msp_mlflow_v1alpha1_cluster" "mlflow" {
    
    Common resource metadata. (see [below for nested schema](#nestedatt--metadata))
 - `name` (String) Human-readable name for the resource.
+- `network_id` (String) ID of the vpc network.
 - `parent_id` (String) Identifier of the parent resource to which the resource belongs.
 - `public_access` (Boolean) Either make cluster public accessible or accessible only via private VPC.
 - `sensitive` (Attributes, Sensitive) This object mirrors the structure of the resource, providing view on the resource's [write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral/write-only) fields. It is a preferred way to define such fields as they are not stored in the state file. To use any field in write-only mode, do not set it in the main resource, instead set it in the `sensitive` object. Setting the field in the main resource will overwrite the field in the `sensitive` object at merging. (see [below for nested schema](#nestedatt--sensitive))
