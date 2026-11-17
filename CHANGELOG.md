@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.86 (November 17, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.95`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_mk8s_v1_node_group](./docs/resources/mk8s_v1_node_group.md):
+    * Added: `autoscaling.initial_node_count`
+* Changed attributes for resource [nebius_mk8s_v1alpha1_node_group](./docs/resources/mk8s_v1alpha1_node_group.md):
+    * Added: `autoscaling.initial_node_count`
+* Changed attributes for data source [nebius_mk8s_v1_node_group](./docs/data-sources/mk8s_v1_node_group.md):
+    * Added: `autoscaling.initial_node_count`
+* Changed attributes for data source [nebius_mk8s_v1alpha1_node_group](./docs/data-sources/mk8s_v1alpha1_node_group.md):
+    * Added: `autoscaling.initial_node_count`
+
 ## 0.6.85 (November 16, 2026)
 
 NOTES:
