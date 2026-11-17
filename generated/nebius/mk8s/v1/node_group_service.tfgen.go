@@ -129,6 +129,10 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "",
 					},
+					"initial_node_count": schema.Int64Attribute{
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Initial number of nodes in the autoscaled node group. Defaults to `min_node_count`.\n   At creation, the value must be between `min_node_count` and `max_node_count`, inclusive.\n   \n   Updating or clearing this field after creation has no effect.\n   This also applies when switching an existing node group from a fixed size to autoscaling.\n   Autoscaling starts from the current node count, subject to `min_node_count` and `max_node_count`.\n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: ":\n\n   Enables [Kubernetes Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler)\n   for that NodeGroup, and defines autoscaling parameters.\n   \n   *Cannot be set alongside fixed_node_count.*\n",
@@ -714,6 +718,14 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 						},
 						Optional:            true,
 						MarkdownDescription: "",
+						PlanModifiers:       []planmodifier.Int64{},
+					},
+					"initial_node_count": schema1.Int64Attribute{
+						Validators: []validator.Int64{
+							validators.ProtoFieldValidator(&v11.NodeGroupAutoscalingSpec{}, "initial_node_count", "initial_node_count", fieldNameMapNodeGroup),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   Initial number of nodes in the autoscaled node group. Defaults to `min_node_count`.\n   At creation, the value must be between `min_node_count` and `max_node_count`, inclusive.\n   \n   Updating or clearing this field after creation has no effect.\n   This also applies when switching an existing node group from a fixed size to autoscaling.\n   Autoscaling starts from the current node count, subject to `min_node_count` and `max_node_count`.\n",
 						PlanModifiers:       []planmodifier.Int64{},
 					},
 				},

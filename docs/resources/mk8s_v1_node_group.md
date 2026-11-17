@@ -576,6 +576,14 @@ Optional:
 
 Optional:
 
+- `initial_node_count` (Number) :
+
+   Initial number of nodes in the autoscaled node group. Defaults to `min_node_count`.
+   At creation, the value must be between `min_node_count` and `max_node_count`, inclusive.
+   
+   Updating or clearing this field after creation has no effect.
+   This also applies when switching an existing node group from a fixed size to autoscaling.
+   Autoscaling starts from the current node count, subject to `min_node_count` and `max_node_count`.
 - `max_node_count` (Number)
 - `min_node_count` (Number)
 
