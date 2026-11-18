@@ -113,7 +113,7 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 			},
 			"version": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: ":\n\n   Version is desired Kubernetes version of the cluster. For now only acceptable format is\n   `<major>.<minor>` like \"1.31\". Option for patch version update will be added later.\n   By default the cluster control plane `<major>.<minor>` version will be used.\n",
+				MarkdownDescription: ":\n\n   Desired Kubernetes version and optional node image version for the node group.\n   Use `<major>.<minor>[-nebius-node.<image>]`, for example, \"1.36\" or \"1.36-nebius-node.80\".\n   If this field is omitted, the Kubernetes version defaults to the cluster control plane version.\n   If the image version suffix is omitted, the latest compatible node image version is selected on NodeGroup creation.\n   To upgrade to the latest node image version later, use `NodeGroupService.Upgrade`.\n",
 			},
 			"fixed_node_count": schema.Int64Attribute{
 				Computed:            true,
@@ -503,7 +503,7 @@ func (r *serviceNodeGroup) DataSourceSchema() schema.Schema {
 					},
 					"version": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Actual version of NodeGroup. Have format `<major>.<minor>.<patch>-nebius-node.<infra_version>` like \"1.30.0-nebius-node.10\".\n   Where `<major>.<minor>.<patch>` is Kubernetes version and `<infra_version>` is version of Node infrastructure and configuration,\n   which update may include bug fixes, security updates and new features depending on worker node configuration.\n",
+						MarkdownDescription: ":\n\n   Actual Kubernetes version and node image version of the node group.\n   Format: `<major>.<minor>.<patch>-nebius-node.<image>`, for example, \"1.36.3-nebius-node.80\".\n   `<major>.<minor>.<patch>` is the Kubernetes version, and `<image>` is the node image version.\n   Node image updates can include bug fixes, security updates, and new features for the selected node configuration.\n",
 					},
 					"target_node_count": schema.Int64Attribute{
 						Computed:            true,
@@ -687,7 +687,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 					validators.ProtoFieldValidator(&v11.NodeGroupSpec{}, "version", "version", fieldNameMapNodeGroup),
 				},
 				Optional:            true,
-				MarkdownDescription: ":\n\n   Version is desired Kubernetes version of the cluster. For now only acceptable format is\n   `<major>.<minor>` like \"1.31\". Option for patch version update will be added later.\n   By default the cluster control plane `<major>.<minor>` version will be used.\n",
+				MarkdownDescription: ":\n\n   Desired Kubernetes version and optional node image version for the node group.\n   Use `<major>.<minor>[-nebius-node.<image>]`, for example, \"1.36\" or \"1.36-nebius-node.80\".\n   If this field is omitted, the Kubernetes version defaults to the cluster control plane version.\n   If the image version suffix is omitted, the latest compatible node image version is selected on NodeGroup creation.\n   To upgrade to the latest node image version later, use `NodeGroupService.Upgrade`.\n",
 				PlanModifiers:       []planmodifier.String{},
 			},
 			"fixed_node_count": schema1.Int64Attribute{
@@ -1419,7 +1419,7 @@ func (r *serviceNodeGroup) ResourceSchema() schema1.Schema {
 					},
 					"version": schema1.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Actual version of NodeGroup. Have format `<major>.<minor>.<patch>-nebius-node.<infra_version>` like \"1.30.0-nebius-node.10\".\n   Where `<major>.<minor>.<patch>` is Kubernetes version and `<infra_version>` is version of Node infrastructure and configuration,\n   which update may include bug fixes, security updates and new features depending on worker node configuration.\n",
+						MarkdownDescription: ":\n\n   Actual Kubernetes version and node image version of the node group.\n   Format: `<major>.<minor>.<patch>-nebius-node.<image>`, for example, \"1.36.3-nebius-node.80\".\n   `<major>.<minor>.<patch>` is the Kubernetes version, and `<image>` is the node image version.\n   Node image updates can include bug fixes, security updates, and new features for the selected node configuration.\n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"target_node_count": schema1.Int64Attribute{
