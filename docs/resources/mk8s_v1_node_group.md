@@ -79,9 +79,11 @@ resource "nebius_mk8s_v1_node_group" "default" {
    Allows to setup compromise in roll-out speed, extra resources consumption and workloads disruption. (see [below for nested schema](#nestedatt--strategy))
 - `version` (String) :
 
-   Version is desired Kubernetes version of the cluster. For now only acceptable format is
-   `<major>.<minor>` like "1.31". Option for patch version update will be added later.
-   By default the cluster control plane `<major>.<minor>` version will be used.
+   Desired Kubernetes version and optional node image version for the node group.
+   Use `<major>.<minor>[-nebius-node.<image>]`, for example, "1.36" or "1.36-nebius-node.80".
+   If this field is omitted, the Kubernetes version defaults to the cluster control plane version.
+   If the image version suffix is omitted, the latest compatible node image version is selected on NodeGroup creation.
+   To upgrade to the latest node image version later, use `NodeGroupService.Upgrade`.
 
 ### Read-Only
 
@@ -721,9 +723,10 @@ Read-Only:
    `NodeGroupAutoscalingSpec.min_node_count` and `NodeGroupAutoscalingSpec.max_node_count` decided by autoscaler.
 - `version` (String) :
 
-   Actual version of NodeGroup. Have format `<major>.<minor>.<patch>-nebius-node.<infra_version>` like "1.30.0-nebius-node.10".
-   Where `<major>.<minor>.<patch>` is Kubernetes version and `<infra_version>` is version of Node infrastructure and configuration,
-   which update may include bug fixes, security updates and new features depending on worker node configuration.
+   Actual Kubernetes version and node image version of the node group.
+   Format: `<major>.<minor>.<patch>-nebius-node.<image>`, for example, "1.36.3-nebius-node.80".
+   `<major>.<minor>.<patch>` is the Kubernetes version, and `<image>` is the node image version.
+   Node image updates can include bug fixes, security updates, and new features for the selected node configuration.
 
 <a id="nestedatt--status--events"></a>
 ### Nested Schema for `status.events`
