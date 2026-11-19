@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.88 (November 19, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.97`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_compute_v1_gpu_cluster](./docs/resources/compute_v1_gpu_cluster.md):
+    * Became optional: `infiniband_fabric`
+
 ## 0.6.87 (November 18, 2026)
 
 NOTES:
