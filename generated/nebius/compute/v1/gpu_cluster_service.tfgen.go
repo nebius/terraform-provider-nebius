@@ -228,7 +228,7 @@ func (r *serviceGpuCluster) ResourceSchema() schema1.Schema {
 			},
 			"infiniband_fabric": schema1.StringAttribute{
 				Validators:          []validator.String{},
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: ":\n\n   The identifier of the physical InfiniBand fabric to connect GPU instances to.\n   For details, see https://docs.nebius.com/compute/clusters/gpu#fabrics\n",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
