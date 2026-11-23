@@ -56,6 +56,8 @@ const (
 
 	disableWriteOnlyEnv = "NEBIUS_TERRAFORM_PROVIDER_DISABLE_WRITE_ONLY"
 	disableDynamicEnv   = "NEBIUS_TERRAFORM_PROVIDER_DISABLE_DYNAMIC"
+
+	versionedEphemeralsAttribute = "versioned_ephemeral_values"
 )
 
 func New() func() provider.Provider {
@@ -120,7 +122,6 @@ type config struct {
 	Impersonate            types.String      `tfsdk:"impersonate_service_account_id"`
 	ServiceAccount         types.Object      `tfsdk:"service_account"`
 	ModuleName             types.String      `tfsdk:"module_name"`
-	VersionedEphemerals    types.Dynamic     `tfsdk:"versioned_ephemeral_values"`
 	DefaultLabels          types.Map         `tfsdk:"default_labels"`
 	ParentID               types.String      `tfsdk:"parent_id"`
 	Profile                types.Object      `tfsdk:"profile"`
@@ -128,6 +129,13 @@ type config struct {
 	AuthTimeout            duration.Duration `tfsdk:"auth_timeout"`
 	PerRetryTimeout        duration.Duration `tfsdk:"per_retry_timeout"`
 	Retries                types.Int64       `tfsdk:"retries"`
+}
+
+// configWithVersionedEphemerals adds the versioned_ephemeral_values
+// attribute to config. Use it only when the schema contains this attribute.
+type configWithVersionedEphemerals struct {
+	config
+	VersionedEphemerals types.Dynamic `tfsdk:"versioned_ephemeral_values"`
 }
 
 func (p *internalProvider) SDK() *gosdk.SDK {
@@ -392,8 +400,8 @@ func (p *internalProvider) Schema(
 			},
 		},
 	}
-	if os.Getenv(disableDynamicEnv) != "true" && p.WriteOnlyFieldsSupported() {
-		resp.Schema.Attributes["versioned_ephemeral_values"] = schema.DynamicAttribute{
+	if p.versionedEphemeralsSupported() {
+		resp.Schema.Attributes[versionedEphemeralsAttribute] = schema.DynamicAttribute{
 			Optional:  true,
 			Sensitive: true,
 			Description: "A map of all ephemeral values that will be " +
@@ -661,8 +669,19 @@ func (p *internalProvider) Configure(
 	req provider.ConfigureRequest,
 	resp *provider.ConfigureResponse,
 ) {
+	// The schema contains versioned_ephemeral_values only in some modes.
+	// The struct fields must match the schema attributes.
+	// Select the struct that matches the schema of the request.
 	var data config
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	versionedEphemerals := types.DynamicNull()
+	if _, ok := req.Config.Schema.GetAttributes()[versionedEphemeralsAttribute]; ok {
+		var dataWithEphemerals configWithVersionedEphemerals
+		resp.Diagnostics.Append(req.Config.Get(ctx, &dataWithEphemerals)...)
+		data = dataWithEphemerals.config
+		versionedEphemerals = dataWithEphemerals.VersionedEphemerals
+	} else {
+		resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	}
 	p.disablePreflightChecks = data.DisablePreflightChecks.ValueBool()
 	if p.disablePreflightChecks {
 		tflog.Warn(ctx, "Preflight checks are disabled")
@@ -972,13 +991,13 @@ func (p *internalProvider) Configure(
 		p.sdk = sdk
 	}
 
-	if isKnown(data.VersionedEphemerals) {
-		val, _, diags := ctypes.UnwrapDynamic(ctx, data.VersionedEphemerals)
+	if isKnown(versionedEphemerals) {
+		val, _, diags := ctypes.UnwrapDynamic(ctx, versionedEphemerals)
 		resp.Diagnostics.Append(diags...)
 		if diags.HasError() {
 			return
 		}
-		tfVal, err := data.VersionedEphemerals.ToTerraformValue(ctx)
+		tfVal, err := versionedEphemerals.ToTerraformValue(ctx)
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"failed to convert versioned_ephemeral_values to terraform value",
@@ -1008,6 +1027,12 @@ func (p *internalProvider) Configure(
 
 func (p *internalProvider) WriteOnlyFieldsSupported() bool {
 	return os.Getenv(disableWriteOnlyEnv) != "true"
+}
+
+// versionedEphemeralsSupported returns true if the provider schema contains
+// versioned_ephemeral_values and the provider has the nebius_hash resource.
+func (p *internalProvider) versionedEphemeralsSupported() bool {
+	return os.Getenv(disableDynamicEnv) != "true" && p.WriteOnlyFieldsSupported()
 }
 
 func (p *internalProvider) name() string {
@@ -1047,8 +1072,7 @@ func (p *internalProvider) Resources(
 ) []func() resource.Resource {
 	ret := []func() resource.Resource{}
 
-	if os.Getenv(disableDynamicEnv) != "true" &&
-		p.WriteOnlyFieldsSupported() {
+	if p.versionedEphemeralsSupported() {
 		ret = append(ret, func() resource.Resource {
 			return api.NewHashResource(p.versionedEphemerals)
 		})
