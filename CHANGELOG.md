@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.89 (November 23, 2026)
+
+NOTES:
+
+* provider: Update Nebius Go SDK to `v0.2.98`.
+
+FEATURES:
+
+* Added new resources and data sources: [nebius_ai_v1_endpoint](./docs/resources/ai_v1_endpoint.md).
+
 ## 0.6.88 (November 19, 2026)
 
 NOTES:
