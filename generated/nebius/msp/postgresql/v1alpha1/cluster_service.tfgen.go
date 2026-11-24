@@ -9,7 +9,6 @@ import (
 	schema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	resource "github.com/hashicorp/terraform-plugin-framework/resource"
 	schema1 "github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	objectplanmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	planmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	stringplanmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	validator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -690,9 +689,7 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 				Validators:          []validator.Object{},
 				Optional:            true,
 				MarkdownDescription: "",
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
-				},
+				PlanModifiers:       []planmodifier.Object{},
 			},
 			"status": schema1.SingleNestedAttribute{
 				Attributes: map[string]schema1.Attribute{
