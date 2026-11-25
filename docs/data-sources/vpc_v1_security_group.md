@@ -120,3 +120,7 @@ Read-Only:
    
    - `STATE_UNSPECIFIED` - Default state, unspecified.
    - `READY` - Security group is ready for use.
+   - `CREATING` - Security group is being created.
+   - `RECONCILING` - Security group is reconciling changes after it has been created.
+   - `DELETING` - Security group is being deleted.
+   - `FAILED` - Reconciliation stopped because of an error.

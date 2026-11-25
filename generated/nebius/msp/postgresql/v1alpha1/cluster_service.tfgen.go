@@ -273,6 +273,16 @@ func (r *serviceCluster) DataSourceSchema() schema.Schema {
 						Computed:            true,
 						MarkdownDescription: "Retention policy to be used for backups and WALs (i.e. '7d')",
 					},
+					"replication_regions": schema.ListAttribute{
+						ElementType:         types.StringType,
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Regions that receive copies of the backups. Example: \"eu-west1\".\n   The list cannot contain the region of the cluster.\n",
+					},
+					"replication_interval": schema.StringAttribute{
+						CustomType:          wellknown.WellKnownByName("google.protobuf.Duration").Type().(basetypes.StringTypable),
+						Computed:            true,
+						MarkdownDescription: ":\n\n   Time between two replication iterations.\n   The minimum value is 1 minute. The default value is 15 minutes.\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
+					},
 				},
 				Computed:            true,
 				MarkdownDescription: "",
@@ -684,6 +694,24 @@ func (r *serviceCluster) ResourceSchema() schema1.Schema {
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
+					},
+					"replication_regions": schema1.ListAttribute{
+						ElementType: types.StringType,
+						Validators: []validator.List{
+							validators.ProtoFieldValidator(&v1alpha1.BackupSpec{}, "replication_regions", "replication_regions", fieldNameMapCluster),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   Regions that receive copies of the backups. Example: \"eu-west1\".\n   The list cannot contain the region of the cluster.\n",
+						PlanModifiers:       []planmodifier.List{},
+					},
+					"replication_interval": schema1.StringAttribute{
+						CustomType: wellknown.WellKnownByName("google.protobuf.Duration").Type().(basetypes.StringTypable),
+						Validators: []validator.String{
+							validators.ProtoFieldValidator(&v1alpha1.BackupSpec{}, "replication_interval", "replication_interval", fieldNameMapCluster),
+						},
+						Optional:            true,
+						MarkdownDescription: ":\n\n   Time between two replication iterations.\n   The minimum value is 1 minute. The default value is 15 minutes.\n   \n   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.\n",
+						PlanModifiers:       []planmodifier.String{},
 					},
 				},
 				Validators:          []validator.Object{},

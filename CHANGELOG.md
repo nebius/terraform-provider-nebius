@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.91 (November 25, 2026)
+
+NOTES:
+
+* deps: Update `buf.build/go/protovalidate` from `v1.4.0` to `v1.4.1`.
+* provider: Update Nebius Go SDK to `v0.2.100`.
+
+IMPROVEMENTS:
+
+* Changed attributes for resource [nebius_msp_postgresql_v1alpha1_cluster](./docs/resources/msp_postgresql_v1alpha1_cluster.md):
+    * Added: `backup.replication_interval`, `backup.replication_regions`
+* Changed attributes for data source [nebius_msp_postgresql_v1alpha1_cluster](./docs/data-sources/msp_postgresql_v1alpha1_cluster.md):
+    * Added: `backup.replication_interval`, `backup.replication_regions`
+
 ## 0.6.90 (November 24, 2026)
 
 NOTES:
