@@ -212,6 +212,16 @@ Optional:
 Optional:
 
 - `backup_window_start` (String) Backup window start in "HH:MM:SS" format (UTC Time)
+- `replication_interval` (String) :
+
+   Time between two replication iterations.
+   The minimum value is 1 minute. The default value is 15 minutes.
+   
+   Duration as a string: possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix, such as `300ms`, `-1.5h` or `2h45m`. Valid time units are `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`, `d`.
+- `replication_regions` (List of String) :
+
+   Regions that receive copies of the backups. Example: "eu-west1".
+   The list cannot contain the region of the cluster.
 - `retention_policy` (String) Retention policy to be used for backups and WALs (i.e. '7d')
 
 

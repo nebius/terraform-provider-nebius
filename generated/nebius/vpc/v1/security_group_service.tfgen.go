@@ -118,7 +118,7 @@ func (r *serviceSecurityGroup) DataSourceSchema() schema.Schema {
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Current state of the security group.\n   \n   #### Supported values\n   \n   Enumeration of possible states of the security group.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - Default state, unspecified.\n   - `READY` - Security group is ready for use.\n   \n",
+						MarkdownDescription: ":\n\n   Current state of the security group.\n   \n   #### Supported values\n   \n   Enumeration of possible states of the security group.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - Default state, unspecified.\n   - `READY` - Security group is ready for use.\n   - `CREATING` - Security group is being created.\n   - `RECONCILING` - Security group is reconciling changes after it has been created.\n   - `DELETING` - Security group is being deleted.\n   - `FAILED` - Reconciliation stopped because of an error.\n   \n",
 					},
 					"default": schema.BoolAttribute{
 						Computed:            true,
@@ -214,7 +214,7 @@ func (r *serviceSecurityGroup) ResourceSchema() schema1.Schema {
 				Attributes: map[string]schema1.Attribute{
 					"state": schema1.StringAttribute{
 						Computed:            true,
-						MarkdownDescription: ":\n\n   Current state of the security group.\n   \n   #### Supported values\n   \n   Enumeration of possible states of the security group.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - Default state, unspecified.\n   - `READY` - Security group is ready for use.\n   \n",
+						MarkdownDescription: ":\n\n   Current state of the security group.\n   \n   #### Supported values\n   \n   Enumeration of possible states of the security group.\n   Possible values:\n   \n   - `STATE_UNSPECIFIED` - Default state, unspecified.\n   - `READY` - Security group is ready for use.\n   - `CREATING` - Security group is being created.\n   - `RECONCILING` - Security group is reconciling changes after it has been created.\n   - `DELETING` - Security group is being deleted.\n   - `FAILED` - Reconciliation stopped because of an error.\n   \n",
 						PlanModifiers:       []planmodifier.String{},
 					},
 					"default": schema1.BoolAttribute{
